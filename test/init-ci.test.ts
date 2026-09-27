@@ -42,7 +42,8 @@ describe('init with a global core.hooksPath', () => {
     const before = chains ? '#!/bin/sh\nbuzzcut_local="$(git rev-parse --git-common-dir)/hooks/commit-msg"\n' : '#!/bin/sh\necho my own hook\n';
     writeFileSync(join(globalDir, 'commit-msg'), before, { mode: 0o755 });
     const cfg = join(mkdtempSync(join(tmpdir(), 'buzzcut-gitcfg-')), 'config');
-    writeFileSync(cfg, `[core]\n\thooksPath = ${globalDir}\n`);
+    // Forward slashes: a backslash is an escape character in a git config file (Windows paths).
+    writeFileSync(cfg, `[core]\n\thooksPath = ${globalDir.replace(/\\/g, '/')}\n`);
     const saved = process.env.GIT_CONFIG_GLOBAL;
     process.env.GIT_CONFIG_GLOBAL = cfg;
     try {

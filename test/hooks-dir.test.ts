@@ -17,16 +17,18 @@ describe('the agent hook checks the repo a command runs in', () => {
   writeFileSync(join(repo, 'a.js'), 'x\ny\n');
   git('add', '.');
   const outside = mkdtempSync(join(tmpdir(), 'buzzcut-outside-'));
+  // Forward slashes, quoted: what an agent's shell (Git Bash on Windows) passes through intact.
+  const at = JSON.stringify(repo.replace(/\\/g, '/'));
 
   it.each([
-    ['cd <repo> &&', `cd ${repo} && git commit -m "fix bug"`],
-    ['git -C <repo>', `git -C ${repo} commit -m "fix bug"`],
+    ['cd <repo> &&', `cd ${at} && git commit -m "fix bug"`],
+    ['git -C <repo>', `git -C ${at} commit -m "fix bug"`],
   ])('%s from outside any repo', (_, command) => {
     const { problems } = checkCommand(command, outside);
     expect(problems.map((p) => p.report.findings.map((f) => f.rule)).flat()).toContain('subject-vague');
   });
 
   it('lets a good message through from outside the repo', () => {
-    expect(checkCommand(`cd ${repo} && git commit -m "Fall back to y when x is empty" -m "The export crashed on an empty x (#12)."`, outside).problems).toEqual([]);
+    expect(checkCommand(`cd ${at} && git commit -m "Fall back to y when x is empty" -m "The export crashed on an empty x (#12)."`, outside).problems).toEqual([]);
   });
 });
