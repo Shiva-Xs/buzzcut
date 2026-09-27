@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/duckdb/duckdb/pull/1800","repo":"duckdb/duckdb","number":1800,"set":"baseline","title":"Arrow api change fix","body":"","authorType":"User","additions":2,"deletions":2,"changedFiles":1,"files":[{"path":"tools/rpkg/src/duckdbr.cpp","additions":2,"deletions":2}],"baseSha":"1c8943bda0904f2b5e984f15bdf5558d3e6078d2","template":null}

@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/neovim/neovim/commit/cf714bf418c4e1951466aac4c0dff09cfe9be225","repo":"neovim/neovim","sha":"cf714bf418c4e1951466aac4c0dff09cfe9be225","set":"baseline","message":"vim-patch.sh -m: Ignore changes to version.c\n\n[skip ci]","files":[{"path":"scripts/vim-patch.sh","additions":1,"deletions":1}],"additions":1,"deletions":1}

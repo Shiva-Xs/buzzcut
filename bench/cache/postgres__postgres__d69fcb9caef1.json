@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/postgres/postgres/commit/d69fcb9caef1ac1f38241645d4fb9f7e0ce02a70","repo":"postgres/postgres","sha":"d69fcb9caef1ac1f38241645d4fb9f7e0ce02a70","set":"baseline","message":"fix syntax error","files":[{"path":"src/tools/msvc/Solution.pm","additions":1,"deletions":1}],"additions":1,"deletions":1}

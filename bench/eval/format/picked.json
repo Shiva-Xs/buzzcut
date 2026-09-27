@@ -1,0 +1,242 @@
+[
+ {
+  "url": "https://github.com/DhavalLimbad1109/OfficeaGames/pull/4",
+  "source": "copilot-agent",
+  "size": "tiny",
+  "lines": 2,
+  "words": 52,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/Comfy-Org/Comfy-Desktop/pull/508",
+  "source": "amp",
+  "size": "tiny",
+  "lines": 23,
+  "words": 205,
+  "score": 12
+ },
+ {
+  "url": "https://github.com/teamzuzu/rancher-secrets-manager/pull/14",
+  "source": "claude-code",
+  "size": "tiny",
+  "lines": 5,
+  "words": 45,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/RDHoldings/website-v1/pull/232",
+  "source": "cursor",
+  "size": "tiny",
+  "lines": 23,
+  "words": 75,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/view-ignored/view-ignored/pull/63",
+  "source": "jules",
+  "size": "tiny",
+  "lines": 6,
+  "words": 60,
+  "score": 5
+ },
+ {
+  "url": "https://github.com/ryusoh/networking/pull/41",
+  "source": "jules",
+  "size": "tiny",
+  "lines": 18,
+  "words": 85,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/harleygod/stock_lanmei/pull/1",
+  "source": "cursor",
+  "size": "tiny",
+  "lines": 28,
+  "words": 150,
+  "score": 19
+ },
+ {
+  "url": "https://github.com/erwins-enkel/shepherd/pull/6",
+  "source": "claude-code",
+  "size": "tiny",
+  "lines": 9,
+  "words": 71,
+  "score": 7
+ },
+ {
+  "url": "https://github.com/DamianPiuselli/isotools/pull/4",
+  "source": "copilot-agent",
+  "size": "tiny",
+  "lines": 15,
+  "words": 104,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/gastownhall/gascity/pull/390",
+  "source": "claude-code-open",
+  "size": "tiny",
+  "lines": 5,
+  "words": 60,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/vothalvino/fireisp5.0/pull/195",
+  "source": "copilot-agent",
+  "size": "normal",
+  "lines": 188,
+  "words": 261,
+  "score": 31
+ },
+ {
+  "url": "https://github.com/ocaml/ocaml.org/pull/3598",
+  "source": "claude-code-open",
+  "size": "normal",
+  "lines": 246,
+  "words": 70,
+  "score": 8
+ },
+ {
+  "url": "https://github.com/CodeBacket/cinco-uno/pull/49",
+  "source": "cursor",
+  "size": "normal",
+  "lines": 249,
+  "words": 97,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/techulus/capture-docs/pull/20",
+  "source": "amp",
+  "size": "normal",
+  "lines": 45,
+  "words": 49,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/hadzija7/cursor-workshop-15may/pull/5",
+  "source": "cursor",
+  "size": "normal",
+  "lines": 250,
+  "words": 157,
+  "score": 12
+ },
+ {
+  "url": "https://github.com/S0l0m0n8und9/RalphDex/pull/85",
+  "source": "devin",
+  "size": "normal",
+  "lines": 49,
+  "words": 362,
+  "score": 5
+ },
+ {
+  "url": "https://github.com/openkaiden/kaiden/pull/1610",
+  "source": "claude-code-open",
+  "size": "normal",
+  "lines": 259,
+  "words": 92,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/CodeGraphContext/CodeGraphContext/pull/1269",
+  "source": "amp",
+  "size": "normal",
+  "lines": 107,
+  "words": 65,
+  "score": 16
+ },
+ {
+  "url": "https://github.com/torresposso/voxpopuli.digital/pull/12",
+  "source": "jules",
+  "size": "normal",
+  "lines": 46,
+  "words": 96,
+  "score": 7
+ },
+ {
+  "url": "https://github.com/imcvum/lisney-music/pull/33",
+  "source": "devin",
+  "size": "normal",
+  "lines": 117,
+  "words": 407,
+  "score": 46
+ },
+ {
+  "url": "https://github.com/billyboy95/bennybookwurm/pull/1",
+  "source": "cursor",
+  "size": "big",
+  "lines": 489,
+  "words": 107,
+  "score": 8
+ },
+ {
+  "url": "https://github.com/3rdIteration/Kern/pull/1",
+  "source": "copilot-agent",
+  "size": "big",
+  "lines": 1217,
+  "words": 40,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/nammayatri/gtfs-inmemory-server-rust/pull/117",
+  "source": "claude-code-open",
+  "size": "big",
+  "lines": 1189,
+  "words": 85,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/Auto-wiz/AgentFlow/pull/17",
+  "source": "cursor",
+  "size": "big",
+  "lines": 331,
+  "words": 169,
+  "score": 5
+ },
+ {
+  "url": "https://github.com/exceptionless/Exceptionless/pull/2276",
+  "source": "copilot-agent",
+  "size": "big",
+  "lines": 981,
+  "words": 198,
+  "score": 5
+ },
+ {
+  "url": "https://github.com/ColoredCow/frappe-lms/pull/13",
+  "source": "claude-code-open",
+  "size": "big",
+  "lines": 1037,
+  "words": 105,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/tiagomiele/oficina-backend-fiap-fase2/pull/28",
+  "source": "devin",
+  "size": "big",
+  "lines": 477,
+  "words": 290,
+  "score": 7
+ },
+ {
+  "url": "https://github.com/Swaggyxren/MaliVK13Patcher/pull/2",
+  "source": "devin",
+  "size": "big",
+  "lines": 1463,
+  "words": 310,
+  "score": 0
+ },
+ {
+  "url": "https://github.com/zainfathoni/amux/pull/286",
+  "source": "amp",
+  "size": "big",
+  "lines": 1573,
+  "words": 126,
+  "score": 6
+ },
+ {
+  "url": "https://github.com/jeremy-angulo/Jules-Orchestrator/pull/68",
+  "source": "jules",
+  "size": "big",
+  "lines": 619,
+  "words": 139,
+  "score": 9
+ }
+]

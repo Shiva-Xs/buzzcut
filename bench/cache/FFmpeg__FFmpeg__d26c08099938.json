@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/FFmpeg/FFmpeg/commit/d26c080999383be096e70bc1d071aac3bb2988e6","repo":"FFmpeg/FFmpeg","sha":"d26c080999383be096e70bc1d071aac3bb2988e6","set":"human","message":"avformat/http: do not send Secure cookies over plain http","files":[{"path":"libavformat/http.c","additions":4,"deletions":0}],"additions":4,"deletions":0}

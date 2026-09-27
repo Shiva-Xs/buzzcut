@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/torvalds/linux/commit/93f51579e7df248780214094418f205253383cc5","repo":"torvalds/linux","sha":"93f51579e7df248780214094418f205253383cc5","set":"human","message":"Linux 7.3-rc4","files":[{"path":"Makefile","additions":1,"deletions":1}],"additions":1,"deletions":1}

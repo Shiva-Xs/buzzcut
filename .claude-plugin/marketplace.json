@@ -1,0 +1,16 @@
+{
+  "name": "buzzcut",
+  "owner": {
+    "name": "Shivateja Janjirala"
+  },
+  "metadata": {
+    "description": "Commit messages and PR descriptions from coding agents that say what changed and why, checked against the actual diff."
+  },
+  "plugins": [
+    {
+      "name": "buzzcut",
+      "source": "./",
+      "description": "Commit messages and PR descriptions that say what changed and why, checked against the actual diff."
+    }
+  ]
+}

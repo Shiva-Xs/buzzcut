@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/d72a519a5a7ca0efa7af26a457757a86175a6f74","repo":"rust-lang/rust","sha":"d72a519a5a7ca0efa7af26a457757a86175a6f74","set":"human","message":"remove unneeded type ascription","files":[{"path":"compiler/rustc_borrowck/src/type_check/liveness/mod.rs","additions":3,"deletions":4}],"additions":3,"deletions":4}

@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/9a3ab6566b1f483f08d1e914584ae1e761da98bf","repo":"rust-lang/rust","sha":"9a3ab6566b1f483f08d1e914584ae1e761da98bf","set":"human","message":"add comment","files":[{"path":"compiler/rustc_borrowck/src/polonius/liveness.rs","additions":2,"deletions":0}],"additions":2,"deletions":0}

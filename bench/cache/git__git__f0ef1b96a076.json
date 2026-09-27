@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/git/git/commit/f0ef1b96a076d08dc972a8d2cb0d1cfd60931eb6","repo":"git/git","sha":"f0ef1b96a076d08dc972a8d2cb0d1cfd60931eb6","set":"human","message":"4th batch for -rc1\n\nSigned-off-by: Junio C Hamano <gitster@pobox.com>","files":[{"path":"Documentation/RelNotes/2.56.0.adoc","additions":14,"deletions":0}],"additions":14,"deletions":0}

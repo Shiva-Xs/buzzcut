@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/8832cc20b7927a6d78f85cbd0687f110e9296520","repo":"rust-lang/rust","sha":"8832cc20b7927a6d78f85cbd0687f110e9296520","set":"baseline","message":"Check that trait_map is not moved twice.","files":[{"path":"compiler/rustc_resolve/src/lib.rs","additions":9,"deletions":0}],"additions":9,"deletions":0}

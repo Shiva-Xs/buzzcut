@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>buzzcut · Pull requests written like the good old days</title>
+<meta name="description" content="Your agent writes the code. buzzcut makes its commits and pull requests say what changed and why, in plain words, so reviewers read the PR itself instead of asking another AI to explain it.">
+<meta name="theme-color" content="#0b0a09">
+<meta property="og:title" content="buzzcut · AI yaps, we cut">
+<meta property="og:description" content="Pull requests written like the good old days. Roast any GitHub PR in your browser, then put buzzcut on every repo your team reviews.">
+<meta property="og:image" content="https://buzzcut-pr.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://buzzcut-pr.pages.dev/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://buzzcut-pr.pages.dev/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0a09'/%3E%3CclipPath id='c'%3E%3Crect x='11' y='3' width='10' height='26'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23c)'%3E%3Crect x='11' y='3' width='10' height='26' fill='%23f3ede2'/%3E%3Cpath d='M0 8l32-16v6L0 14zM0 20l32-16v6L0 26zM0 32l32-16v6L0 38z' fill='%23ff4b36'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+<a class="skip" href="#try">Skip to the roast</a>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="logo" href="./" aria-label="buzzcut home"><span class="pole" aria-hidden="true"></span>buzzcut</a>
+    <nav aria-label="Main">
+      <a href="#try">Try it</a>
+      <a href="#problem">The problem</a>
+      <a href="#how">How it works</a>
+      <a href="#teams">For teams</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="nav-gh" href="https://github.com/Shiva-Xs/buzzcut" aria-label="buzzcut on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
+    <button type="button" class="nav-install" data-copy="npm i -g buzzcut && buzzcut setup" data-label="npm i -g buzzcut">npm i -g buzzcut</button>
+  </div>
+</header>
+
+<main>
+  <!-- hero: a wall of AI yap with a clean stripe shaved through it -->
+  <section class="hero" id="top" aria-labelledby="hero-h">
+    <canvas class="yap" id="yap" aria-hidden="true"></canvas>
+    <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+    <div class="clipper" id="clipper" aria-hidden="true"><i></i></div>
+
+    <div class="hero-band" id="band">
+      <div class="hero-in">
+        <ul class="menu" aria-label="Price list">
+          <li><span>The cut</span><i aria-hidden="true"></i><b>free</b></li>
+          <li><span>API keys</span><i aria-hidden="true"></i><b>0</b></li>
+          <li><span>LLM calls</span><i aria-hidden="true"></i><b>0</b></li>
+          <li><span>License</span><i aria-hidden="true"></i><b>MIT</b></li>
+        </ul>
+        <h1 id="hero-h"><span>AI yaps,</span> <span class="cut">we cut</span></h1>
+        <p class="tagline">Pull requests written like the good old days</p>
+        <p class="lede">Your agent writes the code. buzzcut makes the commits and PRs it writes say what changed and why, in plain words, so reviewers read the PR itself instead of asking another AI to explain it.</p>
+        <div class="cmd hero-cmd" role="group" aria-label="Install command">
+          <span class="prompt" aria-hidden="true">$</span>
+          <code>npm i -g buzzcut &amp;&amp; buzzcut setup</code>
+          <button type="button" class="copy" data-copy="npm i -g buzzcut && buzzcut setup" data-label="Copy">Copy</button>
+        </div>
+        <p class="works-in">Claude Code · Cursor · Windsurf · Antigravity · VS Code · Codex · any terminal</p>
+      </div>
+    </div>
+
+    <p class="hero-hint" id="hint" aria-hidden="true">The grey text is real AI yap. Run your cursor over it.</p>
+  </section>
+
+  <div class="stripe" aria-hidden="true"></div>
+
+  <!-- 01 · try it: text left, receipt right -->
+  <section class="roast" id="try" aria-labelledby="try-h">
+    <div class="wrap roast-grid">
+      <div class="roast-copy">
+        <p class="label"><b>01</b> Try it</p>
+        <h2 id="try-h">See your PRs the way reviewers do</h2>
+        <p class="sub">Paste a public pull request. buzzcut checks that it says what changed and why, and marks everything a reviewer would skim past. Paste a repo to rank its last merged PRs. It all runs in your browser.</p>
+
+        <form class="seat" id="seat-form">
+          <label class="sr" for="target">GitHub PR link or repo</label>
+          <input id="target" name="target" autocomplete="off" spellcheck="false" placeholder="github.com/owner/repo/pull/123  or  owner/repo">
+          <button type="submit" class="btn-red" id="go"><span>Roast it</span></button>
+        </form>
+
+        <div class="queue">
+          <p class="queue-h">Or pick one of three made-up PRs</p>
+          <ul class="queue-list" id="queue" aria-label="Example pull requests"></ul>
+        </div>
+        <p class="status" id="status" role="status"></p>
+
+        <div class="share">
+          <p class="share-h">Know a reviewer who'd want this?</p>
+          <div class="share-btns">
+            <a class="btn" id="share-x" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18.2h1.7L6.3 3.7H4.5l13.3 16.5Z" fill="currentColor"/></svg>Share buzzcut</a>
+            <button type="button" class="btn" id="copy-link" data-label="Copy link">Copy link</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="receipt-col">
+        <article class="ticket" id="ticket" aria-live="polite"></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · the problem -->
+  <section class="problem" id="problem" aria-labelledby="problem-h">
+    <div class="wrap">
+      <p class="label"><b>02</b> The problem</p>
+      <div class="split-head">
+        <h2 id="problem-h">Nobody should need an AI to read a pull request</h2>
+        <p class="sub">Senior engineers keep saying it: AI-written PRs are hard to read. Headers on a nine-line fix, a bold label on every bullet, a tour of files the diff already shows. So reviewers paste them into another chatbot to find out what changed. A PR should just say it, the way good ones always did.</p>
+      </div>
+
+      <div class="pr-panel" id="panel">
+        <div class="pr-bar">
+          <div class="tabs" role="tablist" aria-label="Before and after">
+            <button type="button" role="tab" id="tab-before" aria-selected="true" aria-controls="pr-view">As the agent wrote it</button>
+            <button type="button" role="tab" id="tab-after" aria-selected="false" aria-controls="pr-view">After buzzcut</button>
+          </div>
+          <span class="pr-count"><b id="wc">0</b> words</span>
+        </div>
+        <div class="pr-body">
+          <div class="pr-view" id="pr-view" role="tabpanel" aria-labelledby="tab-before"></div>
+          <div class="blade" id="blade" aria-hidden="true"></div>
+        </div>
+        <div class="pr-foot">
+          <span id="pr-status">acme/api · PR #482 · 9 changed lines</span>
+          <button type="button" class="btn-red small" id="cut">Cut it <span aria-hidden="true">✂</span></button>
+        </div>
+      </div>
+
+      <div class="found">
+        <p class="found-h">What we found in <b>1,275</b> real PRs opened by coding agents this year</p>
+        <ul class="bars">
+          <li style="--v:21"><span class="n">21%</span><span class="t">Never say how it was tested</span></li>
+          <li style="--v:20.2"><span class="n">20%</span><span class="t">Never say why</span></li>
+          <li style="--v:16.4"><span class="n">16%</span><span class="t">More bullets than the change deserves</span></li>
+          <li style="--v:15.5"><span class="n">16%</span><span class="t">A bold label on every line</span></li>
+          <li style="--v:5.5"><span class="n">6%</span><span class="t">A tour of files the diff already shows</span></li>
+          <li style="--v:3.9"><span class="n">4%</span><span class="t">A full template on a small diff</span></li>
+        </ul>
+        <p class="fine">PRs from Claude Code, Copilot, Cursor, Devin, Jules, Amp and Codex. The data and the script are in <a href="https://github.com/Shiva-Xs/buzzcut/tree/main/bench">bench/</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · how it works -->
+  <section class="how" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <p class="label"><b>03</b> How it works</p>
+      <div class="split-head">
+        <h2 id="how-h">Install once, then just say push it</h2>
+        <p class="sub">Whatever agent you use keeps writing the code, the commit and the PR. buzzcut reads each one before it runs and sends back anything a reviewer would struggle with, with the exact fix. You don't do anything.</p>
+      </div>
+      <div class="how-grid">
+        <div class="term" id="chat" aria-label="An example agent session">
+          <div class="term-bar"><span class="sq" aria-hidden="true"></span><span>your editor · agent chat</span><button type="button" class="replay" id="replay">Replay</button></div>
+          <ol class="term-log" id="chat-log"></ol>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="n">1</span>
+            <div><h3>It writes it right the first time</h3><p>Before writing, the agent asks buzzcut what changed: which files, how big the change is, how long the description should be, and how this repo writes its commits.</p></div>
+          </li>
+          <li>
+            <span class="n">2</span>
+            <div><h3>It checks before anything runs</h3><p>Every <code>git commit</code>, <code>gh pr create</code> and GitHub tool call is read against the diff before it runs. A form on a tiny change, a missing reason or a claim the diff contradicts goes back with the fix.</p></div>
+          </li>
+          <li>
+            <span class="n">3</span>
+            <div><h3>It cuts yap, never facts</h3><p>A rewrite that drops numbers, error messages, issue links or <code>file:line</code> pointers is sent back with the list of what went missing. Short means no padding, not fewer facts.</p></div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="rules">
+        <div class="rule-col">
+          <h3><span class="dot bad" aria-hidden="true"></span>Sent back to the agent</h3>
+          <ul>
+            <li>Subjects that say nothing: "fix bug", "wip", "Update webhook.js"</li>
+            <li>A full Summary / Changes / Testing form on a small diff</li>
+            <li>A commit body that lists every change as bullets</li>
+            <li>Claims the diff contradicts</li>
+            <li>A rewrite that quietly dropped facts</li>
+          </ul>
+        </div>
+        <div class="rule-col">
+          <h3><span class="dot note" aria-hidden="true"></span>A note, never a block</h3>
+          <ul>
+            <li>A bit long, a few extra bullets, a buzzword</li>
+            <li>No reason given on a larger change</li>
+            <li>"Added" instead of "Add", and it follows your repo's tense</li>
+            <li>Anything a person writes. People only ever get a warning.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · for teams -->
+  <section class="teams" id="teams" aria-labelledby="teams-h">
+    <div class="wrap">
+      <p class="label"><b>04</b> For teams</p>
+      <div class="split-head">
+        <h2 id="teams-h">Put it on every repo your team reviews</h2>
+        <p class="sub">Readable PRs matter most to the people reviewing them. Start with your own machine, commit it to a repo, or check every pull request in your org, including ones from people and agents that never installed anything.</p>
+      </div>
+      <div class="tiers">
+        <article class="tier">
+          <p class="tier-k">Your machine</p>
+          <h3>Every repo, every agent</h3>
+          <p>Git hooks for every repo and the skill for every coding agent it finds. <code>buzzcut setup --uninstall</code> puts it all back.</p>
+          <div class="cmd small" role="group" aria-label="Install command"><span class="prompt" aria-hidden="true">$</span><code>npm i -g buzzcut &amp;&amp; buzzcut setup</code><button type="button" class="copy" data-copy="npm i -g buzzcut && buzzcut setup" data-label="Copy">Copy</button></div>
+        </article>
+        <article class="tier">
+          <p class="tier-k">One repo</p>
+          <h3>The whole team, the same rules</h3>
+          <p>Writes the hooks and the skill into the repo. Commit them and every teammate's agent follows the same rules. Nobody gets locked out if they don't have it.</p>
+          <div class="cmd small" role="group" aria-label="Repo setup command"><span class="prompt" aria-hidden="true">$</span><code>npx buzzcut init</code><button type="button" class="copy" data-copy="npm i -D buzzcut && npx buzzcut init" data-label="Copy">Copy</button></div>
+        </article>
+        <article class="tier">
+          <p class="tier-k">Every PR in your org</p>
+          <h3>The GitHub Action</h3>
+          <p>Checks each PR description and its commits, keeps one comment up to date, and fails the check only when something is sent back. <a href="https://github.com/Shiva-Xs/buzzcut#github-action">Full workflow</a></p>
+          <div class="cmd small" role="group" aria-label="GitHub Action step"><span class="prompt" aria-hidden="true">-</span><code>uses: <span class="nb">Shiva-Xs/buzzcut@v0</span></code><button type="button" class="copy" data-copy="- uses: Shiva-Xs/buzzcut@v0" data-label="Copy">Copy</button></div>
+        </article>
+      </div>
+      <p class="agents-line"><span>Works with</span> Claude Code · Cursor · Windsurf · Antigravity · VS Code + Copilot · Codex · Gemini CLI · any terminal</p>
+    </div>
+  </section>
+
+  <!-- 05 · proof -->
+  <section class="proof" id="proof" aria-labelledby="proof-h">
+    <div class="wrap">
+      <p class="label"><b>05</b> Proof</p>
+      <div class="split-head">
+        <h2 id="proof-h">Tested on real pull requests, from before AI and after</h2>
+        <p class="sub">Two tests. buzzcut's checks ran on every PR and commit we downloaded, including work merged between 2018 and May 2021 in 75 projects, from kubernetes and rust to cpython and the Linux kernel: anything flagged there is a false alarm. Then an agent wrote buzzcut's version of real agent PRs from their own diffs, and a blind judge compared each with the original.</p>
+      </div>
+      <div class="stats">
+        <div class="stat red"><b>3,366</b><span>real PRs and commits buzzcut's checks ran on, 1,275 of them opened by coding agents</span></div>
+        <div class="stat"><b>0 <small>of</small> 167</b><span>commits from before AI were sent back</span></div>
+        <div class="stat"><b>30 <small>of</small> 30</b><span>times a blind judge preferred buzzcut's version of a real agent PR, on PRs from repos it was never tuned on</span></div>
+        <div class="stat"><b>11 <small>vs</small> 67</b><span>facts a reviewer needs that were missing: 11 from buzzcut's versions, 67 from the agents' originals</span></div>
+      </div>
+      <p class="fine proof-src">Data, scripts and every judged pair: <a href="https://github.com/Shiva-Xs/buzzcut/tree/main/bench">bench/</a> and <a href="https://github.com/Shiva-Xs/buzzcut/tree/main/bench/eval/corpus">bench/eval/corpus/</a></p>
+    </div>
+  </section>
+
+  <!-- 06 · faq -->
+  <section class="faqs" id="faq" aria-labelledby="faq-h">
+    <div class="wrap faq-grid">
+      <div>
+        <p class="label"><b>06</b> FAQ</p>
+        <h2 id="faq-h">Questions teams ask first</h2>
+        <p class="faq-more">Something else? <a href="https://github.com/Shiva-Xs/buzzcut/issues">Open an issue</a> and ask.</p>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Is this an AI detector?</summary>
+          <p>No. It flags patterns, not authors. A person who writes "leverage" gets the same note as a model that does, and no roast ever names who wrote it.</p>
+        </details>
+        <details>
+          <summary>Does it use an LLM or send my code anywhere?</summary>
+          <p>No. It's a deterministic check that runs on your machine in 20 to 40 ms per hook call. The only network calls go to GitHub, when you roast a PR or run the Action.</p>
+        </details>
+        <details>
+          <summary>What does it check against the diff?</summary>
+          <p>Which files changed and how many lines. That's enough to size the description and catch a file-by-file tour, a <code>feat:</code> on a docs-only change, or a claim about files that aren't there. It doesn't read what the code does.</p>
+        </details>
+        <details>
+          <summary>Will it block my team?</summary>
+          <p>Coding agents get sent back with the fix. People only ever get a warning, unless you set <code>"block": "always"</code>, and a teammate without buzzcut can always commit.</p>
+        </details>
+        <details>
+          <summary>Does it make agents write "What" and "Why" headings?</summary>
+          <p>No. It asks for the PR a good engineer writes: an opening that says what changed and why in plain words, a few bullets for the changes a reviewer would ask about, and a Tested line. On a small change, headings like "## Summary / ## Changes / ## Notes" count as a form; on a big one, a few short plain headers are fine.</p>
+        </details>
+        <details>
+          <summary>How do I undo it?</summary>
+          <p><code>buzzcut setup --uninstall</code> puts every hook, skill and setting back exactly as it was.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- last call -->
+  <section class="last" aria-labelledby="last-h">
+    <div class="stripe" aria-hidden="true"></div>
+    <div class="wrap">
+      <h2 id="last-h">Keep the agent,<br><span class="cut">lose the yap</span></h2>
+      <div class="cmd big" role="group" aria-label="Install command">
+        <span class="prompt" aria-hidden="true">$</span>
+        <code>npm i -g buzzcut &amp;&amp; buzzcut setup</code>
+        <button type="button" class="copy" data-copy="npm i -g buzzcut && buzzcut setup" data-label="Copy">Copy</button>
+      </div>
+      <p class="fine">No LLM, no API key, zero dependencies, MIT.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+      <a class="logo" href="./"><span class="pole" aria-hidden="true"></span>buzzcut</a>
+      <p class="foot-tag">Pull requests written like the good old days.</p>
+      <p class="foot-note">Open source · no LLM · no API key · MIT</p>
+      <a class="btn foot-gh" href="https://github.com/Shiva-Xs/buzzcut"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 .2a8 8 0 0 0-2.53 15.6c.4.07.55-.17.55-.38v-1.4c-2.23.49-2.7-.96-2.7-.96-.36-.93-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2Z"/></svg>Star it on GitHub</a>
+    </div>
+    <div>
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#try">Try it</a></li>
+        <li><a href="#problem">The problem</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#teams">For teams</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Resources</h4>
+      <ul>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut#readme">Docs</a></li>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut#github-action">GitHub Action</a></li>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut/tree/main/bench">Benchmark</a></li>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut/blob/main/CHANGELOG.md">Changelog</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Project</h4>
+      <ul>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut">GitHub</a></li>
+        <li><a href="https://www.npmjs.com/package/buzzcut">npm</a></li>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut/issues">Report an issue</a></li>
+        <li><a href="https://github.com/Shiva-Xs/buzzcut/blob/main/LICENSE">MIT license</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-mark" aria-hidden="true"></div>
+  <div class="foot-base"><div><span>© 2026 buzzcut</span><span>AI yaps, we cut</span></div></div>
+</footer>
+
+<script src="buzzcut-web.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

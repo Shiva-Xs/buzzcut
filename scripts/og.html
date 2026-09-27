@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- The link-preview image. Render it to site/og.png with Chrome:
+     chrome --headless=new --hide-scrollbars --window-size=1200,630 --virtual-time-budget=5000 \
+       --screenshot=site/og.png scripts/og.html -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@400;500;700&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #0b0a09; }
+  body { position: relative; font-family: "JetBrains Mono", monospace; color: #f3ede2; }
+  .yap { position: absolute; left: 44px; right: 44px; font: 400 15px/24px "JetBrains Mono", monospace; color: rgba(243, 237, 226, 0.09); white-space: nowrap; overflow: hidden; }
+  .yap b { color: rgba(243, 237, 226, 0.18); }
+  .yap i { font-style: normal; color: rgba(255, 75, 54, 0.32); }
+  .top { top: 22px; }
+  .bottom { bottom: 22px; }
+  .band { position: absolute; left: 0; right: 0; top: 118px; height: 394px; border-block: 1.5px solid #ff4b36; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .eyebrow { font: 500 17px/1 "JetBrains Mono", monospace; letter-spacing: 0.16em; text-transform: uppercase; color: #a59d90; margin-bottom: 22px; }
+  .eyebrow span { color: #ff4b36; }
+  h1 { font: 800 140px/0.86 "Bricolage Grotesque", sans-serif; letter-spacing: -0.05em; }
+  h1 em { font-style: normal; color: #ff4b36; }
+  .tag { margin-top: 22px; font: 500 30px/1.2 "Bricolage Grotesque", sans-serif; letter-spacing: -0.02em; color: #f3ede2; }
+  .cmd { margin-top: 28px; display: flex; align-items: center; gap: 14px; font: 500 22px/1 "JetBrains Mono", monospace; background: #000; border: 1.5px solid #36312b; padding: 16px 22px; }
+  .cmd span { color: #ff4b36; }
+  .pole { position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: repeating-linear-gradient(135deg, #ff4b36 0 12px, #f3ede2 12px 24px, #4a72ff 24px 36px, #f3ede2 36px 48px); }
+</style>
+</head>
+<body>
+  <div class="pole"></div>
+  <div class="yap top">
+    <div><b>## 🚀 Summary</b></div>
+    <div>This PR introduces a <i>comprehensive</i> and <i>robust</i> retry mechanism for webhook delivery, <i>significantly enhancing</i> the</div>
+    <div>reliability and <i>resilience</i> of our notification system. <b>## ✨ Key Changes</b> - **Retry Logic**: Implemented a</div>
+    <div><i>robust</i> retry loop that <i>seamlessly</i> handles transient failures - **Code Quality**: Improved readability</div>
+  </div>
+  <div class="band">
+    <p class="eyebrow"><span>✂</span>&nbsp; buzzcut</p>
+    <h1>AI yaps, <em>we cut</em></h1>
+    <p class="tag">Pull requests written like the good old days</p>
+    <p class="cmd"><span>$</span> npm i -g buzzcut &amp;&amp; buzzcut setup</p>
+  </div>
+  <div class="yap bottom">
+    <div><b>## 🧪 Testing</b> - [x] Tested locally - [x] No breaking changes - [x] Follows the style guide</div>
+    <div><b>## 📝 Notes</b> <i>Overall</i>, these changes <i>significantly</i> improve the <i>robustness</i> of our webhook pipeline and</div>
+    <div>follow industry <i>best practices</i>. Let me know if you have any questions! This change <i>empowers</i> the team to</div>
+    <div>deliver a <i>seamless</i>, <i>production-ready</i> developer experience. It's worth noting this refactor plays a crucial</div>
+  </div>
+</body>
+</html>

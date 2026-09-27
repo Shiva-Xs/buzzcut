@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="561" height="184" viewBox="0 0 561 184" role="img" aria-label="buzzcut check --kind pr body.md">
+<title>buzzcut check --kind pr body.md</title>
+<rect width="561" height="184" rx="10" fill="#0d1117"/>
+<rect width="561" height="30" rx="10" fill="#161b22"/>
+<rect y="20" width="561" height="10" fill="#161b22"/>
+<circle cx="18" cy="15" r="5.5" fill="#ff5f57"/><circle cx="36" cy="15" r="5.5" fill="#febc2e"/><circle cx="54" cy="15" r="5.5" fill="#28c840"/>
+<text x="280.5" y="19" fill="#8b949e" font-size="12" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">buzzcut check --kind pr body.md</text>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14">
+<text y="78" xml:space="preserve"><tspan x="20.0" textLength="16.8" lengthAdjust="spacing" fill="#e6edf3">  </tspan><tspan x="36.8" textLength="58.8" lengthAdjust="spacing" fill="#e6edf3" font-weight="700">buzzcut</tspan><tspan x="95.6" textLength="8.4" lengthAdjust="spacing" fill="#e6edf3"> </tspan><tspan x="104.0" textLength="369.6" lengthAdjust="spacing" fill="#8b949e">· pr · 1 file, +7 −2 · 80 words (budget 210)</tspan></text>
+<rect x="188.00000000000003" y="104" width="25.200000000000003" height="19" rx="3" fill="#3fb950"/>
+<text y="118" xml:space="preserve"><tspan x="20.0" textLength="16.8" lengthAdjust="spacing" fill="#e6edf3">  </tspan><tspan x="36.8" textLength="75.6" lengthAdjust="spacing" fill="#e6edf3" font-weight="700">YAP SCORE</tspan><tspan x="112.4" textLength="16.8" lengthAdjust="spacing" fill="#e6edf3">  </tspan><tspan x="129.2" textLength="42.0" lengthAdjust="spacing" fill="#3fb950" font-weight="700">0/100</tspan><tspan x="171.2" textLength="16.8" lengthAdjust="spacing" fill="#e6edf3">  </tspan><tspan x="188.0" textLength="25.2" lengthAdjust="spacing" fill="#0d1117" font-weight="700"> A </tspan><tspan x="213.2" textLength="201.6" lengthAdjust="spacing" fill="#e6edf3">  Says less. Ships more.</tspan></text>
+<text y="158" xml:space="preserve"><tspan x="20.0" textLength="16.8" lengthAdjust="spacing" fill="#e6edf3">  </tspan><tspan x="36.8" textLength="8.4" lengthAdjust="spacing" fill="#3fb950">✓</tspan><tspan x="45.2" textLength="134.4" lengthAdjust="spacing" fill="#e6edf3"> Nothing to cut.</tspan></text>
+</g>
+</svg>

@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/evanw/esbuild/pull/4399","repo":"evanw/esbuild","number":4399,"set":"human","title":"chore: correct copy&paste panic message","body":"","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"pkg/api/api_impl.go","additions":1,"deletions":1}],"baseSha":"9129e00e6c36a3e374820cb5e3fc2cd319c8ab85","template":null}

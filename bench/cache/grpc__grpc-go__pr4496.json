@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/grpc/grpc-go/pull/4496","repo":"grpc/grpc-go","number":4496,"set":"baseline","title":"Backport #4495","body":"","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"test/kokoro/xds_k8s.cfg","additions":1,"deletions":1}],"baseSha":"b3f14c2aaad6db4181297bddeff750cc7eb6517d","template":null}

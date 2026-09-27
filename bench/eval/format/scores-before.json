@@ -1,0 +1,911 @@
+[
+ {
+  "key": "DhavalLimbad1109__OfficeaGames__pr4",
+  "url": "https://github.com/DhavalLimbad1109/OfficeaGames/pull/4",
+  "source": "copilot-agent",
+  "size": "tiny",
+  "lines": 2,
+  "original": {
+   "words": 52,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 68,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 68,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "Comfy-Org__Comfy-Desktop__pr508",
+  "url": "https://github.com/Comfy-Org/Comfy-Desktop/pull/508",
+  "source": "amp",
+  "size": "tiny",
+  "lines": 23,
+  "original": {
+   "words": 205,
+   "score": 19,
+   "grade": "B",
+   "pass": true,
+   "rules": [
+    "template-on-tiny",
+    "subject-length",
+    "bullet-bloat",
+    "emoji"
+   ]
+  },
+  "old": {
+   "words": 88,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 123,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  }
+ },
+ {
+  "key": "teamzuzu__rancher-secrets-manager__pr14",
+  "url": "https://github.com/teamzuzu/rancher-secrets-manager/pull/14",
+  "source": "claude-code",
+  "size": "tiny",
+  "lines": 5,
+  "original": {
+   "words": 45,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 64,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 79,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "RDHoldings__website-v1__pr232",
+  "url": "https://github.com/RDHoldings/website-v1/pull/232",
+  "source": "cursor",
+  "size": "tiny",
+  "lines": 23,
+  "original": {
+   "words": 75,
+   "score": 7,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "template-on-tiny"
+   ]
+  },
+  "old": {
+   "words": 70,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 92,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "view-ignored__view-ignored__pr63",
+  "url": "https://github.com/view-ignored/view-ignored/pull/63",
+  "source": "jules",
+  "size": "tiny",
+  "lines": 6,
+  "original": {
+   "words": 60,
+   "score": 5,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "unbacked-claim"
+   ]
+  },
+  "old": {
+   "words": 72,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 91,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "ryusoh__networking__pr41",
+  "url": "https://github.com/ryusoh/networking/pull/41",
+  "source": "jules",
+  "size": "tiny",
+  "lines": 18,
+  "original": {
+   "words": 85,
+   "score": 6,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "vague-verification"
+   ]
+  },
+  "old": {
+   "words": 67,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 72,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "harleygod__stock_lanmei__pr1",
+  "url": "https://github.com/harleygod/stock_lanmei/pull/1",
+  "source": "cursor",
+  "size": "tiny",
+  "lines": 28,
+  "original": {
+   "words": 150,
+   "score": 19,
+   "grade": "B",
+   "pass": true,
+   "rules": [
+    "template-on-tiny",
+    "diff-echo"
+   ]
+  },
+  "old": {
+   "words": 96,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 89,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "erwins-enkel__shepherd__pr6",
+  "url": "https://github.com/erwins-enkel/shepherd/pull/6",
+  "source": "claude-code",
+  "size": "tiny",
+  "lines": 9,
+  "original": {
+   "words": 71,
+   "score": 16,
+   "grade": "B",
+   "pass": true,
+   "rules": [
+    "template-on-tiny",
+    "vague-verification"
+   ]
+  },
+  "old": {
+   "words": 62,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 59,
+   "score": 6,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "vague-verification"
+   ]
+  }
+ },
+ {
+  "key": "DamianPiuselli__isotools__pr4",
+  "url": "https://github.com/DamianPiuselli/isotools/pull/4",
+  "source": "copilot-agent",
+  "size": "tiny",
+  "lines": 15,
+  "original": {
+   "words": 104,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 77,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 87,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "gastownhall__gascity__pr390",
+  "url": "https://github.com/gastownhall/gascity/pull/390",
+  "source": "claude-code-open",
+  "size": "tiny",
+  "lines": 5,
+  "original": {
+   "words": 60,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 60,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 62,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "vothalvino__fireisp5.0__pr195",
+  "url": "https://github.com/vothalvino/fireisp5.0/pull/195",
+  "source": "copilot-agent",
+  "size": "normal",
+  "lines": 188,
+  "original": {
+   "words": 261,
+   "score": 27,
+   "grade": "C",
+   "pass": true,
+   "rules": [
+    "diff-echo",
+    "bold-spam",
+    "subject-length",
+    "em-dash"
+   ]
+  },
+  "old": {
+   "words": 125,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 200,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "ocaml__ocaml.org__pr3598",
+  "url": "https://github.com/ocaml/ocaml.org/pull/3598",
+  "source": "claude-code-open",
+  "size": "normal",
+  "lines": 246,
+  "original": {
+   "words": 70,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  },
+  "old": {
+   "words": 102,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  },
+  "new": {
+   "words": 118,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  }
+ },
+ {
+  "key": "CodeBacket__cinco-uno__pr49",
+  "url": "https://github.com/CodeBacket/cinco-uno/pull/49",
+  "source": "cursor",
+  "size": "normal",
+  "lines": 249,
+  "original": {
+   "words": 97,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 99,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 139,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "techulus__capture-docs__pr20",
+  "url": "https://github.com/techulus/capture-docs/pull/20",
+  "source": "amp",
+  "size": "normal",
+  "lines": 45,
+  "original": {
+   "words": 49,
+   "score": 7,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "template-on-tiny"
+   ]
+  },
+  "old": {
+   "words": 82,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 85,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "hadzija7__cursor-workshop-15may__pr5",
+  "url": "https://github.com/hadzija7/cursor-workshop-15may/pull/5",
+  "source": "cursor",
+  "size": "normal",
+  "lines": 250,
+  "original": {
+   "words": 157,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 110,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 142,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "S0l0m0n8und9__RalphDex__pr85",
+  "url": "https://github.com/S0l0m0n8und9/RalphDex/pull/85",
+  "source": "devin",
+  "size": "normal",
+  "lines": 49,
+  "original": {
+   "words": 362,
+   "score": 9,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "length",
+    "em-dash"
+   ]
+  },
+  "old": {
+   "words": 105,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 116,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "openkaiden__kaiden__pr1610",
+  "url": "https://github.com/openkaiden/kaiden/pull/1610",
+  "source": "claude-code-open",
+  "size": "normal",
+  "lines": 259,
+  "original": {
+   "words": 92,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 115,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 158,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "CodeGraphContext__CodeGraphContext__pr1269",
+  "url": "https://github.com/CodeGraphContext/CodeGraphContext/pull/1269",
+  "source": "amp",
+  "size": "normal",
+  "lines": 107,
+  "original": {
+   "words": 65,
+   "score": 12,
+   "grade": "B",
+   "pass": true,
+   "rules": [
+    "ai-opener",
+    "bullet-bloat"
+   ]
+  },
+  "old": {
+   "words": 92,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 126,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "torresposso__voxpopuli.digital__pr12",
+  "url": "https://github.com/torresposso/voxpopuli.digital/pull/12",
+  "source": "jules",
+  "size": "normal",
+  "lines": 46,
+  "original": {
+   "words": 96,
+   "score": 7,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "emoji",
+    "ai-vocab"
+   ]
+  },
+  "old": {
+   "words": 93,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  },
+  "new": {
+   "words": 124,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  }
+ },
+ {
+  "key": "imcvum__lisney-music__pr33",
+  "url": "https://github.com/imcvum/lisney-music/pull/33",
+  "source": "devin",
+  "size": "normal",
+  "lines": 117,
+  "original": {
+   "words": 407,
+   "score": 45,
+   "grade": "C",
+   "pass": false,
+   "rules": [
+    "bullet-bloat",
+    "diff-echo",
+    "subject-length",
+    "length",
+    "em-dash"
+   ]
+  },
+  "old": {
+   "words": 114,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 185,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "billyboy95__bennybookwurm__pr1",
+  "url": "https://github.com/billyboy95/bennybookwurm/pull/1",
+  "source": "cursor",
+  "size": "big",
+  "lines": 489,
+  "original": {
+   "words": 107,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 111,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 175,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "3rdIteration__Kern__pr1",
+  "url": "https://github.com/3rdIteration/Kern/pull/1",
+  "source": "copilot-agent",
+  "size": "big",
+  "lines": 1217,
+  "original": {
+   "words": 40,
+   "score": 14,
+   "grade": "B",
+   "pass": true,
+   "rules": [
+    "ticked-boxes"
+   ]
+  },
+  "old": {
+   "words": 141,
+   "score": 8,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "missing-why"
+   ]
+  },
+  "new": {
+   "words": 229,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "nammayatri__gtfs-inmemory-server-rust__pr117",
+  "url": "https://github.com/nammayatri/gtfs-inmemory-server-rust/pull/117",
+  "source": "claude-code-open",
+  "size": "big",
+  "lines": 1189,
+  "original": {
+   "words": 85,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 148,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 259,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "Auto-wiz__AgentFlow__pr17",
+  "url": "https://github.com/Auto-wiz/AgentFlow/pull/17",
+  "source": "cursor",
+  "size": "big",
+  "lines": 331,
+  "original": {
+   "words": 169,
+   "score": 5,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "unbacked-claim"
+   ]
+  },
+  "old": {
+   "words": 126,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 219,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "exceptionless__Exceptionless__pr2276",
+  "url": "https://github.com/exceptionless/Exceptionless/pull/2276",
+  "source": "copilot-agent",
+  "size": "big",
+  "lines": 981,
+  "original": {
+   "words": 198,
+   "score": 5,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "bullet-bloat",
+    "em-dash"
+   ]
+  },
+  "old": {
+   "words": 152,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 224,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "ColoredCow__frappe-lms__pr13",
+  "url": "https://github.com/ColoredCow/frappe-lms/pull/13",
+  "source": "claude-code-open",
+  "size": "big",
+  "lines": 1037,
+  "original": {
+   "words": 105,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 110,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 169,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "tiagomiele__oficina-backend-fiap-fase2__pr28",
+  "url": "https://github.com/tiagomiele/oficina-backend-fiap-fase2/pull/28",
+  "source": "devin",
+  "size": "big",
+  "lines": 477,
+  "original": {
+   "words": 290,
+   "score": 7,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "subject-length",
+    "em-dash"
+   ]
+  },
+  "old": {
+   "words": 113,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 185,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "Swaggyxren__MaliVK13Patcher__pr2",
+  "url": "https://github.com/Swaggyxren/MaliVK13Patcher/pull/2",
+  "source": "devin",
+  "size": "big",
+  "lines": 1463,
+  "original": {
+   "words": 310,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "old": {
+   "words": 134,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 246,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "zainfathoni__amux__pr286",
+  "url": "https://github.com/zainfathoni/amux/pull/286",
+  "source": "amp",
+  "size": "big",
+  "lines": 1573,
+  "original": {
+   "words": 126,
+   "score": 6,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "bullet-bloat"
+   ]
+  },
+  "old": {
+   "words": 132,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 265,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ },
+ {
+  "key": "jeremy-angulo__Jules-Orchestrator__pr68",
+  "url": "https://github.com/jeremy-angulo/Jules-Orchestrator/pull/68",
+  "source": "jules",
+  "size": "big",
+  "lines": 619,
+  "original": {
+   "words": 139,
+   "score": 9,
+   "grade": "A",
+   "pass": true,
+   "rules": [
+    "diff-echo"
+   ]
+  },
+  "old": {
+   "words": 87,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  },
+  "new": {
+   "words": 119,
+   "score": 0,
+   "grade": "A",
+   "pass": true,
+   "rules": []
+  }
+ }
+]

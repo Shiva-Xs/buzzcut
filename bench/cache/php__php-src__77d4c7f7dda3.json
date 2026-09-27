@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/php/php-src/commit/77d4c7f7dda31fb3517f021f8544aa3ce79499ea","repo":"php/php-src","sha":"77d4c7f7dda31fb3517f021f8544aa3ce79499ea","set":"human","message":"Reflection: add UPGRADING note about changed boolean constant display","files":[{"path":"UPGRADING","additions":7,"deletions":0}],"additions":7,"deletions":0}

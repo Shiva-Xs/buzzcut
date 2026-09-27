@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/84a341bb5cf6e6e371b0b1ecf80521f5408b5ac7","repo":"rust-lang/rust","sha":"84a341bb5cf6e6e371b0b1ecf80521f5408b5ac7","set":"human","message":"Use wrapping arithmetic in `from_str_radix`","files":[{"path":"library/core/src/num/mod.rs","additions":19,"deletions":6}],"additions":19,"deletions":6}

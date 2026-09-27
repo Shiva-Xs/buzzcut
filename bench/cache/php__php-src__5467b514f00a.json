@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/php/php-src/commit/5467b514f00aa9a4646bd82168d85b884f99214c","repo":"php/php-src","sha":"5467b514f00aa9a4646bd82168d85b884f99214c","set":"human","message":"[ci skip] Update NEWS for 8.6.0RC3","files":[{"path":"NEWS","additions":4,"deletions":1}],"additions":4,"deletions":1}

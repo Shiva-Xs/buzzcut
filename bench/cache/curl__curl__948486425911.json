@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/curl/curl/commit/948486425911bc83cc8a224bf23bcffaaa7de6f6","repo":"curl/curl","sha":"948486425911bc83cc8a224bf23bcffaaa7de6f6","set":"human","message":"socksd: count connections per test, widen the method2 sentinel","files":[{"path":"tests/server/socksd.c","additions":22,"deletions":8}],"additions":22,"deletions":8}

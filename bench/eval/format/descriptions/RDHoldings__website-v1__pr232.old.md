@@ -1,0 +1,3 @@
+Build health branches in CI, deploy only from main, move Actions to v5
+
+A cleanup from the project health review: `deploy-github-pages.yml` now also runs on pushes to `cursor/project-health-review-*` and `cursor/project-health-cleanup-*`, and the `deploy` job only runs on `refs/heads/main`, so those branches build without deploying. checkout and setup-node go from v4 to v5, upload-pages-artifact from v3 to v5 and deploy-pages from v4 to v5, and VS Code recommends markdownlint and runs it on save with `.markdownlint.json`. `npx markdownlint-cli2` reports 0 errors and `npm run build` succeeded locally.

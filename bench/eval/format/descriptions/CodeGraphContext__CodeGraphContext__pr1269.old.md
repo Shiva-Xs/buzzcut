@@ -1,0 +1,3 @@
+feat: make the watch startup sync opt-in with --sync-on-start
+
+Addresses #1268. `cgc watch` on an already-indexed repo synchronized every current file before watching; it now attaches the watcher at once and only processes future file events, and the old startup sync moves behind `--sync-on-start`. `watch_helper` takes `sync_on_start` (default `False`) and passes it to `watch_directory`, the CLI points to `cgc index --force` or `--sync-on-start` for existing changes, `cgc w` gets `--sync-on-start` and now forwards `--poll` too, and the shutdown message drops "Graph is up to date". New unit and integration tests cover the flag. Not tested: the new tests and a `cgc watch` on an indexed repo.

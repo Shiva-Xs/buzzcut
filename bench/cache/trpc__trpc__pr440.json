@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/trpc/trpc/pull/440","repo":"trpc/trpc","number":440,"set":"baseline","title":"updated typo","body":"","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"www/docs/main/quickstart.md","additions":1,"deletions":1}],"baseSha":"6605730c882c854c91af297fe960882f4aba8e29","template":null}

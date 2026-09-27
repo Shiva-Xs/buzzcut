@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/django/django/commit/85647bccc19947646f5b382808415acf623e964d","repo":"django/django","sha":"85647bccc19947646f5b382808415acf623e964d","set":"human","message":"Fixed #37321 -- Documented BaseSpatialField.srid=-1 behavior.","files":[{"path":"docs/ref/contrib/gis/model-api.txt","additions":4,"deletions":0}],"additions":4,"deletions":0}

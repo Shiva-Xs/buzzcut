@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/withastro/astro/commit/743638839b4dd93ef0c3dd320836e34a9538d4ec","repo":"withastro/astro","sha":"743638839b4dd93ef0c3dd320836e34a9538d4ec","set":"human","message":"chore: group renovate updates for repo tooling and examples (#18095)","files":[{"path":".github/renovate.json5","additions":23,"deletions":0}],"additions":23,"deletions":0}

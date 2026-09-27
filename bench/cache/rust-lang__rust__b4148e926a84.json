@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/b4148e926a84482c5733a17a7469d9334e5a5557","repo":"rust-lang/rust","sha":"b4148e926a84482c5733a17a7469d9334e5a5557","set":"baseline","message":"Add eslint checks in CI","files":[{"path":"src/ci/docker/host-x86_64/mingw-check/Dockerfile","additions":3,"deletions":1}],"additions":3,"deletions":1}

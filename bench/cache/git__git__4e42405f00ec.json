@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/git/git/commit/4e42405f00ecbbee412846f48cb0253efeebe726","repo":"git/git","sha":"4e42405f00ecbbee412846f48cb0253efeebe726","set":"baseline","message":"Git 2.32-rc2\n\nSigned-off-by: Junio C Hamano <gitster@pobox.com>","files":[{"path":"GIT-VERSION-GEN","additions":1,"deletions":1}],"additions":1,"deletions":1}

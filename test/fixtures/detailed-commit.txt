@@ -1,0 +1,35 @@
+Return real 404s instead of serving the app at 200
+
+not_found_handling was "single-page-application", so every unmatched path
+answered with the 214 KB index.html at HTTP 200. /vite/.env, /wp-admin/install.php
+and every scraped typo became a 200-status duplicate of the homepage. Google
+records those as soft 404s and spends crawl budget on them, and a scanner reads
+200 as a probe worth repeating. app.shrinkr.in has been at 0 of 6 pages indexed
+since mid-June, and this is the most likely reason.
+
+The obvious fix, a _redirects file mapping the SPA routes to /index.html at
+status 200, does not work on Workers Assets:
+
+  Found 5 invalid redirect rules:
+  Infinite loop detected in this rule and has been ignored.
+    at _redirects:14 | /manage/*    /index.html    200
+
+Rewrites are a Pages feature. So worker.js matches the six client-side routes
+and serves the shell for those; everything else falls through to the asset
+handler, which now serves 404.html with a real 404.
+
+worker.js asks the asset binding for "/" rather than "/index.html": the
+handler normalises an explicit /index.html back to / with a 307, which would
+hand the browser a redirect and lose the requested path.
+
+404.html keeps the courtesy redirect for app.shrinkr.in/<slug>, which route()
+used to handle: crawlers get the 404, and only a browser that runs the script
+follows the hop to shrinkr.in.
+
+Verified locally against wrangler dev, 17 paths: SPA routes and guide pages 200,
+scanner paths 404, robots.txt and sitemap.xml 200, worker.js not publicly
+served, and the _headers CSP/HSTS rules still applied on both branches.
+
+Also:
+- robots.txt collapsed to one User-agent: * group.
+- Oversized wordmark closing the footer.

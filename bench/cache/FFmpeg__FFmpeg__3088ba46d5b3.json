@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/FFmpeg/FFmpeg/commit/3088ba46d5b3774e367b58e857fa3d31a35667be","repo":"FFmpeg/FFmpeg","sha":"3088ba46d5b3774e367b58e857fa3d31a35667be","set":"human","message":"avformat/http: keep cookie attributes that carry no value","files":[{"path":"libavformat/http.c","additions":5,"deletions":3}],"additions":5,"deletions":3}

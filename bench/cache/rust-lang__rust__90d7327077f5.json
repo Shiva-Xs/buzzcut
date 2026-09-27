@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/90d7327077f5eb03d90f0620c5cff62cdece950a","repo":"rust-lang/rust","sha":"90d7327077f5eb03d90f0620c5cff62cdece950a","set":"human","message":"Make it clear what the alignment needs to be for `deallocate`","files":[{"path":"library/core/src/alloc/mod.rs","additions":2,"deletions":1}],"additions":2,"deletions":1}

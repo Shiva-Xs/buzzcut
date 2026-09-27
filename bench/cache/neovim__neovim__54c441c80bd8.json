@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/neovim/neovim/commit/54c441c80bd82df9c1c9f206d8e2749ceb05481c","repo":"neovim/neovim","sha":"54c441c80bd82df9c1c9f206d8e2749ceb05481c","set":"baseline","message":"perf(lsp): get all lines from a file in one go","files":[{"path":"runtime/lua/vim/lsp/util.lua","additions":61,"deletions":6}],"additions":61,"deletions":6}

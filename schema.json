@@ -1,0 +1,309 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unpkg.com/buzzcut/schema.json",
+  "title": "buzzcut config",
+  "description": "Settings for buzzcut, in .buzzcut.json at the repo root or a \"buzzcut\" key in package.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "max": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 35,
+      "description": "Fail above this yap score (a D or F). Any ✗ error (a false claim, an empty or meaningless subject, extreme bloat) also fails."
+    },
+    "block": {
+      "enum": [
+        "agents",
+        "always",
+        "never"
+      ],
+      "default": "agents",
+      "description": "Who a failing check blocks: coding agents only (people get a warning), everyone, or no one."
+    },
+    "length": {
+      "enum": [
+        "short",
+        "normal",
+        "detailed"
+      ],
+      "default": "normal",
+      "description": "How long commit messages and PR descriptions should be. Scales the word budget and the bullets allowed: short 0.6×, detailed 1.6×. The checks for facts, the why and the Tested line are the same at every length."
+    },
+    "rules": {
+      "type": "object",
+      "description": "Turn a rule off or change its severity.",
+      "additionalProperties": false,
+      "properties": {
+        "length": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "phantom-tests": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "unverified-in-session": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "template-on-tiny": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "diff-echo": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "ticked-boxes": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "vague-verification": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "unbacked-claim": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "missing-why": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "thin-description": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "type-mismatch": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "dropped-facts": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "empty-subject": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "subject-vague": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "subject-length": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "subject-mood": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "subject-period": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "blank-line": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "markdown-in-commit": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "commit-changelog": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "style-convention": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "style-case": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "style-ticket": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "chatbot-leftovers": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "ai-opener": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "ai-closer": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "ai-vocab": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "bullet-bloat": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "long-bullet": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "emoji": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "bold-spam": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "em-dash": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        }
+      }
+    },
+    "ignore": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "regex"
+      },
+      "description": "Skip commits whose subject matches any of these regexes (merges, reverts, fixups, dependency bumps and version tags are always skipped)."
+    }
+  }
+}

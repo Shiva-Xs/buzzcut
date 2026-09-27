@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/FFmpeg/FFmpeg/commit/9b8e45b3ba3f2b515119aaf9d620f49e0b807419","repo":"FFmpeg/FFmpeg","sha":"9b8e45b3ba3f2b515119aaf9d620f49e0b807419","set":"human","message":"avformat/http: match cookie paths case-sensitively\n\nRFC 6265 section 5.1.4","files":[{"path":"libavformat/http.c","additions":1,"deletions":1}],"additions":1,"deletions":1}

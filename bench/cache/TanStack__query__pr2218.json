@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/TanStack/query/pull/2218","repo":"TanStack/query","number":2218,"set":"baseline","title":"Docs/fix","body":"","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"docs/src/pages/guides/placeholder-query-data.md","additions":1,"deletions":1}],"baseSha":"542ad07ca865c29d79f0085926ce95cc183856b1","template":null}

@@ -1,0 +1,17 @@
+feat: stateless JWT auth, JPA persistence and role-based access
+
+Passwords were stored with NoOpPasswordEncoder, students weren't
+persisted, and there were no roles. Users and students are now JPA
+entities, passwords are hashed with BCrypt (strength 12), and
+/auth/register and /auth/login issue HMAC-SHA256 JWTs that a filter
+checks on every request.
+
+Reads need ROLE_USER and writes need ROLE_ADMIN. A bad token gets a
+JSON 401, a missing role a 403, and GlobalExceptionHandler keeps stack
+traces and SQL out of error responses.
+
+The signing key comes from JWT_SECRET_KEY, then application properties,
+then a random key made at startup. Without the env var, tokens stop
+working after a restart.
+
+Verified: all 14 tests pass (BUILD SUCCESS).

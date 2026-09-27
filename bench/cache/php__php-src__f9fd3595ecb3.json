@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/php/php-src/commit/f9fd3595ecb36c8dc6add0515782a18f15216d77","repo":"php/php-src","sha":"f9fd3595ecb36c8dc6add0515782a18f15216d77","set":"baseline","message":"Fix snmp build without DES","files":[{"path":"ext/snmp/snmp.c","additions":14,"deletions":2}],"additions":14,"deletions":2}

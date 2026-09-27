@@ -1,0 +1,965 @@
+[
+ {
+  "cmp": "old",
+  "id": "P04",
+  "key": "billyboy95__bennybookwurm__pr1",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both are accurate summaries of a pure documentation PR, but B's bulleted breakdown covers more of the doc's actual sections (regional providers, availability/double-booking, inbound replies, observability, API sketch, line count), giving a reviewer better traceability into the 483-line file than A's single paragraph.",
+  "missingNew": [],
+  "missingOther": [
+   "doc also compares regional WhatsApp providers (360dialog, MessageBird, Vonage, Sinch), not just Twilio vs Meta",
+   "doc includes an 'API surface sketch' section",
+   "doc covers availability/double-booking prevention and inbound-reply handling explicitly",
+   "doc covers observability",
+   "new file is 483 lines"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P22",
+  "key": "3rdIteration__Kern__pr1",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both descriptions are accurate against the diff, but B gives the reviewer precise, checkable technical detail (Kconfig/sdkconfig file names, exact GPIO/LDO assignments, artifact retention, matrix board list, master-only push trigger) that A only paraphrases at a higher level.",
+  "missingNew": [],
+  "missingOther": [
+   "Kconfig symbol KERN_BOARD_CROWPANEL_101 and the sdkconfig.defaults.crowpanel_101 file",
+   "exact pin assignments: I2C SCL/SDA on GPIO46/45, backlight on GPIO31 via LEDC/PWM",
+   "LDO channel numbers: DSI PHY uses channel 3, the panel's extra rail is channel 4 at 3.3V",
+   "firmware artifact retention is 30 days; matrix explicitly covers wave_4b/wave_35/wave_5/crowpanel_101",
+   "scripts/ci-checks.sh now loops and builds all four boards per commit instead of just wave_4b",
+   "push trigger restricted to branches:[master] so PR pushes don't also trigger a build/deploy"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P13",
+  "key": "nammayatri__gtfs-inmemory-server-rust__pr117",
+  "size": "big",
+  "winner": "new",
+  "reason": "A surfaces two concrete, code-verified findings that matter for review -- that employee login compares a client-sent password hash directly against the stored hash (so a leaked hash is a valid credential) and the cluster-destinations fallback/cache-key behavior -- which B omits entirely, while both otherwise cover the same undisclosed scope-creep in the branch.",
+  "missingNew": [
+   "OSRTC access token is logged in plaintext via info!(\"OSRTC access token: {}\", access_token)",
+   "dev dhall config flips enable_schedule_reconciliation to True, an unrelated behavior change bundled in this branch"
+  ],
+  "missingOther": [
+   "login endpoint compares the client-sent password_hash directly against the stored hash with no server-side hashing step, so a leaked hash can be replayed as a password",
+   "cluster destinations endpoint falls back to a single-stop walk when a stop has no clusterId",
+   "the chennai-only service-type cache is renamed/keyed by gtfs_id:vehicle_no so it's now shared across cities",
+   "a separate /employee/register endpoint upserts employees_internal using client-supplied hashes",
+   "OSRTC access token is logged in plaintext via info!(\"OSRTC access token: {}\", access_token)",
+   "dev dhall config flips enable_schedule_reconciliation to True, an unrelated behavior change bundled in this branch"
+  ],
+  "unsupNew": [
+   "\"The branch carries 13 commits, more than its title says\" -- no commit count is present in change.diff or notes.md"
+  ],
+  "unsupOther": [
+   "\"The branch carries 13 commits, more than its title says\" -- no commit count is present in change.diff or notes.md"
+  ]
+ },
+ {
+  "cmp": "old",
+  "id": "P03",
+  "key": "Auto-wiz__AgentFlow__pr17",
+  "size": "big",
+  "winner": "new",
+  "reason": "A matches B's accuracy but adds precisely-verified numeric/behavioral detail (the 8-installation fallback cap, GHL_API_TOKEN as last resort, appId now optional, .env.example URL change) that makes the token-selection fallback chain easier to check against the diff.",
+  "missingNew": [],
+  "missingOther": [
+   "GHL_API_TOKEN is included as a final fallback candidate",
+   "the any-type fallback is capped at the 8 most recent installations",
+   "appId is now set only when configured (previously required unconditionally)",
+   ".env.example install URL path changed to /v2/oauth/chooselocation"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P27",
+  "key": "exceptionless__Exceptionless__pr2276",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both are accurate, but B captures several precise, code-verified correctness details of the actual bug fix -- Lucene range/existence-filter handling, stripping quoted/range value literals before field detection, the exact 'free for event OR stack' rule, and session endpoints getting their own upgrade message -- that A only gestures at vaguely.",
+  "missingNew": [],
+  "missingOther": [
+   "session endpoints still count as premium but now get their own distinct upgrade message (PremiumSessionUpgradeMessage)",
+   "premium-filter.ts now strips quoted and Lucene range-bracket value literals before extracting fields, so value text isn't misread as a field name",
+   "Lucene existence/missing operators (_exists_/_missing_) are specifically handled in field detection",
+   "EventStackQueryValidator's exact rule: a field is free if it's free for events OR for stacks",
+   "which pages gained the guidance UI (event, stack, stream, session)"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P21",
+  "key": "ColoredCow__frappe-lms__pr13",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both correctly identify the 2-line Quiz.vue fix as the actual change, but B accurately itemizes the large unrelated demo-data payload (CI payments-app install, Clear Demo Data menu item + API, analytics/persona exclusions, workspace_sidebar removal, Cypress selector change) in a way a reviewer can act on, while A only gestures at it in one sentence.",
+  "missingNew": [],
+  "missingOther": [
+   "CI now installs frappe/payments before the lms app",
+   "analytics capture (course_progress) and the persona-capture check now both exclude the demo course",
+   "Cypress course_creation test selector changed from grid position to matching by title",
+   "lms/workspace_sidebar/lms.json is deleted",
+   "setup_wizard_requires hook replaced by setup_wizard_complete = lms.demo.demo_data.create_demo_data"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P12",
+  "key": "tiagomiele__oficina-backend-fiap-fase2__pr28",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both accurately summarize the 4 new/changed endpoints and validation rules, but B's bullet structure names which controller/perfil owns each endpoint, names the specific new test files, and flags the real risk that removing GET /ordens-servico/ativas breaks existing callers, all of which help a reviewer more than A's single dense paragraph.",
+  "missingNew": [
+   "ListagemAtivasIntegrationTest was adjusted to the new /relatorios/os-por-status path"
+  ],
+  "missingOther": [
+   "the new/changed tests are in OrdemServicoTest and EndpointsAdminTecnicoFase2IntegrationTest specifically",
+   "risk callout that removing /ordens-servico/ativas breaks any existing caller of that route"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P30",
+  "key": "Swaggyxren__MaliVK13Patcher__pr2",
+  "size": "big",
+  "winner": "other",
+  "reason": "Both cover the icon fix, SDK/signing bump, UI rewrites, PackOptions, and CI/Linux-build additions accurately, but A adds a specific '15 more commits' figure that nothing in the diff or notes can verify and a gui.py line-count ('about 480') that is off by roughly 100 lines from the diff's actual final size (~586), while B makes no such unverifiable claims.",
+  "missingNew": [],
+  "missingOther": [
+   "review checklist item: confirm CI's build-apk job is green",
+   "review checklist item: confirm the launcher icon and themed-icon toggle actually work on device",
+   "why this PR supersedes #1 (its branch was renamed and GitHub no longer accepts pushes to it)",
+   "APK gets a settings dialog, credits row, and status-bar inset handling",
+   "README now documents Linux build/usage steps"
+  ],
+  "unsupNew": [
+   "\"carries 15 more commits\" (no commit history is present in the diff or notes to support this count)",
+   "\"the Windows `gui.py` (about 480)\" (diff's final hunk implies the file ends around line 586, not ~480)"
+  ],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P08",
+  "key": "zainfathoni__amux__pr286",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both accurately describe the quarantine plan/apply/inspect design, fail-closed rules, and permanent fence, but A additionally verifies concrete line counts, flags the important trust-boundary caveat that authorization_sha256 is an unauthenticated operator-supplied reference with no TTL, and lists a more complete validation checklist (including the Python compile check and git diff --check), all of which matter for reviewing a security-sensitive change.",
+  "missingNew": [
+   "Oracle read-only blocker review and post-fix re-review was part of validation"
+  ],
+  "missingOther": [
+   "authorization_sha256 is an operator-supplied reference, not an authenticated credential, and has no TTL",
+   "Python syntax compile check was run",
+   "git diff --check was run",
+   "Oracle read-only blocker review and post-fix re-review was part of validation"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P17",
+  "key": "jeremy-angulo__Jules-Orchestrator__pr68",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both correctly catch that background.test.js only lost a comment (contradicting the stale notes) and both flag patch_trefle.mjs and the deleted Playwright test, but A additionally notes vitest remains an unused dependency in package.json and explicitly asks for sign-off before removing the Playwright test, giving the reviewer more concrete action items in an equally accurate, better-scannable bullet format.",
+  "missingNew": [],
+  "missingOther": [
+   "vitest package dependency is left in package.json even though no test file uses it anymore",
+   "explicit call for a reviewer/stakeholder sign-off before removing the Playwright test that other people may rely on"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P20",
+  "key": "vothalvino__fireisp5.0__pr195",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both give the same accurate root-cause and fix narrative, but B additionally covers the docs/tls-setup.md and .gitignore changes and gives a concrete manual test suggestion that A leaves out.",
+  "missingNew": [],
+  "missingOther": [
+   "docs/tls-setup.md now documents the bootstrap file and the common failure modes surfaced by the new error output",
+   ".gitignore ignores the transient nginx/.nginx.conf.bootstrap-backup file"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P19",
+  "key": "ocaml__ocaml.org__pr3598",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both summarize the tutorial's content and test plan equivalently, but B also notes that current-bench enrollment requires manual maintainer approval, a real onboarding detail A omits.",
+  "missingNew": [],
+  "missingOther": [
+   "enrollment on the hosted service is manual and requires the current-bench maintainers (Tarides) to approve/activate the repository"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P05",
+  "key": "CodeBacket__cinco-uno__pr49",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both describe the state contract accurately, but B adds two concrete, review-relevant details from the diff (the exact stub throw message and the specific v1 rules baked into RULES.md) that A leaves out.",
+  "missingNew": [],
+  "missingOther": [
+   "engine.js stub: createEngine().applyIntent() throws \"Engine not implemented yet\"",
+   "RULES.md content specifics: 108-card deck, 7 cards dealt, Draw Two stacking disabled for v1"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P06",
+  "key": "techulus__capture-docs__pr20",
+  "size": "normal",
+  "winner": "new",
+  "reason": "The two are nearly identical, but A explicitly notes that the OpenAPI `cdp` field's schema description was also updated to reflect the new proxy compatibility, a diff hunk B doesn't mention.",
+  "missingNew": [],
+  "missingOther": [
+   "the `cdp` property description in components/schemas was also updated to state it can be combined with proxy but not bypassBotDetection"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P09",
+  "key": "hadzija7__cursor-workshop-15may__pr5",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both describe the stepper/remove UI and state changes accurately, but B also notes that the spec still leaves diet filters and visible total cost for Phase 2, and is explicit that no automated tests ran, both useful scoping facts A omits.",
+  "missingNew": [],
+  "missingOther": [
+   "spec still defers extra diet filters and a visible total cost to Phase 2",
+   "no automated tests were run, only the manual demo/verification steps"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P28",
+  "key": "S0l0m0n8und9__RalphDex__pr85",
+  "size": "normal",
+  "winner": "tie",
+  "reason": "Identical substantive content (what the new test does, what it asserts, and the test results); the only difference is bullets vs. prose.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P02",
+  "key": "openkaiden__kaiden__pr1610",
+  "size": "normal",
+  "winner": "new",
+  "reason": "A covers the fallback-to-rootful-socket behavior on timeout and matches all three items of the notes' manual test plan, while B drops the timeout-fallback detail and one manual test item.",
+  "missingNew": [],
+  "missingOther": [
+   "on timeout, findPaths logs an error and returns what it found, which may be the rootful socket",
+   "manual verification that repeated socket-finder polls don't spawn a second podman process"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P11",
+  "key": "CodeGraphContext__CodeGraphContext__pr1269",
+  "size": "normal",
+  "winner": "tie",
+  "reason": "Both capture the same behavior change, the incidental --poll fix for `cgc w`, the shutdown message change, and equivalent test coverage; differences are only phrasing/format.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P25",
+  "key": "torresposso__voxpopuli.digital__pr12",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both correctly avoid repeating the notes' unsupported performance-win claims and flag that there's no measurement, but A additionally mentions the new .jules/bolt.md file and explicitly calls out the untested with/without-meta case.",
+  "missingNew": [],
+  "missingOther": [
+   "a new .jules/bolt.md note file documenting the pattern is added",
+   "explicit callout that testing a post with and without vp_reading_time set was not done"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P10",
+  "key": "imcvum__lisney-music__pr33",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both are accurate on the splash/init changes, but B reproduces the notes' specific device-verification checklist (cold start, warm start, search/play) and names the GlobalScope/DelicateCoroutinesApi usage, both of which matter for a reviewer and are missing from A.",
+  "missingNew": [],
+  "missingOther": [
+   "the deferred NewPipe.init coroutine runs in GlobalScope under @OptIn(DelicateCoroutinesApi::class), a pattern reviewers may flag",
+   "specific manual device-test steps: cold start with no black frame, warm start, and search/play a song right after launch"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P29",
+  "key": "DhavalLimbad1109__OfficeaGames__pr4",
+  "size": "tiny",
+  "winner": "tie",
+  "reason": "A and B contain identical wording; the only difference is a paragraph break before the 'Not tested' sentence.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P16",
+  "key": "Comfy-Org__Comfy-Desktop__pr508",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "B includes the manual repro/verification steps from the notes that let a reviewer actually check the fix, which A drops entirely.",
+  "missingNew": [],
+  "missingOther": [
+   "manual verification steps: open a fresh Comfy instance window and click Send Feedback before touching the ComfyUI body, and again via the waffle menu, to confirm the typeform opens"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P01",
+  "key": "teamzuzu__rancher-secrets-manager__pr14",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "A and B give the same root cause and fix, but A's fuller 'not tested' note gives the reviewer a concrete manual check to perform, which B's bare 'Not tested' does not.",
+  "missingNew": [],
+  "missingOther": [
+   "what specifically should be verified: following the new step on a Rancher 2.14 cluster and confirming the extension is gone"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P18",
+  "key": "RDHoldings__website-v1__pr232",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both cover the same substantive changes, but B's bullet structure is easier to scan and it adds the useful caveat that the CI-trigger change itself is only confirmed by an actual push.",
+  "missingNew": [],
+  "missingOther": [
+   "caveat that the branch-trigger/deploy-gating change can only be confirmed by an actual push, not by the local build/lint checks cited"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P24",
+  "key": "view-ignored__view-ignored__pr63",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both correctly flag the caching risk (stale/shared result) and the lack of a perf measurement, but A additionally spells out what a verification pass should cover, which B omits.",
+  "missingNew": [],
+  "missingOther": [
+   "what a 'not tested' check should cover: run the test suite and scan a large tree and check results match"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P26",
+  "key": "ryusoh__networking__pr41",
+  "size": "tiny",
+  "winner": "tie",
+  "reason": "A and B cover the identical set of facts (3→0 errors, the JSDoc/narrowing changes, the narrower SVG-node behavior change, and make precommit passing), differing only in bullets vs. prose.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P07",
+  "key": "harleygod__stock_lanmei__pr1",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both fabricate the same unverifiable lockfile line count, but B's bullet structure separates the two changes more clearly and also mentions the health-check endpoint from AGENTS.md that A leaves out.",
+  "missingNew": [],
+  "missingOther": [
+   "AGENTS.md also documents the health-check command (curl http://localhost:3001/api/health)"
+  ],
+  "unsupNew": [
+   "\"about 1,500 lines, lockfile only\" — no lockfile diff is present in change.diff (only AGENTS.md is) and no line count appears in notes.md"
+  ],
+  "unsupOther": [
+   "\"about 1,500 lines, lockfile only\" — no lockfile diff is present in change.diff (only AGENTS.md is) and no line count appears in notes.md"
+  ]
+ },
+ {
+  "cmp": "old",
+  "id": "P14",
+  "key": "erwins-enkel__shepherd__pr6",
+  "size": "tiny",
+  "winner": "tie",
+  "reason": "A and B state exactly the same facts about the change and the same test results, differing only in whether 'Tested:' is a separate lead-in or folded into the sentence.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P23",
+  "key": "DamianPiuselli__isotools__pr4",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "A and B explain the exit-code-28 root cause and the fix identically, but A's fuller 'not tested' note tells the reviewer exactly what to confirm on the next push, which B's shorter version omits.",
+  "missingNew": [],
+  "missingOther": [
+   "what the on-push check should confirm: that it passes at the current score and fails below 8.5"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "old",
+  "id": "P15",
+  "key": "gastownhall__gascity__pr390",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "A and B are otherwise identical; A keeps the full 'context, not conversation' distinction from the notes' test plan, which B truncates.",
+  "missingNew": [],
+  "missingOther": [
+   "that an active session should treat nudges as context and specifically not as conversation"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P04",
+  "key": "billyboy95__bennybookwurm__pr1",
+  "size": "big",
+  "winner": "new",
+  "reason": "Both are accurate, but A summarizes the concrete design decisions in the doc (hold duration, Twilio vs Meta recommendation, signature check, milestone count) that a reviewer needs to judge the doc's quality, while B is a generic table-of-contents restatement.",
+  "missingNew": [],
+  "missingOther": [
+   "specific proposed decisions in the doc: 5-15 min slot holds, Twilio-for-MVP/Meta-for-cost recommendation, X-Hub-Signature-256 webhook verification, five concrete milestones"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P22",
+  "key": "3rdIteration__Kern__pr1",
+  "size": "big",
+  "winner": "new",
+  "reason": "A accurately covers the full scope of the PR (new board BSP, CI matrix, flasher, security pin) with verified technical details, while B's checklist omits the actual board-support code entirely and describes the flasher as 'self-contained' when it loads esptool-js from a CDN.",
+  "missingNew": [],
+  "missingOther": [
+   "the crowpanel_101 BSP itself: 1024x600 MIPI DSI panel (EK79007, 2 lanes), GT911 touch, GPIO pin assignments, second LDO channel for panel power",
+   "Kconfig/sdkconfig.defaults.crowpanel_101 and simulator/`just clean` support for the new board",
+   "CI build matrix over all four boards and 30-day firmware artifact retention",
+   "safe.directory fix in test-each-commit.yml and push-builds-only-on-master change",
+   "need to enable GitHub Pages (Actions) in repo settings for the deploy to work"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"Create `flasher/index.html` — self-contained web flasher\" (it loads esptool-js 0.6.0 from unpkg.com at runtime, not self-contained)"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P13",
+  "key": "nammayatri__gtfs-inmemory-server-rust__pr117",
+  "size": "big",
+  "winner": "new",
+  "reason": "A discloses that the diff spans far more than the title's currentOperation change (employee login/register, new read endpoints, OSRTC station cache, kolkata_bus data) and flags a real security concern (login trusts client-sent hashes), while B only describes the small person_id slice and silently omits everything else in the 1650-line diff.",
+  "missingNew": [],
+  "missingOther": [
+   "new employee login/register endpoints and their hash-comparison auth (and the pass-the-hash risk this creates)",
+   "new GET /waybill/.../metadata and GET /cluster/.../destinations read endpoints",
+   "new OsrtcStationCache serving get_stops/get_stop for the OSRTC feed",
+   "kolkata_bus data changes: new fleet tags K1001-K1005, routes 1001-1004(033) moved from PREMIUM to SHUTTLE, missing is_flexi fix, service-type cache now keyed by gtfs_id:vehicle_no",
+   "that the branch is actually 13 commits, much broader than the stated title"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P03",
+  "key": "Auto-wiz__AgentFlow__pr17",
+  "size": "big",
+  "winner": "new",
+  "reason": "A gives precise, diff-verified specifics (60s token-refresh cutoff, 8-newest-installation fallback, exact message-API version list) and calls out a real risk (single-agency assumption in the last fallback), while B is vaguer on those specifics and is oddly structured as a running \"New update (this turn)\" log rather than a finished PR description.",
+  "missingNew": [],
+  "missingOther": [
+   "60-second token-expiry cutoff with refresh-and-retry before falling back",
+   "location token fallback expanded to the 8 newest installations of any type",
+   "exact message API version fallback order (2023-02-21, 2021-07-28, 2021-04-15)",
+   "risk note that the final Company-token fallback assumes a single-agency workspace"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P27",
+  "key": "exceptionless__Exceptionless__pr2276",
+  "size": "big",
+  "winner": "new",
+  "reason": "B's claims all check out against the diff and it lists more relevant implementation specifics (ApiFilterPolicy, EventStackQueryValidator, session-specific message, OpenAPI/Angular changes), whereas A contains a claim directly contradicted by the diff and mischaracterizes newly-added enforcement as merely \"kept\".",
+  "missingNew": [],
+  "missingOther": [
+   "new `ApiFilterPolicy`/`EventStackQueryValidator` types introduced to implement the change",
+   "session endpoints get their own distinct upgrade message; new 426 responses added to the OpenAPI doc",
+   "legacy Angular error text now falls back to the response's `title` field",
+   "field-extraction regex now ignores quoted/range value text and handles Lucene existence queries"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"No public API shape, WebSocket message, configuration key, or legacy Angular behavior changed\" (the Angular directives' error-message fallback to `response.data.title` is a real behavior change, and several endpoints newly document/produce 426 where they didn't before)",
+   "\"Kept premium search enforcement at the API boundary for event search, event count, and stack search requests\" (the diff shows the `IsPremiumFeatureQueryBlocked` check being newly added in these handlers, not merely retained — stack search previously tracked but never enforced premium blocking)"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P21",
+  "key": "ColoredCow__frappe-lms__pr13",
+  "size": "big",
+  "winner": "new",
+  "reason": "B correctly scopes the PR as mostly carrying ~1,700 lines of an upstream demo-data feature with only a 2-line Quiz.vue fix for the actual bug, while A's description reads as if this were only that tiny quiz fix and omits nearly everything else in the diff.",
+  "missingNew": [],
+  "missingOther": [
+   "demo course/data creation (lms/demo/demo_data.py, ~550 lines) that runs after the setup wizard",
+   "'Clear Demo Data' user-menu item + clear_demo_data API, and demo-course skip in analytics/persona-capture logic",
+   "frappe/payments added as a required app; install.sh and CI updated to fetch it",
+   "removal of lms/workspace_sidebar/lms.json",
+   "Cypress course-creation test updated to find the course by title instead of grid position"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P12",
+  "key": "tiagomiele__oficina-backend-fiap-fase2__pr28",
+  "size": "big",
+  "winner": "tie",
+  "reason": "Both accurately and thoroughly describe the same four endpoints and their validation rules against the diff; A adds a useful requirements-term mapping and method signatures while B adds an explicit breaking-change risk note, so neither is clearly more useful to a reviewer.",
+  "missingNew": [
+   "mapping of business-document terms to enum values (Aprovado→AGUARDANDO_APROVACAO, Finalizada→AGUARDANDO_PAGAMENTO)",
+   "explicit new domain method signatures (cancelarEmDiagnostico, alterarStatus)"
+  ],
+  "missingOther": [
+   "explicit callout that removing GET /ordens-servico/ativas breaks any existing caller of that route"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P30",
+  "key": "Swaggyxren__MaliVK13Patcher__pr2",
+  "size": "big",
+  "winner": "new",
+  "reason": "B correctly scopes the PR as the Android-16 icon/SDK fix plus 15 more commits (UI rewrites, a new Linux build, CI robustness fixes), all verified in the diff, while A's summary and checklist present the PR as if it were only the icon/SDK fix.",
+  "missingNew": [],
+  "missingOther": [
+   "MainActivity.kt UI rewrite (~660 changed lines): dark/light themes, settings dialog, credits, status-bar insets, pack options",
+   "windows/gui.py rewrite with dark/light themes and pack-option controls",
+   "new Linux build target: PyInstaller spec, build-linux CI job uploading/attaching the binary, README usage section",
+   "core/patcher.py PackOptions (EROFS compression/level, fixed timestamp)",
+   "kotlinx.serialization Gradle plugin added and jniLibs source path fixed",
+   "CI 'verify patched image roundtrips' and APK-rename steps made glob-based/more robust to AGP output naming"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"the other 5 [CI jobs] should be unaffected\" — the diff modifies the existing 'Verify patched image roundtrips' step and adds a brand-new build-linux job in this same PR"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P08",
+  "key": "zainfathoni__amux__pr286",
+  "size": "big",
+  "winner": "new",
+  "reason": "B gives precise, diff-verified specifics a reviewer needs (artifact limits, permanent/unremovable fence semantics, sealed-executable mechanism, approximate size, authorization caveats), while A stays at a higher, less specific level covering the same ground.",
+  "missingNew": [
+   "explicit itemized list of disallowed operations (teardown, remove, archive, catalog detach, provider cleanup, retirement, no_pair conversion) — B only summarizes this"
+  ],
+  "missingOther": [
+   "the quarantine fence is permanently retained and cannot be removed by ordinary fence release",
+   "artifact manifest limits: up to 32 entries, each an owner-owned regular file ≤1 MiB with mode 0600",
+   "park runs from a sealed/immutable executable copy (write-sealed descriptor on Linux, immutable private copy on macOS) and never resolves amux via PATH",
+   "authorization_sha256 is an operator-supplied reference, not an authenticated credential, and carries no TTL",
+   "approximate change size: ~1,280 lines in claude_delegation.py, ~270 new lines of tests in store_test.go"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"Oracle read-only blocker review and post-fix re-review\" — a review step not corroborated by the diff or by B"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P17",
+  "key": "jeremy-angulo__Jules-Orchestrator__pr68",
+  "size": "big",
+  "winner": "new",
+  "reason": "A matches the diff precisely, including that background.test.js only loses a comment, and flags the Playwright-test deletion and new patch_trefle.mjs script as merge risks, whereas B invents a loop-fixing logic change that the diff doesn't show and omits the Playwright test deletion entirely.",
+  "missingNew": [],
+  "missingOther": [
+   "deletion of the ~245-line Playwright test tests/empirical-trefle.test.js, and the one-off patch_trefle.mjs script added to rewrite/replace it (flagged by A as needing sign-off / likely removal before merge)",
+   "userRoutes.test.js rewrite also switches to esmock for mocking, not just to node:test"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"endless while(true) loops were not correctly being broken by the sleep mocks ... We updated the logic so the test suite breaks the loops cleanly\" — the diff shows only a comment removed in tests/background.test.js, no logic change",
+   "\"This dependency [vitest] has been removed\" — package.json is not touched anywhere in the diff"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P20",
+  "key": "vothalvino__fireisp5.0__pr195",
+  "size": "normal",
+  "winner": "new",
+  "reason": "Both explain the bootstrap-config fix accurately, but A explicitly flags what wasn't tested end-to-end while B gives no testing information at all.",
+  "missingNew": [],
+  "missingOther": [
+   "no statement of what was or wasn't tested"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P19",
+  "key": "ocaml__ocaml.org__pr3598",
+  "size": "normal",
+  "winner": "new",
+  "reason": "B is explicit that nothing was actually run/tested and captures the tutorial's own disclosure that it was AI-assisted and reviewed by the OCaml.org team, which A omits.",
+  "missingNew": [
+   "explicit call-out that markdown lint is one of the things to verify"
+  ],
+  "missingOther": [
+   "tutorial opens with a note that it was written with AI assistance and reviewed by the OCaml.org team",
+   "clear statement that verification items were not actually run (A's checklist is just unchecked boxes)"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P05",
+  "key": "CodeBacket__cinco-uno__pr49",
+  "size": "normal",
+  "winner": "tie",
+  "reason": "Both accurately describe the same scaffold with equivalent testing evidence; A supplies the literal reproducible validation commands while B adds a couple of extra content specifics, roughly balancing out.",
+  "missingNew": [
+   "the exact runnable validation commands (node --check invocations and the node -e assertion script)"
+  ],
+  "missingOther": [
+   "exact stub behavior quoted from the diff (createEngine().applyIntent() throws \"Engine not implemented yet\") and RULES.md specifics (108 cards, 7 dealt, no Draw Two stacking)"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P06",
+  "key": "techulus__capture-docs__pr20",
+  "size": "normal",
+  "winner": "new",
+  "reason": "A explains the actual behavior change -- that both the Capture-owned page and CDP-created targets are routed through the proxy -- matching the diff's docs text, while B only states that support was added without that detail.",
+  "missingNew": [],
+  "missingOther": [
+   "that both the Capture-owned page and CDP-created targets are routed through the configured proxy"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P09",
+  "key": "hadzija7__cursor-workshop-15may__pr5",
+  "size": "normal",
+  "winner": "new",
+  "reason": "B discloses that no automated tests were run and explains what the spec still defers to Phase 2, both useful for review, while A only gives manual verification steps and stays silent on automated test coverage.",
+  "missingNew": [
+   "explicit local run commands (pnpm install && pnpm dev) to reproduce the manual test"
+  ],
+  "missingOther": [
+   "explicit disclosure that no automated tests were run",
+   "spec's remaining Phase 2 items (extra diet filters, visible total cost) now explicitly deferred"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P28",
+  "key": "S0l0m0n8und9__RalphDex__pr85",
+  "size": "normal",
+  "winner": "tie",
+  "reason": "Both give the same rationale, the same test evidence (1436 tests, 0 fail) and the same closing claim that T224 is fully satisfied; A adds a small extra rationale for mutating rather than duplicating the fixture, which is minor.",
+  "missingNew": [
+   "rationale for mutating the seeded fixture instead of duplicating it, to avoid drift"
+  ],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P02",
+  "key": "openkaiden__kaiden__pr1610",
+  "size": "normal",
+  "winner": "new",
+  "reason": "B gives the precise wait/timeout behavior (50 attempts x 100ms = 5s) and notes the fallback of returning whatever sockets were found, real behavior details a reviewer needs that A only describes generically.",
+  "missingNew": [],
+  "missingOther": [
+   "exact retry/timeout behavior (50 attempts x 100ms = 5s)",
+   "fallback returns whatever socket(s) were found (possibly just the rootful one) if the wait times out"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P11",
+  "key": "CodeGraphContext__CodeGraphContext__pr1269",
+  "size": "normal",
+  "winner": "new",
+  "reason": "A discloses that the `w` alias also gained `--poll` support it previously lacked (a bundled behavior change) and states what wasn't tested, both of which B omits entirely.",
+  "missingNew": [],
+  "missingOther": [
+   "`w` alias also gained a `--poll` flag it didn't have before, bundled into this change",
+   "any statement of what was or wasn't tested"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P25",
+  "key": "torresposso__voxpopuli.digital__pr12",
+  "size": "normal",
+  "winner": "new",
+  "reason": "B flags that nothing in this diff actually writes the vp_reading_time meta (so the benefit depends on something else populating it) and notes the real min-1-minute/int-cast fix, while A only makes unverified performance claims.",
+  "missingNew": [],
+  "missingOther": [
+   "nothing in this diff writes vp_reading_time, so the win depends on it being populated elsewhere",
+   "readingTime() also gains a max(1, ...) floor and (int) cast for _n(), matching what the blade views already had",
+   "no actual performance measurement was taken"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"severe CPU bottleneck\"",
+   "\"Reduces CPU overhead substantially during page rendering\" via \"fast O(1) post meta cache retrievals\"",
+   "labeling a `php -l` syntax check as \"Measurement\" of the performance impact"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P10",
+  "key": "imcvum__lisney-music__pr33",
+  "size": "normal",
+  "winner": "other",
+  "reason": "B matches the diff's own design rationale (e.g. why the splash is dismissed via a trailing write instead of a SideEffect) more closely and maps every changed file, though it also asserts a couple of on-device results that were never actually tested.",
+  "missingNew": [
+   "rationale for dismissing the splash via a trailing write in setContent rather than SideEffect/post, to avoid an extra frame"
+  ],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"transitioning into the home UI within ~1s\" (asserted without any on-device measurement)",
+   "\"No regression in latency\" for post-launch search asserted despite no on-device test having been run"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P29",
+  "key": "DhavalLimbad1109__OfficeaGames__pr4",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both correctly diagnose and fix the emailRedirectTo/magic-link issue, but B tells the reviewer the fix has not been tested and what to check, while A says nothing about verification.",
+  "missingNew": [],
+  "missingOther": [
+   "no statement of whether the fix was tested"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P16",
+  "key": "Comfy-Org__Comfy-Desktop__pr508",
+  "size": "tiny",
+  "winner": "other",
+  "reason": "Both trace the same root cause and fix with identical test evidence, but B adds why the Dashboard window is unaffected, which helps a reviewer confirm the fix's scope, at the cost of a couple of details not verifiable from the diff.",
+  "missingNew": [
+   "explanation of why the Dashboard/chooser window already works (eager ensurePanelView call)"
+  ],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"The panel renderer is what fires the telemetry action and opens the typeform URL\" (not shown in diff)",
+   "\"The Dashboard (chooser) window is unaffected because openChooserHostWindow calls ensurePanelView(..., 'chooser') eagerly during construction\" (not shown in diff)"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P01",
+  "key": "teamzuzu__rancher-secrets-manager__pr14",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both give the same root cause and correction, but A explicitly flags that the new steps haven't been verified on an actual Rancher 2.14 cluster, which matters for a doc describing UI navigation.",
+  "missingNew": [],
+  "missingOther": [
+   "no mention of whether the new instructions were verified on an actual Rancher 2.14 cluster"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P18",
+  "key": "RDHoldings__website-v1__pr232",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both cover the same changes and cite identical verification, but A explains the mechanism (why health branches build but never deploy) more clearly and specific starting/ending Action versions, and flags that the workflow trigger change itself can only be confirmed on a real push.",
+  "missingNew": [],
+  "missingOther": [
+   "explicit starting versions for each bumped Action",
+   "note that the branch-trigger/deploy-gating behavior can only be confirmed on an actual push, not locally"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P24",
+  "key": "view-ignored__view-ignored__pr63",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "A asserts specific, unmeasured performance gains and omits any caveat or test status, while B is upfront that there's no measurement yet, flags the real risk that the cached object is shared/can go stale, and discloses that it hasn't been tested.",
+  "missingNew": [],
+  "missingOther": [
+   "risk that the cached no-match object is shared and could be seen stale if a Source's `inverted` changes after the first miss, or mutated by a caller",
+   "no statement of test/verification status"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"eliminates thousands of redundant object creations\" (no measurement given)",
+   "\"substantially reduces memory pressure and GC pauses\" (no benchmark given)"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P26",
+  "key": "ryusoh__networking__pr41",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "A correctly calls out that swapping nodeType === 1 for instanceof HTMLElement narrows which nodes match (excluding non-HTMLElement nodes like SVG), while B flatly claims no runtime behavior changed, which the diff contradicts.",
+  "missingNew": [],
+  "missingOther": [
+   "that the instanceof HTMLElement narrowing changes which nodes are matched (e.g. excludes SVG elements) versus the old nodeType === 1 check"
+  ],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"No runtime behavior changes were introduced\" (contradicted by the nodeType===1 → instanceof HTMLElement narrowing in the diff)",
+   "\"Total repository error count decreased.\" (not shown in diff, unsupported repo-wide claim)"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P07",
+  "key": "harleygod__stock_lanmei__pr1",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both explain the mirror/ENOTFOUND problem and cite the same demo as evidence, but A also summarizes the two caveats actually written into AGENTS.md, saving the reviewer from having to parse the new file themselves.",
+  "missingNew": [],
+  "missingOther": [
+   "summary of the two caveats added to AGENTS.md (mirror reintroduction risk if lockfile regenerated inside Tencent Cloud; unused better-sqlite3 dependency)"
+  ],
+  "unsupNew": [
+   "\"about 1,500 lines, lockfile only\" (line count not shown in the given diff or corroborated by B)"
+  ],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P14",
+  "key": "erwins-enkel__shepherd__pr6",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "A's description matches the diff exactly, while B adds a specific `align-items: start` row-alignment change that does not appear anywhere in the diff.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": [
+   "\"Rows top-align (align-items: start) so short prompts still render compactly\" (no such change is in the diff)"
+  ]
+ },
+ {
+  "cmp": "orig",
+  "id": "P23",
+  "key": "DamianPiuselli__isotools__pr4",
+  "size": "tiny",
+  "winner": "new",
+  "reason": "Both diagnose the pylint exit-code-28 issue the same way and show the same fix, but B explicitly tells the reviewer the workflow change hasn't been tested yet and what to check on the next push, while A says nothing about verification.",
+  "missingNew": [],
+  "missingOther": [
+   "no statement of whether/how the workflow change was verified"
+  ],
+  "unsupNew": [],
+  "unsupOther": []
+ },
+ {
+  "cmp": "orig",
+  "id": "P15",
+  "key": "gastownhall__gascity__pr390",
+  "size": "tiny",
+  "winner": "tie",
+  "reason": "Both give the same root cause, fix, and honestly flag (via checklist vs. prose) that the fix hasn't been manually verified yet, with no material difference in content.",
+  "missingNew": [],
+  "missingOther": [],
+  "unsupNew": [],
+  "unsupOther": []
+ }
+]

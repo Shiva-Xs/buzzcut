@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/golang/go/pull/54390","repo":"golang/go","number":54390,"set":"human","title":"net/url: strip relative path components for JoinPath","body":"Fixes #54385 ","authorType":"User","additions":0,"deletions":0,"changedFiles":0,"files":[],"baseSha":"1a8dfadbfe26978cba0d6ce57bf437a93f796da6","template":null}

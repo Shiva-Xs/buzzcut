@@ -1,0 +1,39 @@
+// Coding agents set an environment variable in the shells they run, and git passes it
+// on to hooks. That's how a hook tells an agent (block and explain) from a person (warn).
+const AGENT_VARS: [string, string][] = [
+  ['CLAUDECODE', 'Claude Code'],
+  ['CURSOR_AGENT', 'Cursor'],
+  ['GEMINI_CLI', 'Gemini CLI'],
+  ['CODEX_SANDBOX', 'Codex'],
+  ['CODEX_SANDBOX_NETWORK_DISABLED', 'Codex'],
+  ['OPENCODE_CLIENT', 'OpenCode'],
+  ['AUGMENT_AGENT', 'Augment'],
+  ['WINDSURF_AGENT', 'Windsurf'],
+  ['CODEIUM_AGENT', 'Windsurf'],
+  ['COPILOT_AGENT', 'GitHub Copilot'],
+  ['CLINE_AGENT', 'Cline'],
+  ['CONTINUE_AGENT', 'Continue'],
+];
+
+// Emerging generic conventions: AI_AGENT=<name>, AGENT=<name>.
+const GENERIC_VARS = ['AI_AGENT', 'AGENT'];
+
+const set = (v: string | undefined): v is string => v !== undefined && v !== '' && v !== '0' && v.toLowerCase() !== 'false';
+
+/**
+ * The name of the coding agent running this process, or null for a person.
+ * BUZZCUT_AGENT overrides detection: "1" (or a name) forces agent, "0" forces person.
+ */
+export function detectAgent(env: NodeJS.ProcessEnv = process.env): string | null {
+  const override = env.BUZZCUT_AGENT;
+  if (override !== undefined && override !== '') {
+    if (!set(override)) return null;
+    return override === '1' || override.toLowerCase() === 'true' ? 'agent' : override;
+  }
+  for (const [name, label] of AGENT_VARS) if (set(env[name])) return label;
+  for (const name of GENERIC_VARS) {
+    const v = env[name];
+    if (set(v)) return v === '1' || v.toLowerCase() === 'true' ? 'agent' : v;
+  }
+  return null;
+}

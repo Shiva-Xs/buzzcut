@@ -1,0 +1,37 @@
+name: buzzcut
+description: Checks the PR description and commit messages against the diff, and comments with a yap score.
+author: Shivateja Janjirala
+branding:
+  icon: message-square
+  color: green
+inputs:
+  max:
+    description: Fail above this yap score (default 35, or "max" in .buzzcut.json). Any ✗ error also fails.
+    required: false
+    default: ''
+  comment:
+    description: Post a PR comment when something needs fixing, and keep it updated
+    required: false
+    default: 'true'
+  commits:
+    description: Also check each commit message in the PR (up to 30)
+    required: false
+    default: 'true'
+  fail:
+    description: Fail the check when the description or a commit message doesn't pass
+    required: false
+    default: 'true'
+  github-token:
+    description: Token for reading the PR and commenting
+    required: false
+    default: ${{ github.token }}
+outputs:
+  score:
+    description: Yap score of the PR description (0-100, lower is better)
+  grade:
+    description: Letter grade of the PR description (A-F)
+  pass:
+    description: '"true" when the description and every checked commit pass'
+runs:
+  using: node24
+  main: bundle/action.mjs

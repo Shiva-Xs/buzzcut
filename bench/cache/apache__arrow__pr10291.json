@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/apache/arrow/pull/10291","repo":"apache/arrow","number":10291,"set":"baseline","title":"MINOR: [JS] document how to run benchmarks","body":"","authorType":"User","additions":4,"deletions":0,"changedFiles":1,"files":[{"path":"js/DEVELOP.md","additions":4,"deletions":0}],"baseSha":"90fa130cfa13fb70ec9f1b7080bdb4a216192b3c","template":null}

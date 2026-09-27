@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/FFmpeg/FFmpeg/commit/4e72710e5ffbab5dc4050cc8bf18617a5197a42b","repo":"FFmpeg/FFmpeg","sha":"4e72710e5ffbab5dc4050cc8bf18617a5197a42b","set":"human","message":"avformat/http: match cookie paths against the request path behind a proxy","files":[{"path":"libavformat/http.c","additions":1,"deletions":1}],"additions":1,"deletions":1}

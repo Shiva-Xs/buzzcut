@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/56a2a2ae1f1a4174d8159cc7b6adfc26d19e11c9","repo":"rust-lang/rust","sha":"56a2a2ae1f1a4174d8159cc7b6adfc26d19e11c9","set":"baseline","message":"don't clone attrs","files":[{"path":"compiler/rustc_ast/src/tokenstream.rs","additions":2,"deletions":3}],"additions":2,"deletions":3}

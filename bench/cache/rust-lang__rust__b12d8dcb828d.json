@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/b12d8dcb828df8403b8f486f279f0eda3303a890","repo":"rust-lang/rust","sha":"b12d8dcb828df8403b8f486f279f0eda3303a890","set":"baseline","message":"Don't force-disable incremental","files":[{"path":"Cargo.toml","additions":0,"deletions":7}],"additions":0,"deletions":7}

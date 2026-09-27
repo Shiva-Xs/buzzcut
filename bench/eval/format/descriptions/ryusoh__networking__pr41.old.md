@@ -1,0 +1,3 @@
+refactor(types): annotate youtube-ad-blocker.js so it type-checks
+
+`clean_adblock/youtube-ad-blocker.js` had 3 type-check errors and now has 0: `isAdElement` and `hideAd` get `@param {HTMLElement}` JSDoc, elements from `querySelectorAll` and `closest()` are narrowed with `instanceof HTMLElement` before `hideAd`, and the `window['YouTubeAdBlocker']` export goes through an inline JSDoc cast instead of changing the global types. One check is narrower at runtime: added mutation nodes were matched on `nodeType === 1` (any element, SVG included) and now must be an `HTMLElement`. `make precommit` passes.

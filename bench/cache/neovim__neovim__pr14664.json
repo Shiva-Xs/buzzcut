@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/neovim/neovim/pull/14664","repo":"neovim/neovim","number":14664,"set":"baseline","title":"fix vim.opt:remove doc","body":"@tjdevries ","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"runtime/doc/lua.txt","additions":1,"deletions":1}],"template":null,"baseSha":"43956dea55a49a847a0f2e5d9e0f48384cb34635"}

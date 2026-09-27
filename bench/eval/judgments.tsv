@@ -1,0 +1,161 @@
+url	set	buzzcut	call	note
+https://github.com/0xf4b1/hearthstone-linux/pull/111	agent	SENT BACK	fp	template-on-tiny error on 129w within budget; Problem/Fix/Result/Testing with facts; diff is a submodule bump. card why missed "## Problem" section
+https://github.com/28pins/28pins.github.io/pull/2	agent	CLEAN	meh	body is "Pull request created by AI Agent"; title's "errors" satisfied missing-why
+https://github.com/295369366/-/pull/1	agent	NOTES	ok	opener, no why, unbacked claim: right
+https://github.com/3rdIteration/Kern/pull/1	agent	NOTES	ok	checklist-only body; ticked boxes noted; could be stronger
+https://github.com/8do-abehn/lab/pull/338	agent	NOTES	ok	small form nit, fine
+https://github.com/9b/fellow-aiden/pull/24	agent	NOTES	ok	good PR, two small nits
+https://github.com/a2aproject/a2a-python/pull/1091	agent	NOTES	ok	fine
+https://github.com/aaif/community-events/pull/53	agent	NOTES	fp	ticked-boxes on boxes that each name the command and result (minor)
+https://github.com/abi83/prepify/pull/217	agent	CLEAN	ok	dense, good
+https://github.com/AbramNel/MultiChart/pull/1	agent	SENT BACK	ok	965w class tour for 815 lines; right to send back
+https://github.com/abugida-byte/TsiwaMahber/pull/2	agent	NOTES	ok	good root cause; Devin checklist is noise
+https://github.com/AcademySoftwareFoundation/OpenPBR/pull/301	agent	CLEAN	ok	fine
+https://github.com/AcademySoftwareFoundation/rez/pull/2091	agent	CLEAN	ok	good human-style
+https://github.com/adambkovacs/ghars/pull/4	agent	NOTES	ok	good; bold labels nit
+https://github.com/adamd9/delegate1/pull/66	agent	NOTES	ok	long but explains; notes right
+https://github.com/adasima/hoi4maptools/pull/14	agent	NOTES	fp	unbacked-claim though the next line has 117ns -> 31ns (minor)
+https://github.com/adornes/excalidraw/pull/9	agent	NOTES	ok	no why: right
+https://github.com/adrienbrault/adrien.brage.fr/pull/6	agent	CLEAN	ok	fine
+https://github.com/AFRICAN-FREEFIRE-COMMUNITY/AFC-B/pull/1	agent	NOTES	ok	verdict fine; card why missed "## Why ... needs to skip"
+https://github.com/AgentBuilderZ86/SiaMA-QualifAOAgent/pull/12	agent	SENT BACK	meh	35-line AGENTS.md, 163w of useful facts + emoji ticks; warnings add up past 35
+https://github.com/agenticjess-star/LocalCheck_Expo/pull/2	agent	NOTES	ok	fine
+https://github.com/AGI-Ventures-Canada/hackathon.new/pull/438	agent	CLEAN	ok	fine
+https://github.com/AI-X-16-1/AUTUNE/pull/335	agent	NOTES	meh	type-mismatch docs: on comment-only code edits (minor)
+https://github.com/AIDLC-Research-1/poc-java-app/pull/13	agent	NOTES	ok	bullets restate the first sentence; notes right
+https://github.com/AIKAGRYA/dharma_swarm/pull/409	agent	SENT BACK	ok	26 ticked governance boxes; right
+https://github.com/aiming-lab/WebHarbor/pull/118	agent	NOTES	ok	repetitive sections; notes right
+https://github.com/Aintropie/Cloud-Worker-Nr-1/pull/1	agent	NOTES	ok	no why
+https://github.com/Aintropie/Cloud-Worker-Nr-1/pull/2	agent	NOTES	ok	no why
+https://github.com/airbytehq/airbyte/pull/77642	agent	NOTES	meh	file-by-file tour with partial paths not caught by diff-echo
+https://github.com/airbytehq/airbyte/pull/77644	agent	SENT BACK	ok	confidence-assessment table for a 10-line docs fix; right
+https://github.com/akhuoa/git-recap/pull/1	agent	NOTES	ok	fine
+https://github.com/alascarbonycerdo/alascarbonycerdo/pull/1	agent	NOTES	ok	fine
+https://github.com/alazarsisay145-hash/ai-access-/pull/6	agent	NOTES	ok	fine
+https://github.com/AlbiDR/Clash-Manager/pull/1936	agent	NOTES	ok	fine
+https://github.com/AlbiDR/Clash-Manager/pull/1937	agent	CLEAN	ok	fine
+https://github.com/AlbiDR/Clash-Manager/pull/1938	agent	NOTES	ok	fine
+https://github.com/aledotsoftware/Tudex-Agent-Automator/pull/87	agent	NOTES	ok	verdict fine; card why picked "No ... regressions introduced"
+https://github.com/aledotsoftware/Tudex-Agent-Automator/pull/88	agent	NOTES	ok	fine
+https://github.com/aledotsoftware/Tudex-Live-Chat/pull/3	agent	SENT BACK	fp	phantom-tests on "Ran unit tests and a custom verify script" (running, not adding) - BLOCKING FP
+https://github.com/aledotsoftware/Tudex-Live-Chat/pull/4	agent	CLEAN	ok	fine
+https://github.com/aledotsoftware/Tudex-Orbit/pull/52	agent	CLEAN	ok	emoji labels but readable; card why missed "Why: To ensure..."
+https://github.com/aledotsoftware/wisely/pull/464	agent	CLEAN	ok	no-op PR, fine
+https://github.com/aledotsoftware/wisely/pull/465	agent	CLEAN	ok	no-op PR, fine
+https://github.com/alenephotographs/Ritualmaker/pull/5	agent	CLEAN	ok	fine
+https://github.com/Alex5606/ETHEREALMessenger/pull/20	agent	NOTES	ok	good (Russian)
+https://github.com/Alex5606/ETHEREALMessenger/pull/21	agent	NOTES	ok	good (Russian)
+https://github.com/AlexAn75541/pjseka-60fps-fix/pull/1	agent	NOTES	ok	nested bullets restating; right
+https://github.com/alexbayov/sonya-v2.0/pull/19	agent	NOTES	ok	fine
+https://github.com/alexbayov/sonya-v2.0/pull/20	agent	NOTES	ok	file list per phase noted
+https://github.com/aliqasemzadeh/crm/pull/1	agent	NOTES	ok	fine
+https://github.com/alitravians/Ali/pull/220	agent	NOTES	ok	fine (Arabic)
+https://github.com/Allied-Services/ASILHCM/pull/223	agent	NOTES	ok	fine
+https://github.com/alpb178/invoice-gen/pull/1	agent	NOTES	ok	Summary+Test plan on 19 lines: nit is fair
+https://github.com/alpb178/invoice-gen/pull/10	agent	NOTES	ok	same
+https://github.com/AMDResearch/intellikit/pull/111	agent	CLEAN	ok	fine
+https://github.com/amygdala0408/course-journal-kit/pull/2	agent	NOTES	ok	fine
+https://github.com/andrekuehne/stundenlauf-ts/pull/1	agent	NOTES	ok	fine
+https://github.com/AndreyNF/MyFirstProject/pull/4	agent	CLEAN	ok	fine
+https://github.com/AngelCantugr/ci-feedback-relay/pull/50	agent	CLEAN	ok	decent
+https://github.com/anhanga-tech/AV-SITE/pull/418	agent	SENT BACK	fp	ticked boxes and "tests passed" that name pnpm commands without backticks; warnings add up to 37
+https://github.com/anpuuuuu/apgo-tw-theme2/pull/3	agent	NOTES	ok	fine
+https://github.com/AntonFrisk/alversjo-maps/pull/1	agent	NOTES	ok	fine
+https://github.com/apecloud/kubeblocks-addons/pull/2645	agent	CLEAN	ok	fine
+https://github.com/Applifting/edu-template/pull/3	agent	CLEAN	ok	good
+https://github.com/aqm857886159/Nomi/pull/309	agent	NOTES	ok	title has the Claude footer in it; right
+https://github.com/ArcanePivot/MemOS-Docs/pull/1	agent	NOTES	ok	no why
+https://github.com/arii/tech-dancer/pull/3200	agent	NOTES	fp	"This PR ensures..." first line flagged as a wrap-up sentence (minor)
+https://github.com/arii/tech-dancer/pull/3201	agent	CLEAN	ok	fine
+https://github.com/artalar/cloud-ru-uikit-product/pull/1	agent	NOTES	ok	fine
+https://github.com/artificial-hedge/dipcatcher/pull/5	agent	NOTES	ok	dense, fine
+https://github.com/artificial-hedge/dipcatcher/pull/6	agent	CLEAN	ok	good; card why missed "went red on main"
+https://github.com/artificial-hedge/dipcatcher/pull/7	agent	CLEAN	ok	fine
+https://github.com/ashuryasaf/phins/pull/243	agent	NOTES	meh	excellent problem/fix write-up of a 1-line fix; 4 warnings make it a C (card would roast); "29 API integration tests" not seen as concrete
+https://github.com/asifahmad11996/gif/pull/3	agent	NOTES	ok	fine
+https://github.com/askman-dev/bricks/pull/106	agent	NOTES	ok	Codex form on 26 lines: nit fair
+https://github.com/askman-dev/bricks/pull/113	agent	NOTES	ok	fine
+https://github.com/asodja/gradle-profiler/pull/4	agent	NOTES	ok	fine
+https://github.com/ATherkel/budget/pull/45	agent	NOTES	fp	vague-verification on "tests pass its Ruff gates" though "23 tests pass" is right below (minor)
+https://github.com/atomvm/AtomVM/pull/2252	agent	CLEAN	ok	fine
+https://github.com/atomvm/AtomVM/pull/2256	agent	NOTES	ok	license boilerplate only; no description: right
+https://github.com/AcademySoftwareFoundation/rez/pull/2127	agent/amp	NOTES	meh	human-ish Amp PR, a bit wordy; C grade would roast; diff-echo on subcommand bullets
+https://github.com/agent-of-empires/agent-of-empires/pull/2123	agent/amp	SENT BACK	meh	850w dense root-cause write-up; sent back on accumulated warnings; long but excellent
+https://github.com/AletheiaResearch/mnemosyne/pull/19	agent/amp	CLEAN	ok	good
+https://github.com/andmarek/website/pull/2	agent/amp	CLEAN	ok	title-only on 3 lines: fair
+https://github.com/archestra-ai/archestra/pull/6814	agent/amp	NOTES	fn	no description (Amp link + banner) on 2142 lines only gets 8 pts
+https://github.com/ardanlabs/kronk/pull/579	agent/amp	CLEAN	ok	good
+https://github.com/ArduPilot/ardupilot/pull/33155	agent/amp	NOTES	fp	unbacked-claim on "as a faster merge"; "bound"->"bind" misparse (minor)
+https://github.com/ash-project/reactor/pull/322	agent/amp	NOTES	ok	fine
+https://github.com/austyl/Flow.io/pull/1	agent/cursor	CLEAN	ok	fine
+https://github.com/Auto-wiz/AgentFlow/pull/17	agent/cursor	NOTES	ok	vague resilience claim: right
+https://github.com/awest813/CiderDeck/pull/31	agent/copilot-agent	NOTES	ok	fine
+https://github.com/awest813/CiderDeck/pull/32	agent/copilot-agent	NOTES	ok	fine
+https://github.com/awest813/SpockD3D9/pull/1	agent/copilot-agent	NOTES	fn	"Pull request created by AI Agent" on 756 lines: too weak
+https://github.com/ayredsr/100apps/pull/3	agent/jules	NOTES	ok	fine
+https://github.com/backen-pixel/Quanlycongviec/pull/1	agent/cursor	NOTES	ok	fine
+https://github.com/baconYao/opengl-cts-snap/pull/2	agent/copilot-agent	NOTES	ok	fine
+https://github.com/bakumon1107/mirai-gikai-fukuoka-pref/pull/5	agent/claude-code	CLEAN	ok	fine (Japanese)
+https://github.com/bakumon1107/mirai-gikai-fukuoka-pref/pull/7	agent/claude-code	CLEAN	ok	fine
+https://github.com/barryhession/chess-puzzle-bot/pull/1	agent/copilot-agent	CLEAN	fn	"Pull request created by AI Agent" for 124 lines, CLEAN (title "failure" satisfied why)
+https://github.com/barsik12312/word/pull/1	agent/devin	SENT BACK	meh	dense Russian task table sent back on accumulated style warnings; em dashes are normal Russian punctuation
+https://github.com/barsik12312/word/pull/2	agent/devin	NOTES	ok	fine
+https://github.com/bc19sam-afk/ASX_daily_stock_analysis/pull/49	agent/codex	NOTES	ok	nit fair
+https://github.com/bc19sam-afk/ASX_daily_stock_analysis/pull/51	agent/codex	CLEAN	ok	good
+https://github.com/bcit-tlu/.github/pull/5	agent/devin	NOTES	ok	right, too long for 11 lines
+https://github.com/bcit-tlu/hriv/pull/233	agent/devin	NOTES	ok	fine
+https://github.com/bcit-tlu/technical-operations-documentation/pull/15	agent/devin	NOTES	ok	fine
+https://github.com/bcit-tlu/technical-operations-documentation/pull/16	agent/devin	NOTES	ok	fine
+https://github.com/bdcdo/dataframeit/pull/98	agent/claude-code	NOTES	ok	good; ticked boxes carry results
+https://github.com/bdh-org/dev-common/pull/262	agent/claude-code	NOTES	ok	wordy docs PR: notes fair
+https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/pull/424	agent/claude-code-open	CLEAN	ok	good
+https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/pull/432	agent/claude-code-open	CLEAN	ok	fine
+https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot/pull/2947	agent/claude-code-open	NOTES	fp	Russian: missing-why fires though the first paragraph gives the reason
+https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot/pull/2948	agent/claude-code-open	NOTES	meh	Russian: missing-why unreliable
+https://github.com/beercss/beercss/pull/595	agent/jules	CLEAN	ok	fine
+https://github.com/beercss/beercss/pull/610	agent/jules	NOTES	ok	fine
+https://github.com/BeesNestInc/hieronymus/pull/28	agent/amp	NOTES	fn	"Merge/main" title not seen as vague
+https://github.com/beffjarker/Jouster/pull/37	agent/copilot-agent	NOTES	meh	bullet-bloat on a list of dependency bumps with CVEs (facts)
+https://github.com/behrangalavi/backup-operator/pull/47	agent/devin	NOTES	ok	excellent
+https://github.com/behrangalavi/backup-operator/pull/48	agent/devin	NOTES	ok	good; "bound"->"bind" info misparse
+https://github.com/ben200810-lang/HopeOS/pull/42	agent/devin	NOTES	ok	right, long for 67 lines
+https://github.com/Benopotomus/IronKingdoms/pull/73	agent/copilot-agent	NOTES	meh	missing-why though line 1 says the label gave "no visibility into" rough terrain
+https://github.com/bergsonnelabs/tiles/pull/30	agent/claude-code	CLEAN	ok	fine
+https://github.com/bergsonnelabs/tiles/pull/51	agent/claude-code	CLEAN	ok	fine
+https://github.com/Better-Machine/a2a-gateway/pull/1	agent/claude-code-open	SENT BACK	fp	100w readable chore PR; ticked boxes carry results (244 tests pass); sent back on stacked warnings
+https://github.com/billyboy95/bennybookwurm/pull/1	agent/cursor	CLEAN	ok	fine
+https://github.com/bjohnson1279/bash_encoding/pull/132	agent/jules	CLEAN	ok	fine
+https://github.com/bjohnson1279/gql-ddd-inventory/pull/346	agent/jules	SENT BACK	fp	phantom-tests on "Run `pnpm test` to verify" (an instruction) - BLOCKING
+https://github.com/bjohnson1279/gql-ddd-inventory/pull/537	agent/jules	CLEAN	ok	fine
+https://github.com/bjohnson1279/js-ddd-inventory/pull/544	agent/jules	CLEAN	ok	fine
+https://github.com/bjohnson1279/php-ddd-inventory/pull/461	agent/jules	NOTES	ok	fine
+https://github.com/bjohnson1279/php-ddd-inventory/pull/462	agent/jules	NOTES	fp	missing-why though there's a "Why:" line with the N+1 reason (minor)
+https://github.com/bjohnson1279/react-ddd-inventory-client/pull/44	agent/jules	NOTES	ok	fine
+https://github.com/bjohnson1279/react-ddd-inventory-client/pull/45	agent/jules	CLEAN	ok	fine
+https://github.com/bjohnson1279/tampermonkey_collection/pull/163	agent/jules	CLEAN	ok	fine
+https://github.com/bjohnson1279/tampermonkey_collection/pull/164	agent/jules	NOTES	ok	"unit tests are green": fair
+https://github.com/bjscha03/Final-Banner-Site/pull/214	agent/copilot-agent	NOTES	ok	dense, fine
+https://github.com/bjscha03/Final-Banner-Site/pull/215	agent/copilot-agent	CLEAN	ok	fine
+https://github.com/Black1hp/Rakib-platform/pull/130	agent/devin	NOTES	ok	fine
+https://github.com/BlackSurvivalGear/Family/pull/11	agent/jules	NOTES	ok	no why: right
+https://github.com/blankfacedstudios-a11y/CherryStim-/pull/10	agent/cursor	CLEAN	ok	fine
+https://github.com/blankfacedstudios-a11y/CherryStim-/pull/4	agent/cursor	CLEAN	ok	odd but factual
+https://github.com/blas1n/BSEngine/pull/676	agent/claude-code	NOTES	ok	no why: right
+https://github.com/blas1n/BSEngine/pull/706	agent/claude-code	NOTES	ok	no why: right
+https://github.com/blassaut/claude-skills/pull/3	agent/claude-code	NOTES	ok	nit fair
+https://github.com/blindxx/PacketForge/pull/27	agent/codex	SENT BACK	fp	phantom-tests on the path "engine-test/page.tsx" - BLOCKING
+https://github.com/block/coplan/pull/101	agent/amp	CLEAN	ok	excellent
+https://github.com/block/coplan/pull/167	agent/amp	CLEAN	fn	empty body on 469 lines passes: a UUID in the Amp link matched the ticket pattern as a "why"
+https://github.com/bluntmachetti/aftershock/pull/37	agent/claude-code	CLEAN	ok	fine
+https://github.com/bmordue/puzzle/pull/63	agent/jules	NOTES	fp	"This PR improves..." counted as both opener and closer (minor)
+https://github.com/bmordue/topornot/pull/28	agent/jules	NOTES	ok	fine
+https://github.com/bmordue/topornot/pull/29	agent/jules	NOTES	ok	fine
+https://github.com/Bodinxx/html_games/pull/24	agent/copilot-agent	CLEAN	ok	fine
+https://github.com/botirkhaltaev/ara/pull/18	agent/devin	NOTES	ok	fine
+https://github.com/botirkhaltaev/ara/pull/19	agent/devin	NOTES	ok	fine
+https://github.com/bphazell/cursor-ecommerce-demo/pull/14	agent/cursor	NOTES	ok	fine
+https://github.com/bradhawkins85/goCanvas-Downloader/pull/12	agent/copilot-agent	NOTES	ok	fine
+https://github.com/braiinz94/braiinz-education/pull/1	agent/claude-code-open	SENT BACK	fp	phantom-tests on "Adds GitHub Spec Kit" (product name) - BLOCKING
+https://github.com/brboi/ow/pull/18	agent/claude-code	CLEAN	ok	fine
+https://github.com/brendanv/float/pull/79	agent/amp	CLEAN	ok	title-only on 13 lines: fine
+https://github.com/BreuerLab/wind-tunnel-Control-Daq/pull/38	agent/cursor	CLEAN	ok	fine

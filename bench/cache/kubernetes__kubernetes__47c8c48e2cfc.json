@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/kubernetes/kubernetes/commit/47c8c48e2cfce6f397fbf6230a4a2a48d7858d02","repo":"kubernetes/kubernetes","sha":"47c8c48e2cfce6f397fbf6230a4a2a48d7858d02","set":"baseline","message":"Remove Redundant alias","files":[{"path":"test/utils/image/manifest.go","additions":1,"deletions":1}],"additions":1,"deletions":1}

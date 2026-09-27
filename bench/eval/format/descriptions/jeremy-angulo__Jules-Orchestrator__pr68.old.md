@@ -1,0 +1,3 @@
+Stop npm test hanging: node:test for userRoutes, esmock for agents
+
+`npm test` hung until its 400 s limit. `tests/unit/userRoutes.test.js` used `vitest` under the project's `node --test` runner and is rewritten with `node:test`, and `tests/agents.test.js`, whose fake `globalThis.fetch` sent the pipeline's polling and retries into endless async cycles, now loads `pipeline.js` through `esmock` with mocked clients; no source files change. The diff also deletes `tests/empirical-trefle.test.js`, a 245-line Playwright test, and adds `patch_trefle.mjs`, a one-off script at the repo root that rewrote that file and should probably go before merge; `tests/background.test.js` only loses a comment. All 77 tests pass without hanging.

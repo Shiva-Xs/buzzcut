@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/558b073c4c8f73bac8061befef7cff01d038910a","repo":"rust-lang/rust","sha":"558b073c4c8f73bac8061befef7cff01d038910a","set":"baseline","message":"Fix eslint error in sidebar-items.js","files":[{"path":"src/librustdoc/html/static/sidebar-items.js","additions":1,"deletions":0}],"additions":1,"deletions":0}

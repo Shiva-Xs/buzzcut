@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/trpc/trpc/pull/444","repo":"trpc/trpc","number":444,"set":"baseline","title":"add codeql analysis","body":"","authorType":"User","additions":71,"deletions":0,"changedFiles":1,"files":[{"path":".github/workflows/codeql-analysis.yml","additions":71,"deletions":0}],"baseSha":"962ec2c868dd5d8fb9d37ea8a36b3f1b983f55f4","template":null}

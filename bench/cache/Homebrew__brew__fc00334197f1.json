@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/Homebrew/brew/commit/fc00334197f1f38f8ad65b2e3ef1bc5e5e4ec6ef","repo":"Homebrew/brew","sha":"fc00334197f1f38f8ad65b2e3ef1bc5e5e4ec6ef","set":"human","message":"Fix test","files":[{"path":"Library/Homebrew/test/os/mac/formula_spec.rb","additions":3,"deletions":1}],"additions":3,"deletions":1}

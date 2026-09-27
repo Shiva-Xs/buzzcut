@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/rust-lang/rust/pull/85789","repo":"rust-lang/rust","number":85789,"set":"baseline","title":"Fix typo","body":"","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"compiler/rustc_middle/src/ty/subst.rs","additions":1,"deletions":1}],"template":null,"baseSha":"ce0d64e03ef9875e0935bb60e989542b7ec29579"}

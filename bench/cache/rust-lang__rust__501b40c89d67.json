@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rust-lang/rust/commit/501b40c89d67530ed3b5b55335b202d5f5cab136","repo":"rust-lang/rust","sha":"501b40c89d67530ed3b5b55335b202d5f5cab136","set":"human","message":"Document coroutine storage-conflict fast path","files":[{"path":"compiler/rustc_mir_transform/src/coroutine/layout.rs","additions":3,"deletions":0}],"additions":3,"deletions":0}

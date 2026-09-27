@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/rails/rails/commit/7302f6c59785b61b601b3059901636144a598af2","repo":"rails/rails","sha":"7302f6c59785b61b601b3059901636144a598af2","set":"human","message":"Use RenderedTemplate for EMPTY_SPACER","files":[{"path":"actionview/lib/action_view/renderer/abstract_renderer.rb","additions":1,"deletions":1}],"additions":1,"deletions":1}

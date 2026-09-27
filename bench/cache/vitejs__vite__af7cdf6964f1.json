@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/vitejs/vite/commit/af7cdf6964f124f58d66037e808fe687654948e2","repo":"vitejs/vite","sha":"af7cdf6964f124f58d66037e808fe687654948e2","set":"human","message":"refactor: replace `find` with `some` (#23554)","files":[{"path":"packages/vite/src/node/plugins/preAlias.ts","additions":1,"deletions":1}],"additions":1,"deletions":1}

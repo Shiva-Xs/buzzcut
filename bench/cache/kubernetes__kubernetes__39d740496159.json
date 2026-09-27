@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/kubernetes/kubernetes/commit/39d74049615963ab72c8c975d0f33e4c4346f117","repo":"kubernetes/kubernetes","sha":"39d74049615963ab72c8c975d0f33e4c4346f117","set":"baseline","message":"Uniform output string.","files":[{"path":"test/utils/crd/crd_util.go","additions":1,"deletions":1}],"additions":1,"deletions":1}

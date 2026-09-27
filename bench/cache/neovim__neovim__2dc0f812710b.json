@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/neovim/neovim/commit/2dc0f812710b19f8befcfa64ef9335cadc510296","repo":"neovim/neovim","sha":"2dc0f812710b19f8befcfa64ef9335cadc510296","set":"baseline","message":"fixup! vim-patch:8.2.0959: using 'quickfixtextfunc' is a bit slow","files":[{"path":"src/nvim/quickfix.c","additions":5,"deletions":5}],"additions":5,"deletions":5}

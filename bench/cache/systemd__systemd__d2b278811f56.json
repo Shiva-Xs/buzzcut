@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/systemd/systemd/commit/d2b278811f560f6b56f01baadc260df034eac14e","repo":"systemd/systemd","sha":"d2b278811f560f6b56f01baadc260df034eac14e","set":"baseline","message":"cryptenroll: remove a tiny bit of whitespace","files":[{"path":"src/cryptenroll/cryptenroll.c","additions":0,"deletions":3}],"additions":0,"deletions":3}

@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/vitejs/vite/commit/bd97903e326c4caf022405f7c1d5f3eb624a931f","repo":"vitejs/vite","sha":"bd97903e326c4caf022405f7c1d5f3eb624a931f","set":"human","message":"docs(config): document preserveEntrySignatures defaults (#23469)","files":[{"path":"docs/config/build-options.md","additions":2,"deletions":0}],"additions":2,"deletions":0}

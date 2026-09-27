@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/apache/arrow/pull/10219","repo":"apache/arrow","number":10219,"set":"baseline","title":"MINOR: [julia] fix typo","body":"","authorType":"User","additions":1,"deletions":1,"changedFiles":1,"files":[{"path":"julia/Arrow/docs/src/manual.md","additions":1,"deletions":1}],"baseSha":"2746266addddf71d20a4fe49381497b894c4d15c","template":null}

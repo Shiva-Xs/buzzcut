@@ -1,0 +1,1 @@
+{"kind":"pr","url":"https://github.com/trpc/trpc/pull/443","repo":"trpc/trpc","number":443,"set":"baseline","title":"add security policy","body":"","authorType":"User","additions":14,"deletions":0,"changedFiles":1,"files":[{"path":"SECURITY.md","additions":14,"deletions":0}],"baseSha":"be5c1c52d1c9ab6e16d54927a1df71fa210cde10","template":null}

@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/php/php-src/commit/b751c24e233945281b08ef15b569a63feb6e0c48","repo":"php/php-src","sha":"b751c24e233945281b08ef15b569a63feb6e0c48","set":"baseline","message":"Fix argument index in stream_select()\n\nCloses GH-7067.","files":[{"path":"ext/standard/streamsfuncs.c","additions":1,"deletions":1}],"additions":1,"deletions":1}

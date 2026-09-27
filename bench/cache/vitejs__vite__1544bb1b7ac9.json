@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/vitejs/vite/commit/1544bb1b7ac92f775e9d0dea97954c99cc6cbd43","repo":"vitejs/vite","sha":"1544bb1b7ac92f775e9d0dea97954c99cc6cbd43","set":"human","message":"docs(config): correct the server.sourcemapIgnoreList default (#23462)","files":[{"path":"docs/config/server-options.md","additions":5,"deletions":5}],"additions":5,"deletions":5}

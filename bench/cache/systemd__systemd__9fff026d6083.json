@@ -1,0 +1,1 @@
+{"kind":"commit","url":"https://github.com/systemd/systemd/commit/9fff026d60838aceef4dbceeee93aa54272e26ff","repo":"systemd/systemd","sha":"9fff026d60838aceef4dbceeee93aa54272e26ff","set":"baseline","message":"man: fix tag type\n\nThis is an option, not a command.","files":[{"path":"man/bootctl.xml","additions":1,"deletions":1}],"additions":1,"deletions":1}

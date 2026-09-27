@@ -1,0 +1,17 @@
+{
+  "description": "buzzcut: checks the commit message or PR description in an agent's git commit, gh pr create, or GitHub connector call before it runs, and explains what to fix.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bundle/buzzcut.mjs\" hook claude",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

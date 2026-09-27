@@ -1,0 +1,36 @@
+feat: upgrade to stateless JWT authentication, JPA persistence, and RBAC
+
+Comprehensive overhaul of the Spring Security architecture to introduce production-grade
+stateless JWT authentication, Spring Data JPA persistence, role-based access control,
+Jakarta Bean Validation, and a complete automated test suite.
+
+Key Changes:
+- Security & Cryptography:
+  - Replaced insecure NoOpPasswordEncoder with BCryptPasswordEncoder (strength 12).
+  - Implemented JwtService using HMAC-SHA256 with multi-tier key resolution
+    (JWT_SECRET_KEY env var -> properties -> secure ephemeral random key).
+  - Implemented JwtAuthenticationFilter to intercept Authorization: Bearer tokens.
+  - Configured custom AuthenticationEntryPoint (401) and AccessDeniedHandler (403).
+
+- Persistence & Models:
+  - Created Users JPA entity with unique username, BCrypt password, and Role enum.
+  - Upgraded Student model to a JPA entity mapped to the database.
+  - Implemented UserRepo and StudentRepo extending Spring Data JpaRepository.
+  - Implemented MyUserDetailsService and UserPrincipal for Spring Security integration.
+
+- REST API & RBAC:
+  - Created AuthController for /auth/register and /auth/login with JWT token issuance.
+  - Upgraded StudentController with StudentService providing full transactional CRUD.
+  - Enforced Role-Based Access Control: ROLE_USER for reads, ROLE_ADMIN for mutations.
+  - Updated HelloController to greet authenticated principal in stateless mode.
+
+- Validation & Error Handling:
+  - Added Jakarta Bean Validation (@Valid, @NotBlank, @Size, @Min, @Max) to DTOs.
+  - Implemented GlobalExceptionHandler (@RestControllerAdvice) with standardized
+    ApiErrorResponse avoiding internal stack trace and SQL leaks.
+
+- Testing & Dependencies:
+  - Added dependencies for jjwt (0.12.6), spring-boot-starter-validation, and H2.
+  - Added H2 test datasource configuration in src/test/resources/application.properties.
+  - Added comprehensive automated test suite (AuthControllerTest, StudentSecurityTest,
+    JwtServiceTest, and contextLoads) — all 14 tests passing.
