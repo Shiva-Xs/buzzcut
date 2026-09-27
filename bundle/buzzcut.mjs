@@ -9,7 +9,7 @@ import { basename, resolve as resolve7 } from "path";
 // package.json
 var package_default = {
   name: "buzzcut",
-  version: "0.1.0",
+  version: "0.1.1",
   description: "Makes coding agents write commits and PRs a reviewer can read: what changed and why, checked against the actual diff. No API key, no LLM.",
   type: "module",
   bin: {
@@ -3003,16 +3003,18 @@ function checkCommand(command, cwd, transcript) {
   if (!mightMatter(command)) return { problems: [], repo: null };
   const calls = findCalls(command);
   if (!calls.length) return { problems: [], repo: null };
-  const repo = loadRepo(cwd);
-  if (!repo.root) return { problems: [], repo };
   const problems = [];
   const session = transcript ? readSession(transcript) : null;
+  let first = null;
   for (const call of calls) {
     const dir = call.dir ? resolve4(cwd, call.dir) : cwd;
+    const repo = loadRepo(dir);
+    first ??= repo;
+    if (!repo.root) continue;
     const p = call.tool === "git-commit" ? checkCommit(call, dir, repo, session) : checkPr(call, dir, repo, session);
     if (p) problems.push(p);
   }
-  return { problems, repo };
+  return { problems, repo: first };
 }
 var obj = (v) => v && typeof v === "object" && !Array.isArray(v) ? v : {};
 var str = (...vs) => vs.find((v) => typeof v === "string" && v !== "");
@@ -3356,14 +3358,21 @@ function insertBlock(content, block) {
   return block + base;
 }
 function hooksDir(root) {
-  const configured = git(["config", "--get", "core.hooksPath"], root)?.trim();
+  const configured = git(["config", "--local", "--get", "core.hooksPath"], root)?.trim();
   if (configured) {
     const abs = resolve5(root, configured);
     if (/(^|[\\/])\.husky[\\/]_$/.test(configured)) return { dir: dirname(abs), husky: true };
     return { dir: abs, husky: /(^|[\\/])\.husky$/.test(configured) };
   }
-  const p = git(["rev-parse", "--git-path", "hooks"], root)?.trim();
-  return { dir: resolve5(root, p || ".git/hooks"), husky: false };
+  const common = git(["rev-parse", "--git-common-dir"], root)?.trim();
+  const dir = resolve5(root, common || ".git", "hooks");
+  const shared = git(["config", "--get", "core.hooksPath"], root)?.trim();
+  if (shared) {
+    const hook2 = join7(resolve5(root, shared), "commit-msg");
+    const chains = existsSync7(hook2) && readFileSync8(hook2, "utf8").includes("--git-common-dir");
+    if (!chains) return { dir, husky: false, shadowed: resolve5(root, shared) };
+  }
+  return { dir, husky: false };
 }
 function globalBin(env) {
   const names = process.platform === "win32" ? ["buzzcut.cmd", "buzzcut.exe", "buzzcut"] : ["buzzcut"];
@@ -3425,7 +3434,8 @@ function init(o) {
     };
   }
   if (o.gitHooks) {
-    const { dir, husky } = hooksDir(root);
+    const { dir, husky, shadowed } = hooksDir(root);
+    if (shadowed && !o.uninstall) res.notes.push(`git runs the hooks in ${shadowed} for every repo (core.hooksPath), so the ones in ${rel(dir)} won't run. Run \`buzzcut setup\`, which checks every repo and still runs each repo's own hooks, or add \`buzzcut hook commit-msg "$1"\` to that folder's commit-msg.`);
     for (const hook2 of ["commit-msg", "pre-push"]) {
       const path = join7(dir, hook2);
       const before = existsSync7(path) ? readFileSync8(path, "utf8") : null;

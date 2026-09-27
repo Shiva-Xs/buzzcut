@@ -34,6 +34,44 @@ const opts = (cwd: string, o: Partial<InitOptions> = {}): InitOptions => ({
   ...o,
 });
 
+// regression: on a machine where `buzzcut setup` set a global core.hooksPath, `init` in a repo
+// followed it and overwrote the machine-wide hooks with the repo-level ones.
+describe('init with a global core.hooksPath', () => {
+  const withGlobalHooks = (chains: boolean, fn: (dir: string, globalDir: string, before: string) => void) => {
+    const globalDir = mkdtempSync(join(tmpdir(), 'buzzcut-global-hooks-'));
+    const before = chains ? '#!/bin/sh\nbuzzcut_local="$(git rev-parse --git-common-dir)/hooks/commit-msg"\n' : '#!/bin/sh\necho my own hook\n';
+    writeFileSync(join(globalDir, 'commit-msg'), before, { mode: 0o755 });
+    const cfg = join(mkdtempSync(join(tmpdir(), 'buzzcut-gitcfg-')), 'config');
+    writeFileSync(cfg, `[core]\n\thooksPath = ${globalDir}\n`);
+    const saved = process.env.GIT_CONFIG_GLOBAL;
+    process.env.GIT_CONFIG_GLOBAL = cfg;
+    try {
+      fn(repo(), globalDir, before);
+    } finally {
+      if (saved === undefined) delete process.env.GIT_CONFIG_GLOBAL;
+      else process.env.GIT_CONFIG_GLOBAL = saved;
+    }
+  };
+
+  it("writes the repo's hooks into .git/hooks and leaves buzzcut's global ones alone", () => {
+    withGlobalHooks(true, (dir, globalDir, before) => {
+      const r = init(opts(dir));
+      expect(r.ok).toBe(true);
+      expect(readFileSync(join(globalDir, 'commit-msg'), 'utf8')).toBe(before);
+      expect(readFileSync(join(dir, '.git', 'hooks', 'commit-msg'), 'utf8')).toContain(BEGIN);
+      expect(r.notes.join('\n')).not.toContain("won't run");
+    });
+  });
+
+  it("never writes into someone else's global hooks folder, and says the repo hooks won't run", () => {
+    withGlobalHooks(false, (dir, globalDir, before) => {
+      const r = init(opts(dir));
+      expect(readFileSync(join(globalDir, 'commit-msg'), 'utf8')).toBe(before);
+      expect(r.notes.join('\n')).toContain("won't run");
+    });
+  });
+});
+
 describe('hook script blocks', () => {
   it('inserts after the shebang so an early exit 0 cannot skip it', () => {
     const out = insertBlock('#!/bin/bash\nnpm test\nexit 0\n', hookBlock('commit-msg'));

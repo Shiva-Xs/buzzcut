@@ -1,4 +1,4 @@
-name: buzzcut
+name: buzzcut PR check
 description: Checks the PR description and commit messages against the diff, and comments with a yap score.
 author: Shivateja Janjirala
 branding:

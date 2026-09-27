@@ -234,16 +234,20 @@ export function checkCommand(command: string, cwd: string, transcript?: string):
   if (!mightMatter(command)) return { problems: [], repo: null };
   const calls = findCalls(command);
   if (!calls.length) return { problems: [], repo: null };
-  const repo = loadRepo(cwd);
-  if (!repo.root) return { problems: [], repo };
   const problems: Problem[] = [];
   const session = transcript ? readSession(transcript) : null;
+  let first: RepoContext | null = null;
   for (const call of calls) {
+    // The repo is the one the command runs in: `cd other && git commit` or `git -C other commit`
+    // is judged by other's history and config, even when the agent started outside any repo.
     const dir = call.dir ? resolve(cwd, call.dir) : cwd;
+    const repo = loadRepo(dir);
+    first ??= repo;
+    if (!repo.root) continue;
     const p = call.tool === 'git-commit' ? checkCommit(call, dir, repo, session) : checkPr(call, dir, repo, session);
     if (p) problems.push(p);
   }
-  return { problems, repo };
+  return { problems, repo: first };
 }
 
 /**

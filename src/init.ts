@@ -93,17 +93,31 @@ export function insertBlock(content: string | null, block: string): string {
   return block + base;
 }
 
-/** Where git will look for hooks: core.hooksPath (husky included) or .git/hooks. */
-export function hooksDir(root: string): { dir: string; husky: boolean } {
-  const configured = git(['config', '--get', 'core.hooksPath'], root)?.trim();
+/**
+ * Where this repo's hooks go: its own core.hooksPath (husky included), or .git/hooks.
+ * Only a repo-local core.hooksPath counts. A global one (`buzzcut setup`'s, or the user's own)
+ * is shared by every repo on the machine, so `init` must never write into it; buzzcut's global
+ * hooks run the repo's .git/hooks after their own check. `shadowed` names a global folder that
+ * doesn't, so the caller can say the repo hooks won't run.
+ */
+export function hooksDir(root: string): { dir: string; husky: boolean; shadowed?: string } {
+  const configured = git(['config', '--local', '--get', 'core.hooksPath'], root)?.trim();
   if (configured) {
     const abs = resolve(root, configured);
     // husky v9 points core.hooksPath at .husky/_ and runs the scripts in .husky/.
     if (/(^|[\\/])\.husky[\\/]_$/.test(configured)) return { dir: dirname(abs), husky: true };
     return { dir: abs, husky: /(^|[\\/])\.husky$/.test(configured) };
   }
-  const p = git(['rev-parse', '--git-path', 'hooks'], root)?.trim();
-  return { dir: resolve(root, p || '.git/hooks'), husky: false };
+  // Not --git-path hooks: that follows core.hooksPath, including a global one.
+  const common = git(['rev-parse', '--git-common-dir'], root)?.trim();
+  const dir = resolve(root, common || '.git', 'hooks');
+  const shared = git(['config', '--get', 'core.hooksPath'], root)?.trim();
+  if (shared) {
+    const hook = join(resolve(root, shared), 'commit-msg');
+    const chains = existsSync(hook) && readFileSync(hook, 'utf8').includes('--git-common-dir');
+    if (!chains) return { dir, husky: false, shadowed: resolve(root, shared) };
+  }
+  return { dir, husky: false };
 }
 
 /** A durable buzzcut on PATH, ignoring the temporary copy `npx` runs from. */
@@ -196,7 +210,8 @@ export function init(o: InitOptions): InitResult {
 
   // Git hooks
   if (o.gitHooks) {
-    const { dir, husky } = hooksDir(root);
+    const { dir, husky, shadowed } = hooksDir(root);
+    if (shadowed && !o.uninstall) res.notes.push(`git runs the hooks in ${shadowed} for every repo (core.hooksPath), so the ones in ${rel(dir)} won't run. Run \`buzzcut setup\`, which checks every repo and still runs each repo's own hooks, or add \`buzzcut hook commit-msg "$1"\` to that folder's commit-msg.`);
     for (const hook of ['commit-msg', 'pre-push'] as const) {
       const path = join(dir, hook);
       const before = existsSync(path) ? readFileSync(path, 'utf8') : null;
