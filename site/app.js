@@ -1,4 +1,4 @@
-// buzzcut-pr.pages.dev: the shaved stripe, the roast receipt, the before/after cut and the
+// trybuzzcut.pages.dev: the shaved stripe, the roast receipt, the before/after cut and the
 // "push it" replay. The roast itself comes from buzzcut-web.js: the real analyzer, run here.
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
@@ -189,10 +189,37 @@
     }
   }
 
+  // The status check starts failing (yap 100, F) and runs down to 0 and A once the stripe is cut.
+  const check = $('#check');
+  const ckN = $('#ck-n');
+  const ckG = $('#ck-g');
+  if (check && !calm) {
+    check.classList.remove('pass');
+    ckN.textContent = '100';
+    ckG.textContent = 'F';
+  }
+  function passCheck() {
+    if (!check || calm) return;
+    const t0 = performance.now();
+    const dur = 1100;
+    // the same bands as gradeOf() in src/analyze.ts
+    const grades = [[10, 'A'], [25, 'B'], [45, 'C'], [65, 'D'], [Infinity, 'F']];
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const n = Math.round(100 * Math.pow(1 - k, 3));
+      ckN.textContent = String(n);
+      ckG.textContent = grades.find(([max]) => n <= max)[1];
+      if (k < 1) requestAnimationFrame(step);
+      else check.classList.add('pass');
+    };
+    requestAnimationFrame(step);
+  }
+
   function reveal() {
     revealed = true;
     hero.classList.add('revealed');
     band.style.clipPath = '';
+    setTimeout(passCheck, 250);
   }
 
   function sweep() {
@@ -279,9 +306,11 @@
   const ticket = $('#ticket');
   const status = $('#status');
   const input = $('#target');
+  // The full hint doesn't fit a phone-width box; the short one still names both inputs.
+  if (matchMedia('(max-width: 600px)').matches) input.placeholder = 'PR link or owner/repo';
   const go = $('#go');
   const queue = $('#queue');
-  const SITE = 'https://buzzcut-pr.pages.dev/';
+  const SITE = 'https://trybuzzcut.pages.dev/';
   const HEAT = { praise: 'Says what changed and why. It gets a compliment.', nit: 'Mostly there. It gets a nit or two.', roast: 'It gets the full roast.' };
   const MARK = { ok: '✓', bad: '✗', meh: '!', none: '–' };
   const ICON = { error: '✗', warn: '!', info: '·' };

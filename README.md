@@ -121,7 +121,7 @@ npx buzzcut roast owner/repo                               # its last 10 merged 
 npx buzzcut roast                                          # inside a repo: its last 20 commits
 ```
 
-Or with no install at all, in your browser: **[buzzcut-pr.pages.dev](https://buzzcut-pr.pages.dev)**. It runs the same checks locally in the page, against GitHub's public API.
+Or with no install at all, in your browser: **[trybuzzcut.pages.dev](https://trybuzzcut.pages.dev)**. It runs the same checks locally in the page, against GitHub's public API.
 
 <img src="assets/roast.svg" alt="buzzcut roasting a 117-word PR description for a 9-line diff: it never says why, yap score 100, grade F" width="720">
 

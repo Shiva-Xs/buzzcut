@@ -63,10 +63,10 @@ For Cursor, Windsurf and Antigravity: make a throwaway repo, stage a change, run
 ```bash
 npm run build:site            # rebuilds site/buzzcut-web.js from src/
 npx wrangler login            # once, opens Cloudflare in your browser
-npx wrangler pages deploy site --project-name buzzcut-pr
+npx wrangler pages deploy site --project-name trybuzzcut
 ```
 
-That serves it at `https://buzzcut-pr.pages.dev`. If Cloudflare gives the project a different name, update the three `buzzcut-pr.pages.dev` links in `site/index.html` (the link-preview image needs an absolute URL). Or connect the GitHub repo under Cloudflare → Workers & Pages → Create → Pages, with build command `npm ci && npm run build:site` and output directory `site`, and every push to `main` deploys. Roast links look like `https://buzzcut-pr.pages.dev/?roast=owner/repo%23123`.
+That serves it at `https://trybuzzcut.pages.dev`. If Cloudflare gives the project a different name, update the three `trybuzzcut.pages.dev` links in `site/index.html` (the link-preview image needs an absolute URL). Or connect the GitHub repo under Cloudflare → Workers & Pages → Create → Pages, with build command `npm ci && npm run build:site` and output directory `site`, and every push to `main` deploys. Roast links look like `https://trybuzzcut.pages.dev/?roast=owner/repo%23123`.
 
 ## After publishing, check it the way a user would
 

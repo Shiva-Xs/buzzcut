@@ -8,12 +8,12 @@
 <meta name="theme-color" content="#0b0a09">
 <meta property="og:title" content="buzzcut · AI yaps, we cut">
 <meta property="og:description" content="Pull requests written like the good old days. Roast any GitHub PR in your browser, then put buzzcut on every repo your team reviews.">
-<meta property="og:image" content="https://buzzcut-pr.pages.dev/og.png">
+<meta property="og:image" content="https://trybuzzcut.pages.dev/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="https://buzzcut-pr.pages.dev/">
+<meta property="og:url" content="https://trybuzzcut.pages.dev/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://buzzcut-pr.pages.dev/og.png">
+<meta name="twitter:image" content="https://trybuzzcut.pages.dev/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0a09'/%3E%3CclipPath id='c'%3E%3Crect x='11' y='3' width='10' height='26'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23c)'%3E%3Crect x='11' y='3' width='10' height='26' fill='%23f3ede2'/%3E%3Cpath d='M0 8l32-16v6L0 14zM0 20l32-16v6L0 26zM0 32l32-16v6L0 38z' fill='%23ff4b36'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,12 +48,8 @@
 
     <div class="hero-band" id="band">
       <div class="hero-in">
-        <ul class="menu" aria-label="Price list">
-          <li><span>The cut</span><i aria-hidden="true"></i><b>free</b></li>
-          <li><span>API keys</span><i aria-hidden="true"></i><b>0</b></li>
-          <li><span>LLM calls</span><i aria-hidden="true"></i><b>0</b></li>
-          <li><span>License</span><i aria-hidden="true"></i><b>MIT</b></li>
-        </ul>
+        <!-- the yap score, as buzzcut reports it: 100 under the yap, 0 once the stripe is cut -->
+        <p class="check pass" id="check" aria-label="Yap score 0 out of 100, grade A"><i class="ck-dot" aria-hidden="true"></i><span aria-hidden="true">yap score <b id="ck-n">0</b>/100 · grade <b id="ck-g">A</b></span></p>
         <h1 id="hero-h"><span>AI yaps,</span> <span class="cut">we cut</span></h1>
         <p class="tagline">Pull requests written like the good old days</p>
         <p class="lede">Your agent writes the code. buzzcut makes the commits and PRs it writes say what changed and why, in plain words, so reviewers read the PR itself instead of asking another AI to explain it.</p>
@@ -62,6 +58,7 @@
           <code>npm i -g buzzcut &amp;&amp; buzzcut setup</code>
           <button type="button" class="copy" data-copy="npm i -g buzzcut && buzzcut setup" data-label="Copy">Copy</button>
         </div>
+        <p class="facts">No LLM · no API key · zero dependencies · MIT</p>
         <p class="works-in">Claude Code · Cursor · Windsurf · Antigravity · VS Code · Codex · any terminal</p>
       </div>
     </div>
