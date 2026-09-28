@@ -1,10 +1,15 @@
 # Changelog
 
+## 0.1.2
+
+- The website moved to trybuzzcut.pages.dev (buzzcut-pr.pages.dev redirects there), and the README links follow.
+- The README gives the skill-only install (`npx skills add Shiva-Xs/buzzcut`) and the Claude Code plugin commands.
+
 ## 0.1.1
 
 - The agent hooks check the repo a command runs in. `cd other-repo && git commit …` and `git -C other-repo commit …` are judged by that repo's history and config, and a command started outside any repo is now checked at all (before, the agent hook let it through and only git's commit-msg hook caught it).
 - `buzzcut init` no longer writes into a global `core.hooksPath`. On a machine where `buzzcut setup` ran, `init` in a repo followed the global setting and overwrote the machine-wide hooks with repo-level ones; it now writes to the repo's own `.git/hooks`, which the global hooks run, and warns when a global hooks folder that isn't buzzcut's would stop them from running.
-- The GitHub Action is listed on the Marketplace as "buzzcut PR check", since the name buzzcut belongs to an existing GitHub organization. Workflows keep using `Shiva-Xs/buzzcut@v0`.
+- The GitHub Action is named "buzzcut PR check" for the Marketplace, since the name buzzcut belongs to an existing GitHub organization. Workflows keep using `Shiva-Xs/buzzcut@v0`.
 - A shorter README (2,186 words); the full rule list, scoring and evidence moved to docs/how-it-works.md.
 
 ## 0.1.0

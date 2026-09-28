@@ -9,7 +9,7 @@ import { basename, resolve as resolve7 } from "path";
 // package.json
 var package_default = {
   name: "buzzcut",
-  version: "0.1.1",
+  version: "0.1.2",
   description: "Makes coding agents write commits and PRs a reviewer can read: what changed and why, checked against the actual diff. No API key, no LLM.",
   type: "module",
   bin: {
