@@ -33,15 +33,17 @@ buzzcut setup
 
 | Where | How buzzcut steps in | Tested with the real app |
 |---|---|---|
-| Claude Code (terminal; the VS Code extension reads the same settings) | Skill + PreToolUse hook + git hooks | ✅ 5 real terminal sessions: blocks, agent rewrites, commits; PRs through `gh` and through a GitHub MCP connector |
-| Antigravity | Skill + PreToolUse hook + git hooks | ✅ Blocked `"Update webhook.js"`, agent (Claude Opus 4.6) rewrote and committed. With the skill, Gemini 3.8 Flash wrote a 52-word commit for a 37-file change where it had written 214 words and 22 bullets without it |
-| Cursor | Skill + beforeShellExecution hook + git hooks | ✅ Blocked `"Update webhook.js"`, agent (Grok 4.6) rewrote and committed |
-| Windsurf | Skill + pre_run_command hook + git hooks | ✅ Blocked `"Update webhook.js"`, agent (SWE-1.6) rewrote and committed |
+| Claude Code (terminal and VS Code extension) | Skill + PreToolUse hook + git hooks | ✅ Blocked, rewrote and committed in 5 sessions; PRs through `gh` and a GitHub MCP connector |
+| Antigravity | Skill + PreToolUse hook + git hooks | ✅ Blocked `"Update webhook.js"`; the agent rewrote and committed |
+| Cursor | Skill + beforeShellExecution hook + git hooks | ✅ Blocked `"Update webhook.js"`; the agent rewrote and committed |
+| Windsurf | Skill + pre_run_command hook + git hooks | ✅ Blocked `"Update webhook.js"`; the agent rewrote and committed |
 | VS Code (Copilot agent, ✨ buttons) | Skill + agent hook + button instructions + git hooks | Built to VS Code's documented format |
 | Codex, Gemini CLI, others | Skill + git hooks | |
-| Any terminal, any person | Git hooks (warn only) | ✅ end-to-end tests with real `git commit` / `git push` |
+| Any terminal, any person | Git hooks (warn only) | ✅ End-to-end tests with real `git commit` and `git push` |
 
 For a whole team instead, `npm i -D buzzcut && npx buzzcut init` writes the same hooks and skill into the repo, to commit and share. Nobody gets locked out if they don't have it.
+
+Only want the skill? `npx skills add Shiva-Xs/buzzcut`. In Claude Code, the plugin brings the skill and the hook: `/plugin marketplace add Shiva-Xs/buzzcut`, then `/plugin install buzzcut@buzzcut`.
 
 ## How it works
 

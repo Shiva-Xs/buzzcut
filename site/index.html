@@ -48,8 +48,12 @@
 
     <div class="hero-band" id="band">
       <div class="hero-in">
-        <!-- the yap score, as buzzcut reports it: 100 under the yap, 0 once the stripe is cut -->
-        <p class="check pass" id="check" aria-label="Yap score 0 out of 100, grade A"><i class="ck-dot" aria-hidden="true"></i><span aria-hidden="true">yap score <b id="ck-n">0</b>/100 · grade <b id="ck-g">A</b></span></p>
+        <ul class="facts" aria-label="What it costs">
+          <li>No LLM</li>
+          <li>No API key</li>
+          <li>Zero dependencies</li>
+          <li>MIT</li>
+        </ul>
         <h1 id="hero-h"><span>AI yaps,</span> <span class="cut">we cut</span></h1>
         <p class="tagline">Pull requests written like the good old days</p>
         <p class="lede">Your agent writes the code. buzzcut makes the commits and PRs it writes say what changed and why, in plain words, so reviewers read the PR itself instead of asking another AI to explain it.</p>
@@ -58,7 +62,6 @@
           <code>npm i -g buzzcut &amp;&amp; buzzcut setup</code>
           <button type="button" class="copy" data-copy="npm i -g buzzcut && buzzcut setup" data-label="Copy">Copy</button>
         </div>
-        <p class="facts">No LLM · no API key · zero dependencies · MIT</p>
         <p class="works-in">Claude Code · Cursor · Windsurf · Antigravity · VS Code · Codex · any terminal</p>
       </div>
     </div>

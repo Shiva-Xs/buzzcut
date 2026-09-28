@@ -189,37 +189,10 @@
     }
   }
 
-  // The status check starts failing (yap 100, F) and runs down to 0 and A once the stripe is cut.
-  const check = $('#check');
-  const ckN = $('#ck-n');
-  const ckG = $('#ck-g');
-  if (check && !calm) {
-    check.classList.remove('pass');
-    ckN.textContent = '100';
-    ckG.textContent = 'F';
-  }
-  function passCheck() {
-    if (!check || calm) return;
-    const t0 = performance.now();
-    const dur = 1100;
-    // the same bands as gradeOf() in src/analyze.ts
-    const grades = [[10, 'A'], [25, 'B'], [45, 'C'], [65, 'D'], [Infinity, 'F']];
-    const step = (t) => {
-      const k = Math.min(1, (t - t0) / dur);
-      const n = Math.round(100 * Math.pow(1 - k, 3));
-      ckN.textContent = String(n);
-      ckG.textContent = grades.find(([max]) => n <= max)[1];
-      if (k < 1) requestAnimationFrame(step);
-      else check.classList.add('pass');
-    };
-    requestAnimationFrame(step);
-  }
-
   function reveal() {
     revealed = true;
     hero.classList.add('revealed');
     band.style.clipPath = '';
-    setTimeout(passCheck, 250);
   }
 
   function sweep() {
