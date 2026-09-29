@@ -10,6 +10,9 @@ export interface FileChange {
   renamed?: boolean;
   /** marked `linguist-generated` in .gitattributes: build output nobody reviews line by line */
   generated?: boolean;
+  /** the lines this file adds and removes, when the diff carried them (see patch.ts) */
+  added?: string;
+  removed?: string;
 }
 
 /** What the diff actually did. Every "grounded" rule checks the text against this. */
@@ -25,6 +28,11 @@ export interface DiffFacts {
   source: FileChange[];
   /** the file list was cut short (very large PRs); totals are still exact */
   truncated: boolean;
+  /**
+   * Every file that changes lines came with them (generated files aside), so a name that isn't
+   * in `changedText(diff)` isn't in the change. False for a diff that carried only line counts.
+   */
+  searchable: boolean;
 }
 
 export interface Message {

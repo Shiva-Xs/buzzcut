@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { buildDiff, parseNumstat } from './diff.js';
+import { buildDiff, parseDiffOutput } from './diff.js';
 import type { DiffFacts, FileChange } from './types.js';
 
 export function git(args: string[], cwd?: string): string | null {
@@ -39,17 +39,24 @@ export function markGenerated(files: FileChange[], cwd?: string): FileChange[] {
   return marked.size ? files.map((f) => (marked.has(f.path) ? { ...f, generated: true } : f)) : files;
 }
 
-const diffOf = (out: string, cwd?: string) => buildDiff(markGenerated(parseNumstat(out), cwd));
+const diffOf = (out: string, cwd?: string) => buildDiff(markGenerated(parseDiffOutput(out), cwd));
+
+/**
+ * `git diff` with the line counts and the changed lines in one call (numstat, then the patch),
+ * so the description can be checked against what the change actually says.
+ */
+const PATCH = ['-c', 'core.quotepath=false', 'diff', '-U0', '--no-color', '--no-ext-diff', '--numstat', '-p', '-M'];
+const patchDiff = (extra: string[], cwd?: string) => git([...PATCH, ...extra], cwd);
 
 /** The staged changes, i.e. what `git commit` is about to record. */
 export function stagedDiff(cwd?: string): DiffFacts | null {
-  const out = git(['diff', '--cached', '--numstat', '-M'], cwd);
+  const out = patchDiff(['--cached'], cwd);
   if (!out?.trim()) return null;
   return diffOf(out, cwd);
 }
 
 export function commitDiff(rev: string, cwd?: string): DiffFacts | null {
-  const out = git(['show', '--numstat', '--format=', '-M', rev], cwd);
+  const out = git(['-c', 'core.quotepath=false', 'show', '-U0', '--no-color', '--no-ext-diff', '--numstat', '-p', '--format=', '-M', rev], cwd);
   if (out == null) return null;
   return diffOf(out, cwd);
 }
@@ -81,7 +88,7 @@ export function branchCommits(base: string, cwd?: string, max = 30): string[] {
 
 /** Everything on this branch since it left `base`, like a PR diff. */
 export function branchDiff(base: string, cwd?: string, head = 'HEAD'): DiffFacts | null {
-  const out = git(['diff', '--numstat', '-M', `${base}...${head}`], cwd);
+  const out = patchDiff([`${base}...${head}`], cwd);
   if (out == null) return null;
   return diffOf(out, cwd);
 }
@@ -92,21 +99,23 @@ const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 export function amendDiff(cwd?: string): DiffFacts | null {
   if (git(['rev-parse', '--verify', '-q', 'HEAD'], cwd) == null) return stagedDiff(cwd);
   const parent = git(['rev-parse', '--verify', '-q', 'HEAD^'], cwd)?.trim() || EMPTY_TREE;
-  const out = git(['diff', '--cached', '--numstat', '-M', parent], cwd);
+  const out = patchDiff(['--cached', parent], cwd);
   return out?.trim() ? diffOf(out, cwd) : null;
 }
 
-function lineCount(path: string): number {
+/** Lines and text of an untracked file. `text` is null when it can't be read (too big, an error). */
+function readNew(path: string): { lines: number; text: string | null } {
   try {
     const st = statSync(path);
-    if (!st.isFile() || st.size > 2 * 1024 * 1024) return 0;
+    if (!st.isFile()) return { lines: 0, text: '' };
+    if (st.size > 2 * 1024 * 1024) return { lines: 1, text: null };
     const buf = readFileSync(path);
-    if (buf.includes(0)) return 0; // binary
+    if (buf.includes(0)) return { lines: 0, text: '' }; // binary: no lines to describe
     let n = 0;
     for (const b of buf) if (b === 10) n++;
-    return n + (buf.length && buf[buf.length - 1] !== 10 ? 1 : 0);
+    return { lines: n + (buf.length && buf[buf.length - 1] !== 10 ? 1 : 0), text: buf.toString('utf8') };
   } catch {
-    return 0;
+    return { lines: 1, text: null };
   }
 }
 
@@ -118,10 +127,15 @@ export function worktreeDiff(cwd?: string, opts: { untracked: boolean } = { untr
   const root = git(['rev-parse', '--show-toplevel'], cwd)?.trim();
   if (!root) return null;
   const hasHead = git(['rev-parse', '--verify', '-q', 'HEAD'], root) != null;
-  const files = parseNumstat((hasHead ? git(['diff', 'HEAD', '--numstat', '-M'], root) : git(['diff', '--cached', '--numstat'], root)) ?? '');
+  const files = parseDiffOutput((hasHead ? patchDiff(['HEAD'], root) : patchDiff(['--cached'], root)) ?? '');
   if (opts.untracked) {
     const others = (git(['ls-files', '--others', '--exclude-standard', '-z'], root) ?? '').split('\0').filter(Boolean);
-    for (const p of others.slice(0, 1000)) files.push({ path: p, additions: lineCount(join(root, p)), deletions: 0 });
+    for (const p of others.slice(0, 1000)) {
+      const { lines, text } = readNew(join(root, p));
+      // An untracked file is all added lines. `added` stays unset for one we couldn't read, so the
+      // diff is called unsearchable rather than trusted to be complete.
+      files.push({ path: p, additions: lines, deletions: 0, ...(text === null ? {} : { added: text.slice(0, 200_000), removed: '' }) });
+    }
   }
   return files.length ? buildDiff(markGenerated(files, root)) : null;
 }

@@ -32,6 +32,12 @@ export interface SessionFacts {
   tests: string[];
   /** commands that ran or tried the code (tests included), as opposed to git/reading files */
   exercised: string[];
+  /** what the commands printed and what the user wrote: where a number or a name in the text may have come from */
+  text?: string;
+  /** the transcript carried command output, so something missing from `text` really wasn't printed */
+  hasOutput?: boolean;
+  /** the numbers test runs printed next to a test or pass/fail word: "Tests: 212 passed" gives 212 */
+  testCounts?: number[];
 }
 
 export interface Rule {

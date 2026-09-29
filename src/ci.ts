@@ -7,7 +7,7 @@ import { agentFooter } from './agent.js';
 import { analyze, parseCommit, passes, prMessage } from './analyze.js';
 import { DEFAULTS, isIgnored, loadConfig, type Config } from './config.js';
 import { buildDiff } from './diff.js';
-import { createClient, fetchPrFiles, fetchTemplate, GitHubError, isBot, isCodingAgent, type ApiPull, type Client } from './github.js';
+import { createClient, fetchPrFiles, fetchTemplate, fileChange, GitHubError, isBot, isCodingAgent, type ApiFile, type ApiPull, type Client } from './github.js';
 import { RULE_IDS } from './rules/index.js';
 import { repoStyle, type StyleProfile } from './style.js';
 import { findTemplate } from './template.js';
@@ -97,7 +97,7 @@ interface ApiCommit {
 }
 
 interface ApiCommitDetail {
-  files?: { filename: string; additions: number; deletions: number }[];
+  files?: ApiFile[];
   parents?: { sha: string }[];
 }
 
@@ -113,7 +113,7 @@ async function checkCommit(client: Client, owner: string, repo: string, sha: str
   if (!msg.title || isIgnored(msg.title, opts.config)) return null;
   const detail = await client.get<ApiCommitDetail>(`/repos/${owner}/${repo}/commits/${sha}`);
   if ((detail.parents?.length ?? 1) > 1) return null;
-  const diff = buildDiff((detail.files ?? []).map((f) => ({ path: f.filename, additions: f.additions, deletions: f.deletions })));
+  const diff = buildDiff((detail.files ?? []).map(fileChange));
   return { sha, report: analyze(msg, diff, { style: opts.style, rules: opts.config.rules, length: opts.config.length }) };
 }
 

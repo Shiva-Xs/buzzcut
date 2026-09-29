@@ -1,4 +1,5 @@
 import { buildDiff } from './diff.js';
+import { splitPatch } from './patch.js';
 import { parseTemplate, TEMPLATE_PATHS, type Template } from './template.js';
 import type { DiffFacts, FileChange } from './types.js';
 
@@ -111,10 +112,17 @@ export interface ApiPull {
   base?: { sha: string; ref: string };
 }
 
-interface ApiFile {
+export interface ApiFile {
   filename: string;
   additions: number;
   deletions: number;
+  /** the file's hunks; GitHub leaves it out for binaries and very large diffs */
+  patch?: string;
+}
+
+/** A GitHub file entry as a FileChange, with its changed lines when the API sent them. */
+export function fileChange(f: ApiFile): FileChange {
+  return { path: f.filename, additions: f.additions, deletions: f.deletions, ...(f.patch === undefined ? {} : splitPatch(f.patch)) };
 }
 
 const MAX_FILE_PAGES = 3;
@@ -137,7 +145,7 @@ export async function fetchPrFiles(client: Client, ref: PrRef, changedFiles: num
   const files: FileChange[] = [];
   for (let page = 1; page <= MAX_FILE_PAGES && files.length < changedFiles; page++) {
     const batch = await client.get<ApiFile[]>(`${base}/files?per_page=100&page=${page}`);
-    files.push(...batch.map((f) => ({ path: f.filename, additions: f.additions, deletions: f.deletions })));
+    files.push(...batch.map(fileChange));
     if (batch.length < 100) break;
   }
   return files;
