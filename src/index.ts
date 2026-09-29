@@ -19,4 +19,7 @@ export type { StyleProfile } from './style.js';
 export { findTemplate, parseTemplate } from './template.js';
 export type { Template } from './template.js';
 export { findCalls } from './shell.js';
+export { claimsIn, factsIn, gitRepoSearch, makeResolver, norm, passedClaims } from './lookup.js';
+export type { Claim, RepoSearch, Resolver, Where } from './lookup.js';
+export { readSession, testCountsIn, transcriptText } from './session.js';
 export type { AnalyzeOptions } from './analyze.js';

@@ -1,4 +1,5 @@
 import type { Length } from '../config.js';
+import type { Resolver } from '../lookup.js';
 import type { StyleProfile } from '../style.js';
 import type { TextFacts, Line } from '../text.js';
 import type { DiffFacts, Finding, Kind, Message } from '../types.js';
@@ -19,6 +20,8 @@ export interface Context {
   session: SessionFacts | null;
   /** the evidence in the previous draft of this message, when buzzcut checked one */
   previous: PreviousDraft | null;
+  /** looks names, files and figures up in the diff, the repo and the session; null when there is nothing to look in */
+  resolver: Resolver | null;
 }
 
 export interface PreviousDraft {

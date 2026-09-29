@@ -263,7 +263,7 @@ export const tickedBoxes: Rule = {
 };
 
 const VAGUE_VERIFY =
-  /\b(?:all |existing |the )?tests? (?:are |were |still |continue to )?(?:pass(?:es|ed|ing)?|green)\b|\bcontinue to pass\b|\bstill pass(?:es)?\b|\btested (?:locally|thoroughly|manually|extensively|and (?:verified|working))\b|\bverified (?:that )?(?:everything|it|the changes?) works?\b|\bworks as expected\b|\beverything works\b/i;
+  /\b(?:all |existing |the )?tests? (?:are |were |still |continue to )?(?:pass(?:es|ed|ing)?|green)\b|\bcontinue to pass\b|\bstill pass(?:es)?\b|\btested (?:locally|thoroughly|manually|extensively|and (?:verified|working))\b|\bverified (?:that )?(?:everything|it|the changes?) works?\b|\bworks as expected\b|\beverything works\b|\b(?:works?|worked|working) (?:fine|locally|well|great|correctly|properly|as intended)\b|\bon my machine\b|\bverified locally\b|\bsanity[- ]check(?:ed)?\b/i;
 
 export const vagueVerification: Rule = {
   id: 'vague-verification',

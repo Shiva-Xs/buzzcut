@@ -63,6 +63,30 @@
             "error"
           ]
         },
+        "unsourced-name": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "unsourced-fact": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "test-count-mismatch": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
         "template-on-tiny": {
           "enum": [
             "off",

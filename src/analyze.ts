@@ -5,6 +5,7 @@ import type { PreviousDraft, SessionFacts } from './rules/rule.js';
 import type { StyleProfile } from './style.js';
 import type { Template } from './template.js';
 import { evidenceOf } from './facts.js';
+import { makeResolver, verifiedSpecificity, type RepoSearch } from './lookup.js';
 import { analyzeText, specificity } from './text.js';
 import type { DiffFacts, Finding, Grade, Kind, Message, Report, Severity } from './types.js';
 
@@ -21,6 +22,8 @@ export interface AnalyzeOptions {
   previous?: PreviousDraft | null;
   /** the repo's `length` setting: scales the word budget and the bullets allowed */
   length?: Length;
+  /** searches the repo for names the diff doesn't contain; enables the source lookups that need it */
+  repo?: RepoSearch | null;
 }
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
@@ -157,10 +160,13 @@ export function analyze(msg: Message, diff: DiffFacts | null, opts: AnalyzeOptio
   const skip = msg.kind === 'pr' ? opts.template?.lines : undefined;
   const text = analyzeText(msg.body, msg.bodyLine, skip);
   const files = new Set(diff?.files.flatMap((f) => [f.path, f.path.split('/').pop()!]) ?? []);
-  const density = specificity(text.lines, text.words, files);
+  // Names, files and figures are looked up in the diff, the repo and the session when there is
+  // something to look in; only the ones found earn extra room. With no evidence this is the old count.
+  const resolver = makeResolver({ diff, session: opts.session, repo: opts.repo });
+  const density = resolver ? verifiedSpecificity(text.lines, text.words, files, resolver) : specificity(text.lines, text.words, files);
   const length = opts.length ?? 'normal';
   const budget = Math.round(wordBudget(msg.kind, diff, length) * specificityBonus(density));
-  const ctx = { msg, diff, text, budget, density, length, style: opts.style ?? null, session: opts.session ?? null, previous: opts.previous ?? null };
+  const ctx = { msg, diff, text, budget, density, length, style: opts.style ?? null, session: opts.session ?? null, previous: opts.previous ?? null, resolver };
 
   let findings: Finding[] = [];
   for (const rule of RULES) {
@@ -177,7 +183,7 @@ export function analyze(msg: Message, diff: DiffFacts | null, opts: AnalyzeOptio
 
 // Findings that mark a line as false or unbacked: its numbers may go, so dropped-facts
 // never asks for them back.
-const CLAIMS = new Set(['phantom-tests', 'unverified-in-session', 'vague-verification', 'ticked-boxes', 'unbacked-claim']);
+const CLAIMS = new Set(['phantom-tests', 'unverified-in-session', 'vague-verification', 'ticked-boxes', 'unbacked-claim', 'unsourced-name', 'unsourced-fact', 'test-count-mismatch']);
 
 /**
  * The evidence in a message worth keeping through a rewrite: everything except what sits on
