@@ -22,4 +22,5 @@ export { findCalls } from './shell.js';
 export { claimsIn, factsIn, gitRepoSearch, makeResolver, norm, passedClaims } from './lookup.js';
 export type { Claim, RepoSearch, Resolver, Where } from './lookup.js';
 export { readSession, testCountsIn, transcriptText } from './session.js';
+export { aiCheck, pickSentences, quoteInDiff, renderAi } from './verify.js';
 export type { AnalyzeOptions } from './analyze.js';

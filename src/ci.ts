@@ -9,6 +9,7 @@ import { analyze, parseCommit, passes, prMessage } from './analyze.js';
 import { DEFAULTS, isIgnored, loadConfig, type Config } from './config.js';
 import { buildDiff } from './diff.js';
 import { gitRepoSearch } from './lookup.js';
+import { aiCheck, DEFAULT_MODEL, providerOf, renderAi } from './verify.js';
 import { createClient, fetchPrFiles, fetchTemplate, fileChange, GitHubError, isBot, isCodingAgent, type ApiFile, type ApiPull, type Client } from './github.js';
 import { RULE_IDS } from './rules/index.js';
 import { repoStyle, type StyleProfile } from './style.js';
@@ -241,7 +242,27 @@ export async function runCi(run: CiRun): Promise<number> {
   }
 
   const allPass = passes(prReport, max) && commits.every((c) => passes(c.report, max));
-  const markdown = renderMarkdown(prReport, commits, max, checked);
+
+  // The optional AI check: only when asked for, with the user's own key, and never part of pass or fail.
+  let aiSection = '';
+  let aiUnsupported = 0;
+  if (input(env, 'ai', 'false').toLowerCase() === 'true') {
+    const provider = providerOf(input(env, 'ai-provider', 'anthropic'));
+    const key = input(env, 'ai-api-key', '');
+    if (!provider) log(`::warning::buzzcut: ai-provider must be "anthropic" or "gemini"; skipping the AI check.`);
+    else if (!key) log('::notice::buzzcut: the AI check is on but there is no ai-api-key (a fork PR has no secrets); skipping it.');
+    else {
+      const model = input(env, 'ai-model', DEFAULT_MODEL[provider]);
+      try {
+        const results = await aiCheck({ provider, model, key, fetch: run.fetch, title: pull.title, body: pull.body ?? '', diff });
+        aiUnsupported = results.filter((r) => r.verdict === 'unsupported').length;
+        aiSection = renderAi(results, provider, model);
+      } catch (e) {
+        log(`::warning::buzzcut: the AI check failed and was skipped: ${(e as Error).message}`);
+      }
+    }
+  }
+  const markdown = renderMarkdown(prReport, commits, max, checked) + aiSection;
 
   if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, markdown.replace(MARKER + '\n', '') + '\n');
   if (env.GITHUB_OUTPUT) appendFileSync(env.GITHUB_OUTPUT, `score=${prReport.score}\ngrade=${prReport.grade}\npass=${allPass}\n`);
@@ -253,7 +274,7 @@ export async function runCi(run: CiRun): Promise<number> {
       if (existing) {
         await client.send('PATCH', `/repos/${owner}/${repo}/issues/comments/${existing.id}`, { body: markdown });
         log(`buzzcut: updated comment ${existing.id}`);
-      } else if (!allPass) {
+      } else if (!allPass || aiUnsupported > 0) {
         await client.send('POST', `/repos/${owner}/${repo}/issues/${pull.number}/comments`, { body: markdown });
         log('buzzcut: posted a comment');
       }

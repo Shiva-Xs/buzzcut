@@ -21,6 +21,22 @@ inputs:
     description: 'Whether a failing check fails the job. "true" (default) follows the repo''s block setting: a coding agent''s PR fails, a person''s gets the comment and a warning. "always" fails everyone; "false" never fails.'
     required: false
     default: 'true'
+  ai:
+    description: 'Also ask a model whether the diff supports the sentences that say what the code does. Off by default. Advice only: it never fails the job. Sends the description and the diff to the provider.'
+    required: false
+    default: 'false'
+  ai-provider:
+    description: 'anthropic or gemini'
+    required: false
+    default: 'anthropic'
+  ai-model:
+    description: "Model name (default: claude-haiku-4-5-20251001 for anthropic, gemini-2.5-flash for gemini)"
+    required: false
+    default: ''
+  ai-api-key:
+    description: 'Your API key for the provider, from a repository secret. Without it the check is skipped.'
+    required: false
+    default: ''
   github-token:
     description: Token for reading the PR and commenting
     required: false

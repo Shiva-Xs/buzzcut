@@ -388,6 +388,69 @@ describe('GitHub Action', () => {
     expect(calls.some((x) => x.method !== 'GET')).toBe(false);
   });
 
+  describe('the optional AI check', () => {
+    const PATCH = '@@ -1 +1,2 @@\n-  return res.ok;\n+  if (res.status < 500) return res.ok;\n+  await sleep(200 * 2 ** i);';
+    const aiRoutes = (reply: unknown) => ({
+      ...ROUTES,
+      'GET /pulls/7/files': [{ filename: 'src/webhook.ts', additions: 2, deletions: 1, patch: PATCH }],
+      'GET /pulls/7/commits': [],
+      'POST /v1/messages': { content: [{ type: 'text', text: JSON.stringify(reply) }] },
+    });
+    const GOOD = 'Webhook sends now retry when the server answers 5xx, waiting 200ms and doubling it each attempt.\n\nTested: not run.';
+    const supported = [{ n: 1, verdict: 'supported', quote: 'if (res.status < 500) return res.ok;' }, { n: 2, verdict: 'unsupported', quote: '' }];
+
+    it('is off unless asked for: nothing is sent to a provider', async () => {
+      const c = ciEnv(GOOD);
+      const calls: Call[] = [];
+      await runCi({ env: c.env, fetch: fakeGitHub(aiRoutes(supported), calls), cwd: c.dir, log: () => {} });
+      expect(calls.some((x) => x.url.includes('anthropic.com'))).toBe(false);
+    });
+
+    it('adds a collapsed advice section to the summary, and never changes the exit code', async () => {
+      const c = ciEnv(GOOD, { INPUT_AI: 'true', 'INPUT_AI-API-KEY': 'sk-test' });
+      const calls: Call[] = [];
+      const code = await runCi({ env: c.env, fetch: fakeGitHub(aiRoutes(supported), calls), cwd: c.dir, log: () => {} });
+      expect(code).toBe(0);
+      const summary = readFileSync(c.summary, 'utf8');
+      expect(summary).toContain('AI check, advice only');
+      expect(summary).toContain('| ✓ |');
+      expect(readFileSync(c.output, 'utf8')).toContain('pass=true');
+      expect(calls.some((x) => x.url.includes('api.anthropic.com/v1/messages'))).toBe(true);
+    });
+
+    it('posts a comment for a sentence the diff does not support even when the PR passes', async () => {
+      const c = ciEnv(GOOD, { INPUT_AI: 'true', 'INPUT_AI-API-KEY': 'sk-test' });
+      const calls: Call[] = [];
+      await runCi({ env: c.env, fetch: fakeGitHub(aiRoutes(supported), calls), cwd: c.dir, log: () => {} });
+      const post = calls.find((x) => x.method === 'POST' && x.url.includes('/issues/7/comments'));
+      expect((post?.body as { body: string }).body).toContain('1 not supported by the diff');
+    });
+
+    it('is skipped with a notice when there is no key, as on a fork PR, and with a warning for an unknown provider', async () => {
+      const lines: string[] = [];
+      const c = ciEnv(GOOD, { INPUT_AI: 'true' });
+      const calls: Call[] = [];
+      expect(await runCi({ env: c.env, fetch: fakeGitHub(aiRoutes(supported), calls), cwd: c.dir, log: (l) => lines.push(l) })).toBe(0);
+      expect(lines.join('\n')).toContain('there is no ai-api-key');
+      expect(calls.some((x) => x.url.includes('anthropic.com'))).toBe(false);
+      const d = ciEnv(GOOD, { INPUT_AI: 'true', 'INPUT_AI-API-KEY': 'k', 'INPUT_AI-PROVIDER': 'openai' });
+      const more: string[] = [];
+      await runCi({ env: d.env, fetch: fakeGitHub(aiRoutes(supported), []), cwd: d.dir, log: (l) => more.push(l) });
+      expect(more.join('\n')).toContain('ai-provider must be');
+    });
+
+    it('reports a provider failure as a warning and carries on', async () => {
+      const c = ciEnv(GOOD, { INPUT_AI: 'true', 'INPUT_AI-API-KEY': 'bad' });
+      const routes = { ...aiRoutes(supported) } as Record<string, unknown>;
+      delete routes['POST /v1/messages']; // the fake answers 404
+      const lines: string[] = [];
+      const code = await runCi({ env: c.env, fetch: fakeGitHub(routes, []), cwd: c.dir, log: (l) => lines.push(l) });
+      expect(code).toBe(0);
+      expect(lines.join('\n')).toContain('::warning::buzzcut: the AI check failed and was skipped');
+      expect(readFileSync(c.summary, 'utf8')).not.toContain('AI check');
+    });
+  });
+
   it('skips other events and bot PRs', async () => {
     const c = ciEnv('x', { GITHUB_EVENT_NAME: 'release' });
     expect(await runCi({ env: c.env, fetch: fakeGitHub({}, []), cwd: c.dir, log: () => {} })).toBe(0);
