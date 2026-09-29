@@ -77,8 +77,40 @@ describe('names and files', () => {
   });
 
   it('notes, without blocking, a name that is only mentioned and exists nowhere', () => {
-    const f = finding(check('Handles the case where the `RetryBudgetManager` gives up.'), 'unsourced-name');
+    const f = finding(check('The `RetryBudgetManager` was the cause of the outage.'), 'unsourced-name');
     expect(f?.severity).toBe('warn');
+  });
+
+  it('sends back a name a sentence says the change does something with, whatever the verb', () => {
+    for (const s of ['Handles the case where the `RetryBudgetManager` gives up.', 'Outlines the limits for `RetryBudgetManager`.', 'Also whitelists `RetryBudgetManager` in the linter.', 'Ensures unexpected states throw `RetryBudgetException`.']) {
+      expect(finding(check(s), 'unsourced-name')?.severity, s).toBe('error');
+    }
+  });
+
+  it('lets a name through when the sentence says where it comes from', () => {
+    for (const s of ['Retries when `ERR_STREAM_PREMATURE_CLOSE` comes from the Node runtime.', 'Handles `RetryBudgetManager` from the upstream SDK.', 'Wraps the third-party `RetryBudgetManager`.']) {
+      expect(sourced(check(s)), s).toEqual([]);
+    }
+  });
+
+  it('looks at the words just before a name for a negation, not the whole sentence', () => {
+    expect(finding(check('Also initializes `RetryBudgetManager` when no CLI options are supplied.'), 'unsourced-name')?.severity).toBe('error');
+    expect(sourced(check('Does not add `RetryBudgetManager` yet.'))).toEqual([]);
+    expect(sourced(check('Works without `RetryBudgetManager`.'))).toEqual([]);
+  });
+
+  it('checks a bare file name in backticks, and files with any common extension', () => {
+    expect(finding(check('Adds an exclude directive for `release_checklist.py`.'), 'unsourced-name')?.severity).toBe('error');
+    expect(finding(check('Updates `docs/topics/url-length-benchmarks.rst`.'), 'unsourced-name')?.severity).toBe('error');
+    expect(finding(check('Updates `ui/app/templates/role.hbs`.'), 'unsourced-name')?.severity).toBe('error');
+    expect(sourced(check('Updates `webhook.js`.'))).toEqual([]); // in the diff
+    expect(sourced(check('Runs on Node.js 20.'))).toEqual([]); // "Node.js" is not a file
+  });
+
+  it('with a session, even a name only mentioned that no command showed is made up', () => {
+    const s = session({ text: 'saw retryPolicy in policy.js' });
+    expect(finding(check('The `RetryBudgetManager` was the cause of the outage.', { session: s }), 'unsourced-name')?.severity).toBe('error');
+    expect(sourced(check('The `retryPolicy` was the cause of the outage.', { session: s }))).toEqual([]);
   });
 
   it('catches a removal described as an addition, and lets removals and renames through', () => {
@@ -86,6 +118,8 @@ describe('names and files', () => {
     expect(f?.message).toContain('the diff only removes it');
     expect(sourced(check('Removes `legacyRetryHeader()` and replaces it with a retry loop in `send()`.'))).toEqual([]);
     expect(sourced(check('Adds `legacyRetryHeader()` back.'))).toEqual([]);
+    // a plain word in backticks counts for this one check only: the diff itself contradicts "adds"
+    expect(finding(check('Adds `X-Legacy` support.'), 'unsourced-name')?.message).toContain('the diff only removes');
   });
 
   it('sends back a file the change is said to touch that exists nowhere, and accepts one in the diff or the repo', () => {

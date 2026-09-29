@@ -87,6 +87,14 @@
             "error"
           ]
         },
+        "unmentioned-area": {
+          "enum": [
+            "off",
+            "info",
+            "warn",
+            "error"
+          ]
+        },
         "template-on-tiny": {
           "enum": [
             "off",

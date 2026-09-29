@@ -138,13 +138,18 @@ export function parseNumstat(out: string): FileChange[] {
 /** Where a diff's changed lines are, by top-level area (two levels deep for src-like roots). */
 export { generatedFile };
 
+/** The top-level area a path belongs to: `src/payments` for src-like roots, the first folder otherwise, `(root)` for a file at the top. */
+export function areaOf(path: string): string {
+  const parts = path.split('/');
+  const deep = parts.length > 2 && /^(src|lib|packages|apps|crates|pkg|internal|cmd|app|services)$/.test(parts[0]!);
+  return parts.length === 1 ? '(root)' : deep ? `${parts[0]}/${parts[1]}` : parts[0]!;
+}
+
 export function areasOf(files: FileChange[], max = 6): { area: string; lines: number; files: number }[] {
   const by = new Map<string, { lines: number; files: number }>();
   for (const f of files) {
     if (generatedFile(f)) continue;
-    const parts = f.path.split('/');
-    const deep = parts.length > 2 && /^(src|lib|packages|apps|crates|pkg|internal|cmd|app|services)$/.test(parts[0]!);
-    const area = parts.length === 1 ? '(root)' : deep ? `${parts[0]}/${parts[1]}` : parts[0]!;
+    const area = areaOf(f.path);
     const a = by.get(area) ?? { lines: 0, files: 0 };
     a.lines += f.additions + f.deletions;
     a.files++;

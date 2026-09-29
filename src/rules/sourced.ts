@@ -14,7 +14,7 @@ export const LEVELS: Record<'nameNowhere' | 'fileNowhere' | 'nameWeak' | 'addedB
   nameNowhere: 'error',
   fileNowhere: 'error',
   nameWeak: 'warn',
-  addedButRemoved: 'warn',
+  addedButRemoved: 'error',
   existsUntouched: 'info',
   fact: 'warn',
   testCount: 'error',
@@ -47,13 +47,25 @@ export const unsourcedName: Rule = {
     for (const c of claims) {
       if (c.kind === 'name') {
         const w = r.where(c.text);
-        if (w === 'nowhere') (c.adds ? madeUp : unsure).push(c);
-        else if (w === 'removed' && c.adds) addedButRemoved.push(c);
+        if (c.plain) {
+          // Whole-word, since `give` is in "given": only the diff's own removal of it makes "adds it" false.
+          if (r.whereWord(c.text) === 'removed') addedButRemoved.push(c);
+          continue;
+        }
+        // A name the change adds or touches that is nowhere is made up. With a session to look in,
+        // even one only mentioned is: an agent that really read it about a dependency has it there.
+        if (w === 'nowhere') (c.adds || c.touches || r.sessionKnown ? madeUp : unsure).push(c);
+        else if (w === 'removed' && c.uses) addedButRemoved.push(c);
         else if (w === 'repo' && c.adds) exists.push(c);
       } else {
         const f = r.file(c.text);
         if (f === 'nowhere') (c.adds || c.touches ? madeUpFile : unsure).push(c);
         else if (f === 'repo' && c.adds) exists.push(c);
+        else if (f === 'diff' && c.uses) {
+          // "Adds `notes.md`" when the diff only deletes it
+          const st = r.fileStat(c.text);
+          if (st && st.additions === 0 && st.deletions > 0) addedButRemoved.push(c);
+        }
       }
     }
 

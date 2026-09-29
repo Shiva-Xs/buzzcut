@@ -54,10 +54,19 @@ const NOT_A_NAME = new Set(
   'json http https url uri api cli todo readme license changelog javascript typescript github gitlab linkedin youtube postgresql mongodb graphql openapi oauth iphone ipad imac ios macos tvos watchos icloud ebay webos jquery grpc mtls npm pnpm nodejs devops nextjs nuxtjs vuejs reactjs openai chatgpt vscode'.split(' '),
 );
 
-const EXT = 'js|mjs|cjs|ts|tsx|jsx|py|go|rs|java|kt|rb|php|html|css|scss|json|ya?ml|toml|md|txt|sh|sql|xml|lock|conf|ini|c|h|cc|cpp|hpp|cs|swift|vue|svelte';
+// Names people write to illustrate, not to point at: someFoo(), myFunction, fooBar, yourName.
+const PLACEHOLDER = /^(?:some|my|your|foo|bar|baz|qux|example|sample|dummy|placeholder|fake)(?:[A-Z_.-]|$)/i;
+
+const EXT = 'js|mjs|cjs|ts|tsx|jsx|py|pyi|go|rs|java|kt|kts|scala|rb|php|html|htm|css|scss|sass|less|json|jsonc|ya?ml|toml|md|mdx|rst|adoc|txt|sh|bash|zsh|bat|cmd|ps1|sql|xml|xsl|lock|conf|cfg|ini|env|in|c|h|cc|cpp|hpp|cxx|cs|swift|m|mm|vue|svelte|hbs|ejs|erb|haml|pug|njk|liquid|dart|ex|exs|erl|hs|ml|lua|pl|pm|r|jl|tf|tfvars|proto|graphql|gql|gradle|mk|cmake|dockerfile';
 const PATH = new RegExp(String.raw`^(?:\.\/)?(?:[\w@.-]+\/)+[\w@.-]+\.(?:${EXT})$`);
 const DOMAINY = /(?:^|\/)[\w-]+\.(?:com|io|org|net|dev|app|co|ai)(?:\/|$)/;
 const FILENAME = new RegExp(String.raw`^[\w.-]+\.(?:${EXT})$`);
+
+/** A bare file name with a known extension (`man_test.go`), or null. Only worth checking in backticks: "Node.js" is not a file. */
+export function bareFileOf(s: string): string | null {
+  const t = s.trim();
+  return FILENAME.test(t) && !/^\d/.test(t) && !/^v?\d+(?:\.\d+)+$/.test(t) && t.length >= 5 ? t : null;
+}
 
 /** A relative path with a directory and a known extension, or null. URLs, absolute paths and vendored folders don't count. */
 export function pathOf(s: string): string | null {
@@ -70,7 +79,7 @@ export function pathOf(s: string): string | null {
 export function codeShaped(s: string): boolean {
   const t = s.replace(/\(\)$/, '');
   if (!/^[A-Za-z_$][\w$]*(?:[.-][A-Za-z_$][\w$]*)*$/.test(t) || FILENAME.test(t)) return false;
-  if (norm(t).length < 6 || NOT_A_NAME.has(norm(t))) return false;
+  if (norm(t).length < 6 || NOT_A_NAME.has(norm(t)) || PLACEHOLDER.test(t)) return false;
   const camel = /[a-z0-9][A-Z]/.test(t);
   const snake = /[A-Za-z0-9]_[A-Za-z0-9]/.test(t);
   const screaming = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+$/.test(t);
@@ -91,23 +100,38 @@ export interface Claim {
   adds: boolean;
   /** …says it removes it */
   removes: boolean;
-  /** …says the change uses, calls or changes it (something that has to exist) */
+  /** …says the change uses, calls or changes it, or the sentence opens with a verb about the change */
   touches: boolean;
+  /** a plain word in backticks rather than a code-shaped name: worth checking only against what the diff removes */
+  plain?: boolean;
+  /** the verb the sentence says the change does with it: "adds", "throws", "configures" */
+  verb?: string;
+  /** the verb is one of using or bringing in something ("adds", "throws", "configures"), not renaming, replacing or moving it */
+  uses: boolean;
 }
 
+// Verbs that bring in or use a thing. A name only the diff's removed lines have contradicts these.
+const USING = /^(?:add\w*|introduc\w*|creat\w*|implement\w*|expos\w*|defin\w*|export\w*|emit\w*|attach\w*|use[sd]?|using|call\w*|invok\w*|set|sets|setting|return\w*|throw\w*|threw|rais\w*|configur\w*|initializ\w*|initialis\w*|regist\w*|provid\w*|support\w*|enabl\w*|pass(?:es|ed|ing)?|send\w*|sent|read|reads|reading|writ\w*|new|wrap\w*|inject\w*|generat\w*|load\w*|import\w*|require\w*|assign\w*)$/i;
+
 const ADD_VERB = String.raw`add(?:s|ed|ing)?|introduc(?:e|es|ed|ing)|creat(?:e|es|ed|ing)|implement(?:s|ed|ing)?|expos(?:e|es|ed|ing)|defin(?:e|es|ed|ing)|export(?:s|ed|ing)?|emit(?:s|ted)?|attach(?:es|ed)?|new`;
-const REMOVE_VERB = String.raw`remov(?:e|es|ed|ing)|delet(?:e|es|ed|ing)|drop(?:s|ped)?|deprecat(?:e|es|ed)|strip(?:s|ped)?|get(?:s)? rid of|no longer`;
+const REMOVE_VERB = String.raw`remov(?:e|es|ed|ing)|delet(?:e|es|ed|ing)|drop(?:s|ped|ping)?|deprecat(?:e|es|ed|ing)|strip(?:s|ped)?|get(?:s)? rid of|no longer`;
 const TOUCH_VERB = String.raw`us(?:e|es|ed|ing)|call(?:s|ed|ing)?|updat(?:e|es|ed|ing)|chang(?:e|es|ed|ing)|modif(?:y|ies|ied)|renam(?:e|es|ed)|replac(?:e|es|ed)|wrap(?:s|ped)?|extend(?:s|ed)?|switch(?:es|ed)?|mov(?:e|es|ed)|handl(?:e|es|ed)|read(?:s)?|writ(?:e|es)|set(?:s)?|send(?:s)?|return(?:s|ed)?|pass(?:es|ed)?|check(?:s|ed)?|fix(?:es|ed)?`;
 const VERBS = new RegExp(String.raw`\b(?:(${ADD_VERB})|(${REMOVE_VERB})|(${TOUCH_VERB}))\b`, 'gi');
-// A sentence that is about something else: "add it back", an example, a plan, or code that was already there.
+// A sentence that is about something else: code that was already there, an example, a plan, or a
+// name attributed to somewhere else ("from the AWS SDK"). Whole-sentence cues.
 const NOT_ABOUT_THIS_CHANGE =
-  /\b(?:(?:add|adds|added|put|puts|bring|brings|brought)\b[^.;]{0,25}\b(?:back|again)|re-?add\w*|restor\w*|revert\w*|e\.g\.|such as|for example|instead of|rather than|unlike|existing|already|pre-?existing|currently|previously|should|would|could|might|consider|todo|follow[- ]?up|later|not|no|without|n\/a|pending)\b|n't\b/i;
+  /\b(?:(?:add|adds|added|put|puts|bring|brings|brought)\b[^.;]{0,25}\b(?:back|again)|re-?add\w*|restor\w*|revert\w*|e\.g\.|such as|for example|instead of|rather than|unlike|existing|already|pre-?existing|currently|previously|todo|follow[- ]?up|later|n\/a)\b/i;
+// Said of the name, not the sentence: "does not add `X`", "without `X`", "should use `X`". Only the words just before it count.
+const NEGATED_NEAR = /\b(?:not|no|without|never|should|would|could|might|consider|pending)\b[^.;]{0,40}$|n't\b[^.;]{0,40}$/i;
+// The name is attributed to something outside this repo, so the repo can't be expected to have it.
+const EXTERNAL_CUE =
+  /\b(?:(?:from|in|of|by|per|via)\s+(?:the\s+)?(?:[\w@./-]+\s+)?(?:sdk|api|library|package|module|crate|gem|docs?|documentation|spec|rfc|dependency|upstream|plugin|framework|runtime|kernel|stdlib|standard library|server|service|manual|standard)|third[- ]party|external|upstream|vendor(?:ed)?|built-?in|standard library|not (?:part of|in|included in|tracked in|checked in to|committed to) (?:the )?(?:repo|repository|tree|codebase|project)|outside (?:of )?(?:the )?(?:repo|repository)|git-?ignored|untracked|local(?:ly)?[- ]only)\b/i;
 const TESTED_LINE = /^\s*(?:[-*+]\s+)?(?:\*\*)?(?:not tested|tested|verified|ran)\b/i;
 
 /** The verb closest before `at` in the sentence: what the sentence says the change does to the name. */
-function verbBefore(sentence: string, at: number): 'add' | 'remove' | 'touch' | null {
-  let last: 'add' | 'remove' | 'touch' | null = null;
-  for (const m of sentence.slice(Math.max(0, at - 90), at).matchAll(VERBS)) last = m[1] ? 'add' : m[2] ? 'remove' : 'touch';
+function verbBefore(sentence: string, at: number): { kind: 'add' | 'remove' | 'touch'; word: string } | null {
+  let last: { kind: 'add' | 'remove' | 'touch'; word: string } | null = null;
+  for (const m of sentence.slice(Math.max(0, at - 90), at).matchAll(VERBS)) last = { kind: m[1] ? 'add' : m[2] ? 'remove' : 'touch', word: m[0] };
   return last;
 }
 
@@ -127,6 +151,13 @@ const STANDARD_HEADERS = new Set(
 );
 const PLAIN_PATH = new RegExp(String.raw`(?<![\w/.:~-])(?:[\w@.-]+/)+[\w@.-]+\.(?:${EXT})(?![\w/-])`, 'g');
 
+/** Prose without its links: a branch name in a URL or a comment anchor (#discussion_r123) isn't a name the change makes. */
+const unlinked = (text: string) =>
+  text
+    .replace(/\]\([^)\n]*\)/g, ']')
+    .replace(/<https?:[^>\n]*>/g, ' ')
+    .replace(/\b(?:https?:\/\/|www\.)\S+/g, ' ');
+
 const sentencesOf = (text: string) => text.split(/(?<=[.!?;])\s+(?=[A-Z0-9`"'(])/);
 
 /**
@@ -142,10 +173,17 @@ export function claimsIn(title: string, lines: Line[], max = 30): Claim[] {
     seen.add(key);
     out.push(c);
   };
+  // Names a sentence places outside this repo ("(not part of the repository)", "from the SDK"): every
+  // mention of them is left alone, wherever it is.
+  const outside = new Set<string>();
   const scan = (raw: string, n: number | undefined) => {
     if (!raw.trim() || /^\s*>/.test(raw) || TESTED_LINE.test(raw)) return;
-    for (const sentence of sentencesOf(raw.replace(/^\s*(?:[-*+•]|\d{1,2}[.)])\s+/, ''))) {
-      if (NOT_ABOUT_THIS_CHANGE.test(sentence) || TESTED_LINE.test(sentence)) continue;
+    for (const sentence of sentencesOf(unlinked(raw).replace(/^\s*(?:[-*+•]|\d{1,2}[.)])\s+/, ''))) {
+      // A question is not a claim; a sentence about code that was already there or a plan is not one either.
+      if (/\?\s*$/.test(sentence) || NOT_ABOUT_THIS_CHANGE.test(sentence) || TESTED_LINE.test(sentence)) continue;
+      // "Outlines the quorum for `X`", "Also whitelists `X`": a description opens with what the change does.
+      const first = sentence.replace(/^(?:also|and|now|then|additionally|plus)\s+/i, '').match(/^([A-Za-z][a-z]{2,})\b/)?.[1]?.toLowerCase() ?? '';
+      const verbFirst = /(?:s|ed|es|ing)$/.test(first) && !/^(?:this|that|these|those|its|was|has|is|does|use|uses|used|thus|plus|also|yes|less|class|access|process|progress|success|address|based|related|inspired|following|given|according|depending|regarding|considering|compared|similar|due|prior|thanks|updated|tested|verified)$/.test(first);
       const spans: { text: string; at: number; backticked: boolean; header?: boolean }[] = [];
       for (const m of sentence.matchAll(/`([^`\n]+)`/g)) spans.push({ text: m[1]!.trim(), at: m.index!, backticked: true });
       const bare = sentence.replace(/`[^`\n]*`/g, (s) => ' '.repeat(s.length));
@@ -153,19 +191,49 @@ export function claimsIn(title: string, lines: Line[], max = 30): Claim[] {
       for (const m of bare.matchAll(PLAIN_NAME)) spans.push({ text: m[0], at: m.index!, backticked: false });
       for (const m of bare.matchAll(HEADER_IN_PROSE)) spans.push({ text: m[1]!, at: m.index!, backticked: false, header: true });
       for (const s of spans) {
-        const verb = verbBefore(sentence, s.at);
-        const flags = { line: n, backticked: s.backticked, adds: verb === 'add', removes: verb === 'remove', touches: verb === 'touch' };
+        // the cue is about this name when it is right next to it
+        if (EXTERNAL_CUE.test(sentence.slice(Math.max(0, s.at - 45), s.at + s.text.length + 45))) {
+          outside.add(s.text.toLowerCase());
+          outside.add(norm(s.text));
+          continue;
+        }
+        if (NEGATED_NEAR.test(sentence.slice(Math.max(0, s.at - 60), s.at))) continue;
+        const v = verbBefore(sentence, s.at);
+        const verb = v?.word ?? (verbFirst ? first : undefined);
+        const flags = {
+          line: n,
+          backticked: s.backticked,
+          adds: v?.kind === 'add',
+          removes: v?.kind === 'remove',
+          touches: v?.kind === 'touch' || (v === null && verbFirst),
+          verb,
+          uses: v?.kind === 'add' || (v?.kind !== 'remove' && Boolean(verb && USING.test(verb))),
+        };
         const path = pathOf(s.text);
+        const bareFile = s.backticked ? bareFileOf(s.text) : null;
         if (path) push({ kind: 'file', text: path, ...flags });
+        else if (bareFile) push({ kind: 'file', text: bareFile, ...flags });
         else if (s.header) {
           if (norm(s.text).length >= 6 && !STANDARD_HEADERS.has(norm(s.text))) push({ kind: 'name', text: s.text, ...flags });
         } else if (codeShaped(s.text) && !STANDARD_HEADERS.has(norm(s.text))) push({ kind: 'name', text: s.text.replace(/\(\)$/, ''), ...flags });
+        // A plain word in backticks says nothing checkable on its own, but "adds `pip`" on a diff that
+        // only removes it is a contradiction: kept, marked plain, for that one check.
+        else if (s.backticked && flags.uses && /^[A-Za-z_][\w.-]{2,}$/.test(s.text) && !NOT_A_NAME.has(norm(s.text))) push({ kind: 'name', text: s.text, ...flags, plain: true });
       }
     }
   };
   scan(title, undefined);
   for (const l of lines) scan(l.text, l.n > 0 ? l.n : undefined);
-  return out;
+  return out.filter((c) => !outside.has(c.text.toLowerCase()) && !outside.has(norm(c.text)));
+}
+
+/** Every code-shaped name in the text, however its sentence uses it. */
+export function codeShapedNames(text: string): string[] {
+  const out = new Set<string>();
+  const t = unlinked(text);
+  for (const m of t.matchAll(/`([^`\n]+)`/g)) if (codeShaped(m[1]!.trim())) out.add(m[1]!.trim().replace(/\(\)$/, ''));
+  for (const m of t.replace(/`[^`\n]*`/g, ' ').matchAll(PLAIN_NAME)) if (codeShaped(m[0])) out.add(m[0].replace(/\(\)$/, ''));
+  return [...out];
 }
 
 // ─── numbers and references ──────────────────────────────────────────────────
@@ -197,7 +265,7 @@ export function factsIn(lines: Line[], max = 12): FactClaim[] {
   const seen = new Set<string>();
   for (const l of lines) {
     if (!l.text.trim() || /^\s*>/.test(l.text) || TESTED_LINE.test(l.text)) continue;
-    const prose = l.text.replace(/`[^`\n]*`/g, ' ');
+    const prose = unlinked(l.text).replace(/`[^`\n]*`/g, ' ');
     const found = [...prose.matchAll(FACT)].map((m) => m[0].trim());
     if (HTTP_CUE.test(prose)) found.push(...[...prose.matchAll(HTTP_CODE)].map((m) => m[0]));
     for (const text of found) {
@@ -270,7 +338,14 @@ export function gitRepoSearch(cwd: string): RepoSearch {
     },
     hasFile(path) {
       const top = toplevel();
-      return top ? existsSync(join(top, path)) : null;
+      if (!top) return null;
+      if (path.includes('/')) return existsSync(join(top, path));
+      // A bare name (`man_test.go`) is in the repo if any folder has it.
+      try {
+        return execFileSync('git', ['-C', top, 'ls-files', '--', `:(glob)**/${path}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000 }).trim().length > 0;
+      } catch {
+        return null;
+      }
     },
   };
 }
@@ -281,7 +356,11 @@ export interface Resolver {
   /** Look up all these names in one repo search, so `where` can answer for each. */
   prime(names: string[]): void;
   where(name: string): Where;
+  /** A plain word, matched whole: `give` isn't in "given". `added` wins over `removed`; null when it is in neither. */
+  whereWord(name: string): 'added' | 'removed' | null;
   file(path: string): 'diff' | 'repo' | 'nowhere' | 'unknown';
+  /** The lines the diff adds and removes in the files that path names, or null when it names none. */
+  fileStat(path: string): { additions: number; deletions: number } | null;
   /** Whether a figure, link or reference appears in the change or the session; null when there is no session to look in. */
   hasFact(text: string): boolean | null;
   /** The diff carries every changed line, so a name missing from it is missing from the change. */
@@ -361,10 +440,23 @@ export function makeResolver(s: Sources): Resolver | null {
       if (r === false && diff) return 'nowhere';
       return 'unknown';
     },
+    whereWord(name) {
+      if (!diff) return null;
+      const c = changedText(diff);
+      const re = new RegExp(String.raw`(?<![A-Za-z0-9_])${escapeRe(name)}(?![A-Za-z0-9_])`, 'i');
+      if (re.test(c.added)) return 'added';
+      return re.test(c.removed) ? 'removed' : null;
+    },
+    fileStat(path) {
+      if (!diff) return null;
+      const base = path.split('/').pop()!;
+      const hit = diff.files.filter((f) => f.path === path || f.path.endsWith('/' + path) || path.endsWith('/' + f.path) || (!path.includes('/') && f.path.split('/').pop() === base));
+      return hit.length ? { additions: hit.reduce((n, f) => n + f.additions, 0), deletions: hit.reduce((n, f) => n + f.deletions, 0) } : null;
+    },
     file(path) {
       if (!diff) return 'unknown';
       const base = path.split('/').pop()!;
-      for (const f of diff.files) if (f.path === path || f.path.endsWith('/' + path) || path.endsWith('/' + f.path) || (f.renamed && f.path.split('/').pop() === base)) return 'diff';
+      for (const f of diff.files) if (f.path === path || f.path.endsWith('/' + path) || path.endsWith('/' + f.path) || ((f.renamed || !path.includes('/')) && f.path.split('/').pop() === base)) return 'diff';
       const has = s.repo?.hasFile(path);
       if (has === true) return 'repo';
       if (has === false) return 'nowhere';
