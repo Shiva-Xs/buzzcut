@@ -13,3 +13,4 @@ bench/cache/diffs/
 bench/cache/heldout/
 bench/cache/snapshots/
 bench/eval/planted/out/
+bench/eval/planted/inputs/
