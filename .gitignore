@@ -9,3 +9,7 @@ bench/eval/.bundle.mjs
 bench/eval/entry.ts
 bench/eval/format/diffs/
 bench/cache/diffs/
+
+bench/cache/heldout/
+bench/cache/snapshots/
+bench/eval/planted/out/
