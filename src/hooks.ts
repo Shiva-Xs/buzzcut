@@ -10,6 +10,7 @@ import { isIgnored, type Block } from './config.js';
 import { ICON, palette, renderReport } from './format.js';
 import { buildDiff } from './diff.js';
 import { amendDiff, branchDiff, commitDiff, commitMessage, defaultBase, git, operationInProgress, stagedDiff, worktreeDiff } from './git.js';
+import { gitRepoSearch } from './lookup.js';
 import { loadRepo, type RepoContext } from './repo.js';
 import type { PreviousDraft, SessionFacts } from './rules/rule.js';
 import { fingerprint, readSeen, recordSeen } from './seen.js';
@@ -72,7 +73,7 @@ export function commitMsgHook(file: string, h: HookEnv): HookResult {
 
   // An empty index usually means `--amend` with only a new message.
   const diff = stagedDiff(h.cwd) ?? amendDiff(h.cwd);
-  const report = analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length });
+  const report = analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length, repo: gitRepoSearch(h.cwd) });
   const max = repo.config.max;
   const p = palette(h.color);
   if (passes(report, max)) return through(ok(p.dim(`buzzcut ✓ yap score ${report.score} (${report.grade})`) + '\n'));
@@ -211,7 +212,7 @@ function checkCommit(call: CommitCall, dir: string, repo: RepoContext, session: 
       : call.amend
         ? amendDiff(dir)
         : stagedDiff(dir);
-  const report = judge('hook:commit', dir, msg, repo.config.max, (previous) => analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length, session, previous }));
+  const report = judge('hook:commit', dir, msg, repo.config.max, (previous) => analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length, session, previous, repo: gitRepoSearch(dir) }));
   return report ? { what: 'commit message', report } : null;
 }
 
@@ -224,7 +225,7 @@ function checkPr(call: PrCall, dir: string, repo: RepoContext, session: SessionF
   const diff = base ? branchDiff(base, dir) : null;
   const msg = prMessage(call.title ?? '', body ?? '');
   const report = judge(branchKey(dir), dir, msg, repo.config.max, (previous) =>
-    analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session, previous }),
+    analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session, previous, repo: gitRepoSearch(dir) }),
   );
   return report ? { what: 'PR description', report } : null;
 }
@@ -379,7 +380,7 @@ export function checkMcp(call: McpCall, cwd: string, transcript?: string): { pro
   const repo = loadRepo(cwd);
   const session = transcript ? readSession(transcript) : null;
   const a = call.args;
-  const opts = { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session };
+  const opts = { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session, repo: repo.root ? gitRepoSearch(cwd) : null };
 
   if (isPr) {
     const title = str(a.title) ?? null;

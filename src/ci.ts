@@ -3,10 +3,12 @@
 // teams that commit straight to main. Catches what local hooks can't: people and agents
 // without buzzcut installed.
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { agentFooter } from './agent.js';
 import { analyze, parseCommit, passes, prMessage } from './analyze.js';
 import { DEFAULTS, isIgnored, loadConfig, type Config } from './config.js';
 import { buildDiff } from './diff.js';
+import { gitRepoSearch } from './lookup.js';
 import { createClient, fetchPrFiles, fetchTemplate, fileChange, GitHubError, isBot, isCodingAgent, type ApiFile, type ApiPull, type Client } from './github.js';
 import { RULE_IDS } from './rules/index.js';
 import { repoStyle, type StyleProfile } from './style.js';
@@ -219,7 +221,9 @@ export async function runCi(run: CiRun): Promise<number> {
   const diff = buildDiff(files, { additions: pull.additions, deletions: pull.deletions }, files.length < pull.changed_files);
   const template = findTemplate(existsSync(workspace) ? workspace : null) ?? (await fetchTemplate(client, owner, repo, pull.base.sha).catch(() => null));
   const opts = { style, template, rules: config.rules, length: config.length };
-  const prReport = analyze(prMessage(pull.title, pull.body ?? ''), diff, opts);
+  // The checkout is the PR merged into its base, so a name the PR adds is there; a name that is
+  // nowhere in it, the diff included, is one the description made up. No checkout, no lookup.
+  const prReport = analyze(prMessage(pull.title, pull.body ?? ''), diff, { ...opts, repo: existsSync(join(workspace, '.git')) ? gitRepoSearch(workspace) : null });
 
   const commits: CommitResult[] = [];
   const messages: string[] = [];

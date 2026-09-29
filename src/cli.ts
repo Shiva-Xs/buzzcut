@@ -11,6 +11,7 @@ import { ConfigError, DEFAULTS, isIgnored } from './config.js';
 import { buildContext, renderContext } from './context.js';
 import { gradePaint, palette, renderReport, toJson, useColor } from './format.js';
 import { branchDiff, commitDiff, commitMessage, defaultBase, git, inRepo, recentCommits, stagedDiff } from './git.js';
+import { gitRepoSearch, type RepoSearch } from './lookup.js';
 import { createClient, fetchPr, fetchRecentPrs, fetchTemplate, GitHubError, parsePrRef, parseRepoRef, type RepoRef } from './github.js';
 import { localToken } from './token.js';
 import { agentHook, commitMsgHook, prePushHook, type HookResult } from './hooks.js';
@@ -145,7 +146,7 @@ function readInput(positional: string[], opts: Opts, allowTtyEmpty = false): str
   return null;
 }
 
-function report(msg: Message, diff: DiffFacts | null, opts: Opts, label?: string, draftFile?: string, anchor?: string): number {
+function report(msg: Message, diff: DiffFacts | null, opts: Opts, label?: string, draftFile?: string, anchor?: string, search?: RepoSearch | null): number {
   const repo = repoOrFail();
   // Checking the same draft file again (the skill's loop): facts that were in the last
   // version and are gone now get flagged, so trimming never quietly loses evidence. The same
@@ -156,7 +157,7 @@ function report(msg: Message, diff: DiffFacts | null, opts: Opts, label?: string
   const sig = diff ? diffSignature(diff) + (anchor ? `@${anchor}` : '') : undefined;
   const saved = key ? readDraft(key, process.cwd()) : null;
   const prev = saved && (!saved.diff || !sig || saved.diff === sig) ? saved : null;
-  const r = analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, previous: prev ? { evidence: prev.evidence, strict: false } : null });
+  const r = analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, previous: prev ? { evidence: prev.evidence, strict: false } : null, repo: search });
   if (key) saveDraft(key, process.cwd(), { evidence: keepableEvidence(msg, r), at: Date.now(), diff: sig });
   const max = maxScore(opts, repo.config.max);
   const json = opts.json === true;
@@ -199,7 +200,8 @@ function check(positional: string[], opts: Opts): number {
     }
   }
   const anchor = kind === 'commit' && !rev && diff ? (git(['rev-parse', '-q', '--verify', 'HEAD']) ?? 'root') : undefined;
-  return report(msg, diff, opts, undefined, typeof opts.m === 'string' || typeof opts.message === 'string' ? undefined : positional[0], anchor);
+  // An old commit is judged against its own diff only: the working tree is a later state of the repo.
+  return report(msg, diff, opts, undefined, typeof opts.m === 'string' || typeof opts.message === 'string' ? undefined : positional[0], anchor, rev ? null : gitRepoSearch(process.cwd()));
 }
 
 /** `buzzcut pr`: a PR body from a file/stdin, or the open PR for this branch via `gh`. */
@@ -223,7 +225,7 @@ function pr(positional: string[], opts: Opts): number {
   const b = base ?? defaultBase();
   const diff = opts.diff === false || !b ? null : branchDiff(b);
   if (!diff && opts.diff !== false) note(`couldn't diff against ${b ?? 'a base branch'}, so the diff checks were skipped (use --base)`, opts.json === true);
-  return report(prMessage(title, raw), diff, opts, 'pr', typeof opts.m === 'string' || typeof opts.message === 'string' ? undefined : positional[0]);
+  return report(prMessage(title, raw), diff, opts, 'pr', typeof opts.m === 'string' || typeof opts.message === 'string' ? undefined : positional[0], undefined, gitRepoSearch(process.cwd()));
 }
 
 function context(opts: Opts): number {
