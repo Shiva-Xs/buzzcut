@@ -227,7 +227,9 @@ function fakeGitHub(routes: Record<string, unknown>, calls: Call[]): typeof fetc
   }) as typeof fetch;
 }
 
-function ciEnv(body: string, extra: Record<string, string> = {}) {
+const AGENT = { login: 'copilot-swe-agent[bot]', type: 'Bot' };
+
+function ciEnv(body: string, extra: Record<string, string> = {}, user: { login: string; type: string } = { login: 'dev', type: 'User' }) {
   const dir = mkdtempSync(join(tmpdir(), 'buzzcut-ci-'));
   const event = join(dir, 'event.json');
   writeFileSync(
@@ -241,7 +243,7 @@ function ciEnv(body: string, extra: Record<string, string> = {}) {
         additions: 7,
         deletions: 2,
         changed_files: 1,
-        user: { login: 'dev', type: 'User' },
+        user,
         base: { sha: 'base', ref: 'main' },
       },
     }),
@@ -279,8 +281,8 @@ const ROUTES = {
 };
 
 describe('GitHub Action', () => {
-  it('fails a bloated PR, comments once, and writes the summary and outputs', async () => {
-    const c = ciEnv(fixture('bloated-pr.md'));
+  it("fails a coding agent's bloated PR, comments once, and writes the summary and outputs", async () => {
+    const c = ciEnv(fixture('bloated-pr.md'), {}, AGENT);
     const calls: Call[] = [];
     const lines: string[] = [];
     const code = await runCi({ env: c.env, fetch: fakeGitHub(ROUTES, calls), cwd: c.dir, log: (l) => lines.push(l) });
@@ -292,6 +294,38 @@ describe('GitHub Action', () => {
     expect(readFileSync(c.output, 'utf8')).toContain('pass=false');
     expect(calls.some((x) => x.url.includes('/commits/bbbbbbb2'))).toBe(false); // merge commit skipped
     expect(lines.join('\n')).toContain('::error::');
+  });
+
+  it("warns, comments and reports pass=false for a person's bloated PR, but does not fail the job", async () => {
+    const c = ciEnv(fixture('bloated-pr.md'));
+    const calls: Call[] = [];
+    const lines: string[] = [];
+    const code = await runCi({ env: c.env, fetch: fakeGitHub(ROUTES, calls), cwd: c.dir, log: (l) => lines.push(l) });
+    expect(code).toBe(0);
+    expect(calls.some((x) => x.method === 'POST')).toBe(true);
+    expect(readFileSync(c.output, 'utf8')).toContain('pass=false');
+    expect(lines.join('\n')).toContain('::warning::buzzcut: the PR description');
+    expect(lines.join('\n')).not.toContain('::error::');
+  });
+
+  it('fails a person too when the repo blocks always, or the action says fail: always', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'buzzcut-ws-'));
+    writeFileSync(join(dir, '.buzzcut.json'), JSON.stringify({ block: 'always' }));
+    const a = ciEnv(fixture('bloated-pr.md'), { GITHUB_WORKSPACE: dir });
+    expect(await runCi({ env: a.env, fetch: fakeGitHub(ROUTES, []), cwd: a.dir, log: () => {} })).toBe(1);
+    const b = ciEnv(fixture('bloated-pr.md'), { INPUT_FAIL: 'always' });
+    expect(await runCi({ env: b.env, fetch: fakeGitHub(ROUTES, []), cwd: b.dir, log: () => {} })).toBe(1);
+    const never = ciEnv(fixture('bloated-pr.md'), { GITHUB_WORKSPACE: dir, INPUT_FAIL: 'false' });
+    expect(await runCi({ env: never.env, fetch: fakeGitHub(ROUTES, []), cwd: never.dir, log: () => {} })).toBe(0);
+  });
+
+  it("treats a PR from a person's account as an agent's when the text carries an agent footer", async () => {
+    const withFooter = fixture('bloated-pr.md') + '\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n';
+    const c = ciEnv(withFooter);
+    expect(await runCi({ env: c.env, fetch: fakeGitHub(ROUTES, []), cwd: c.dir, log: () => {} })).toBe(1);
+    const routes = { ...ROUTES, 'GET /pulls/7/commits': [{ sha: 'aaaaaaa1', commit: { message: 'Added comprehensive retries.\n\nCo-Authored-By: Claude <noreply@anthropic.com>' }, parents: [{ sha: 'p' }] }] };
+    const d = ciEnv(fixture('bloated-pr.md'));
+    expect(await runCi({ env: d.env, fetch: fakeGitHub(routes, []), cwd: d.dir, log: () => {} })).toBe(1);
   });
 
   it('passes a good PR without commenting', async () => {
@@ -324,7 +358,7 @@ describe('GitHub Action', () => {
   });
 
   it('warns instead of crashing when it may not comment (fork PRs)', async () => {
-    const c = ciEnv(fixture('bloated-pr.md'), { INPUT_COMMITS: 'false' });
+    const c = ciEnv(fixture('bloated-pr.md'), { INPUT_COMMITS: 'false' }, AGENT);
     const lines: string[] = [];
     const routes = { ...ROUTES };
     delete (routes as Record<string, unknown>)['POST /issues/7/comments'];
@@ -345,8 +379,12 @@ describe('GitHub Action', () => {
     expect(await runCi({ env: c.env, fetch: fakeGitHub(routes, calls), cwd: c.dir, log: () => {} })).toBe(0);
     expect(readFileSync(c.summary, 'utf8')).toContain('1 commit message checked ✓');
     push([{ id: 'aaaaaaa1', message: 'fix bug' }]);
-    expect(await runCi({ env: c.env, fetch: fakeGitHub(routes, calls), cwd: c.dir, log: () => {} })).toBe(1);
+    const lines: string[] = [];
+    expect(await runCi({ env: c.env, fetch: fakeGitHub(routes, calls), cwd: c.dir, log: (l) => lines.push(l) })).toBe(0);
+    expect(lines.join('\n')).toContain('::warning::');
     expect(readFileSync(c.summary, 'utf8')).toContain('1 of 1 commit message need work');
+    push([{ id: 'aaaaaaa1', message: 'fix bug\n\nCo-Authored-By: Claude <noreply@anthropic.com>' }]);
+    expect(await runCi({ env: c.env, fetch: fakeGitHub(routes, calls), cwd: c.dir, log: () => {} })).toBe(1);
     expect(calls.some((x) => x.method !== 'GET')).toBe(false);
   });
 

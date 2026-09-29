@@ -18,7 +18,7 @@ inputs:
     required: false
     default: 'true'
   fail:
-    description: Fail the check when the description or a commit message doesn't pass
+    description: 'Whether a failing check fails the job. "true" (default) follows the repo''s block setting: a coding agent''s PR fails, a person''s gets the comment and a warning. "always" fails everyone; "false" never fails.'
     required: false
     default: 'true'
   github-token:

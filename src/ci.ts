@@ -3,10 +3,11 @@
 // teams that commit straight to main. Catches what local hooks can't: people and agents
 // without buzzcut installed.
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { agentFooter } from './agent.js';
 import { analyze, parseCommit, passes, prMessage } from './analyze.js';
 import { DEFAULTS, isIgnored, loadConfig, type Config } from './config.js';
 import { buildDiff } from './diff.js';
-import { createClient, fetchPrFiles, fetchTemplate, GitHubError, isBot, type ApiPull, type Client } from './github.js';
+import { createClient, fetchPrFiles, fetchTemplate, GitHubError, isBot, isCodingAgent, type ApiPull, type Client } from './github.js';
 import { RULE_IDS } from './rules/index.js';
 import { repoStyle, type StyleProfile } from './style.js';
 import { findTemplate } from './template.js';
@@ -31,6 +32,18 @@ interface CommitResult {
 function input(env: NodeJS.ProcessEnv, name: string, fallback: string): string {
   const v = env[`INPUT_${name.toUpperCase()}`] ?? env[`INPUT_${name.toUpperCase().replace(/-/g, '_')}`];
   return v === undefined || v === '' ? fallback : v.trim();
+}
+
+/**
+ * Whether a failing check should fail the job. `fail: false` never does and `fail: always` always
+ * does; otherwise it follows the repo's `block` setting, like the git hooks: coding agents are
+ * failed, people get the comment and a warning.
+ */
+export function enforces(env: NodeJS.ProcessEnv, config: Config, agent: boolean): boolean {
+  const fail = input(env, 'fail', 'true').toLowerCase();
+  if (fail === 'false') return false;
+  if (fail === 'always') return true;
+  return config.block === 'always' || (config.block === 'agents' && agent);
 }
 
 const cell = (s: string) => s.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
@@ -171,10 +184,12 @@ async function runPush(run: CiRun): Promise<number> {
   if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, renderPushMarkdown(commits, max) + '\n');
   if (env.GITHUB_OUTPUT) appendFileSync(env.GITHUB_OUTPUT, `pass=${allPass}\n`);
   log(`buzzcut: ${commits.length} commit${commits.length === 1 ? '' : 's'} checked; ${allPass ? 'all pass' : 'some need work'}.`);
-  if (!allPass && input(env, 'fail', 'true') !== 'false') {
+  if (allPass) return 0;
+  if (enforces(env, config, pushed.some((c) => agentFooter(c.message)))) {
     log(`::error::buzzcut: a commit message in this push doesn't pass (max ${max}, no ✗ errors). See the job summary.`);
     return 1;
   }
+  log(`::warning::buzzcut: a commit message in this push doesn't pass (max ${max}, no ✗ errors). Not failing the job: buzzcut only fails agents' work unless "block" is "always". See the job summary.`);
   return 0;
 }
 
@@ -207,10 +222,12 @@ export async function runCi(run: CiRun): Promise<number> {
   const prReport = analyze(prMessage(pull.title, pull.body ?? ''), diff, opts);
 
   const commits: CommitResult[] = [];
+  const messages: string[] = [];
   let checked = 0;
   if (input(env, 'commits', 'true') !== 'false') {
     const list = await client.get<ApiCommit[]>(`/repos/${owner}/${repo}/pulls/${pull.number}/commits?per_page=100`);
     for (const c of list) {
+      messages.push(c.commit.message);
       if (checked >= MAX_COMMITS) break;
       const r = await checkCommit(client, owner, repo, c.sha, c.commit.message, c.parents.length, { style, config });
       if (!r) continue;
@@ -245,9 +262,14 @@ export async function runCi(run: CiRun): Promise<number> {
   }
 
   log(`buzzcut: PR yap score ${prReport.score}/100 (${prReport.grade}); ${checked} commit${checked === 1 ? '' : 's'} checked; ${allPass ? 'passes' : 'needs work'}.`);
-  if (!allPass && input(env, 'fail', 'true') !== 'false') {
+  if (allPass) return 0;
+  // A coding agent's account, or its footer in the text or a commit trailer: the same
+  // "block agents, warn people" the git hooks follow.
+  const agent = isCodingAgent(pull.user) || agentFooter(pull.body) || messages.some(agentFooter);
+  if (enforces(env, config, agent)) {
     log(`::error::buzzcut: the PR description or a commit message doesn't pass (max ${max}, no ✗ errors). See the job summary.`);
     return 1;
   }
+  log(`::warning::buzzcut: the PR description or a commit message doesn't pass (max ${max}, no ✗ errors). Not failing the job: buzzcut only fails agents' work unless "block" is "always" (or the action's "fail" is "always"). See the comment.`);
   return 0;
 }
