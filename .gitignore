@@ -14,3 +14,8 @@ bench/cache/heldout/
 bench/cache/snapshots/
 bench/eval/planted/out/
 bench/eval/planted/inputs/
+bench/eval/threearm/old/
+bench/eval/threearm/data/
+bench/eval/threearm/prs/
+bench/eval/threearm/out/
+bench/eval/threearm/judge/
