@@ -1,0 +1,434 @@
+{
+ "pr01": {
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 3,
+   "unsupported": 1,
+   "missing": 1
+  },
+  "note": "[A] says Sauce Labs requires a build ID to report status: a cause the notes don't give. [B] and [A] omit the capability renames the diff makes."
+ },
+ "pr02": {
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "all accurate; [A] and [C] state the before/after in the body, [B] only in the title"
+ },
+ "pr03": {
+  "C": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "note": "[B] drops the changelog entry; [C] repeats the issue"
+ },
+ "pr04": {
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "tie"
+ },
+ "pr05": {
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[C] names the internal path that goes away"
+ },
+ "pr06": {
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[C] keeps the closes keyword, the merge-order advice and the second PR the author cited; [B] loses closes and the second PR"
+ },
+ "pr07": {
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "all accurate; [B]'s Tested line is odd"
+ },
+ "pr08": {
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "note": "[B] never mentions the test the change adds"
+ },
+ "pr09": {
+  "B": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[B] and [C] link the Go version to why the workaround can go; [A] states both without the link"
+ },
+ "pr10": {
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "only [C] keeps the author's open question about a fallback"
+ },
+ "pr11": {
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "note": "[B] has the best where-to-look pointers but omits the docs change"
+ },
+ "pr12": {
+  "C": {
+   "rank": 2,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 2,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "note": "[C] says the error is defined in decorate.js (it is in errors.js); [B] adds 'when array methods are called', which the notes don't say"
+ },
+ "pr13": {
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 3
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "note": "[C] alone says why add_url_rule changed (setupmethod surfaced it) and mentions the changelog; all three drop the author's stated scope limit (more Callable typing remains)"
+ },
+ "pr14": {
+  "A": {
+   "rank": 3,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "B": {
+   "rank": 1,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "C": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[A] says the list retains only two names (the diff can't show that); [B] infers the removed names were credited in earlier releases; [C] stays with what the notes say"
+ },
+ "pr15": {
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[C] keeps the Node assert precedent and the plan to evaluate a jsdiff alternative; [B] loses the closes keyword too"
+ },
+ "pr16": {
+  "B": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[C] keeps the author's example and backward compatibility; [B] drops both"
+ },
+ "pr17": {
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "only [C] keeps that it is a draft asking for feedback and the author's open question about not using Display; all three flag the removed forbid(unsafe_code)"
+ },
+ "pr18": {
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "note": "[C] is the only one to mention the changelog and docs the diff adds"
+ },
+ "pr19": {
+  "B": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "tie"
+ },
+ "pr20": {
+  "B": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 2
+  },
+  "C": {
+   "rank": 3,
+   "unsupported": 1,
+   "missing": 1
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 1,
+   "missing": 1
+  },
+  "note": "[C] explains the failure as separate contexts across executions and [A] says worker threads; neither is in the notes or the diff. All three drop 'should be a patch release'; [B] also loses the closes keyword"
+ },
+ "pr21": {
+  "B": {
+   "rank": 2,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[B] and [A] state there is no behavior change; nothing in the notes or diff says so"
+ },
+ "pr22": {
+  "C": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "B": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "note": "[B] and [A] lose the closes keyword; [B]'s 100 goroutines checked and true"
+ },
+ "pr23": {
+  "B": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "C": {
+   "rank": 3,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "for 455 lines [C] is one paragraph; [B] and [A] separate mechanical moves from content"
+ },
+ "pr24": {
+  "C": {
+   "rank": 3,
+   "unsupported": 1,
+   "missing": 0
+  },
+  "A": {
+   "rank": 2,
+   "unsupported": 0,
+   "missing": 1
+  },
+  "B": {
+   "rank": 1,
+   "unsupported": 0,
+   "missing": 0
+  },
+  "note": "[C] says tested as the axios-lab fork; the notes say published as, with a demo, and [C] then also says not tested. [B]'s E_JSON_PARSE is in the diff"
+ }
+}
