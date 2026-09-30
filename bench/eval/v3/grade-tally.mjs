@@ -1,6 +1,7 @@
 // Unblinds the grades and tallies them per arm.
 //   node bench/eval/v3/grade-tally.mjs <round> <set>[,<set>...]     e.g. 1 devR,devT
-//   node bench/eval/v3/grade-tally.mjs 1 devR --audit 8              prints 8 random packets with their grades, for a spot-check
+//   node bench/eval/v3/grade-tally.mjs 1 devR,devT --packets 12     prints 12 random packets only, so the auditor can grade them first
+//   node bench/eval/v3/grade-tally.mjs 1 devR,devT --audit 12       the same packets with Gemini's grades, for the comparison
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -32,11 +33,13 @@ for (const set of sets) {
     }
   }
 }
-if (flag === '--audit') {
+if (flag === '--audit' || flag === '--packets') {
   const pick = [...new Set(rows.map((r) => `${r.set}/${r.id}`))].sort((a, b) => createHash('sha1').update(a).digest('hex').localeCompare(createHash('sha1').update(b).digest('hex'))).slice(0, Number(nAudit ?? 8));
   for (const p of pick) {
     const [set, id] = p.split('/');
+    console.log(`[[ ${set}/${id} ]]`);
     console.log(readFileSync(here(`grade/${set}/r${round}/packets/${id}.txt`), 'utf8'));
+    if (flag === '--packets') { console.log(`${'='.repeat(70)}\n`); continue; }
     console.log(`\n>>> GRADE ${set}/${id}:\n${readFileSync(here(`grade/${set}/r${round}/out/${id}.json`), 'utf8')}\n${'='.repeat(70)}\n`);
   }
   process.exit(0);

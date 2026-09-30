@@ -21,10 +21,21 @@ const split = (raw) => {
 const TESTED = /^\s*(?:[-*+]\s+)?(?:\*\*)?(?:not tested|tested|verified|test plan|testing)\b/im;
 const LOOKUP = new Set(['unsourced-name', 'unsourced-fact', 'unmentioned-area']);
 const SHAPE = ['template-on-tiny', 'diff-echo', 'bold-spam', 'emoji', 'ai-vocab', 'ai-opener', 'ai-closer', 'bullet-bloat', 'long-bullet', 'ticked-boxes'];
-// A claim that something was tested or run. Lines that say it wasn't are skipped.
-const CLAIM = /\b(?:tested|verified|all tests? (?:pass|passed)|tests? (?:pass|passed)|passes? (?:locally|ci)|ran (?:the )?(?:tests?|suite)|works? locally|confirmed (?:that|working|it))\b/i;
+// A claim that something was tested or run. Lines that say it wasn't are skipped, and a bare
+// "How tested" heading counts only if the line under it doesn't say it wasn't.
+const CLAIM = /\b(?:tested|all tests? (?:pass|passed)|tests? (?:pass|passed)|passes? (?:locally|ci)|ran (?:the )?(?:tests?|suite)|works? locally|verified (?:by|locally|manually|with|on|against)|confirmed (?:that|working|it))\b/i;
 const NEGATED = /\b(?:not|never|untested|wasn'?t|isn'?t|haven'?t|hasn'?t|no)\b[^.\n]{0,30}\b(?:tested|run|verified|checked)\b|\buntested\b|\bnot tested\b/i;
-const claimsTesting = (text) => text.split('\n').some((l) => CLAIM.test(l) && !NEGATED.test(l));
+const claimsTesting = (text) => {
+  const lines = text.split('\n');
+  return lines.some((l, i) => {
+    if (!CLAIM.test(l) || NEGATED.test(l)) return false;
+    if (/^\s*#{1,6}\s*(?:how(?: it was)? )?(?:tested|testing)\s*:?\s*$/i.test(l)) {
+      const next = lines.slice(i + 1).find((x) => x.trim());
+      return Boolean(next) && !NEGATED.test(next);
+    }
+    return true;
+  });
+};
 
 function scoreOne(set, arm, m) {
   const d = JSON.parse(readFileSync(here(`data/${set.slice(0, -1)}/${m.id}.json`), 'utf8'));

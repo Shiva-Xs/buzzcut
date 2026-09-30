@@ -11,7 +11,7 @@ My message gives you SETS, for example `SETS=devR,devT`. Do the sets in that ord
    - `context.txt`: what `buzzcut context` says about this diff (its size, areas, shape and word range).
 3. Write the description to `bench/eval/v3/out/<SET>/B/prNN.md`: the title on the first line, a blank line, then the body. Nothing else in the file.
    - Keep every fact from the notes that a reviewer needs, unless the diff contradicts it. Add nothing that isn't in the diff or the notes.
-   - The why and the Tested line come only from the notes. If the notes don't say what was run, write "Not tested:" and what should be checked.
+   - The why and anything about how it was checked come only from the notes. Follow the skill for when a Tested line belongs.
    - Write as the author. Never mention "the notes" or "the session" in the PR.
 4. Check it: `node bench/eval/v3/check.mjs <SET> B prNN`. Fix every ✗ line. Apply each ! line unless that would remove a fact the reviewer needs. Never add a fact to satisfy a finding. Check again, at most 3 drafts per PR.
 5. Do the PRs one at a time, pr01 upward.

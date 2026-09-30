@@ -20,7 +20,7 @@ const manifest = JSON.parse(readFileSync(here(`manifest-${set.slice(0, -1)}.json
 const base = here(`grade/${set}/r${round}`);
 mkdirSync(`${base}/packets`, { recursive: true });
 mkdirSync(`${base}/out`, { recursive: true });
-const letters = ['X', 'Y', 'Z', 'W'].slice(0, arms.length);
+const letters = ['X', 'Y', 'Z', 'W', 'V'].slice(0, arms.length);
 const key = {};
 let n = 0;
 for (const m of manifest) {

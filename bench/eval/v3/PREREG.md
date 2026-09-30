@@ -10,6 +10,7 @@
 | C | The same, plus: clear, keep every needed fact from the notes, add nothing, say it wasn't tested if the notes don't say. The best plain prompt. |
 | B0 | The skill text only. No context, no checker. |
 | B | The skill text, `buzzcut context` for the diff, and the checker loop (up to 3 drafts). |
+| C2 | C with one rule changed (added in tuning round 1): say how it was checked only if the notes say something ran; otherwise leave testing out. The plain prompt with the same idea the skill now has. |
 
 B against B0 shows whether the machinery adds anything beyond the words. B against C is the claim.
 
@@ -45,7 +46,7 @@ The grader and the writer are the same model family. That can favour whatever st
 
 B **beats the default** if its mean rank is lower than D's by at least 0.30 and it wins more PRs than it loses against D.
 
-B **beats the plain prompt** if all of these hold against C:
+B **beats the plain prompt** if all of these hold against C, and against C2 (the stricter of the two is the bar):
 
 1. mean rank lower by at least 0.10;
 2. more PRs won than lost;
@@ -55,3 +56,9 @@ B **beats the plain prompt** if all of these hold against C:
 The same four conditions, read on dev, are the dev bar. If B clears the default but not the plain prompt, the release says the skill matches a hand-written prompt and adds the checker, the hooks and the CI action, and does not say it writes better PRs than a good prompt.
 
 What the test cannot show is written in the results: one writer model, human PR text not agent sessions, R and T notes built by rule from the same body.
+
+## Changes after round 0 (kept for the record)
+
+- Round 0 audit: the grader's arm order agreed with Claude's on 68% of the pairs both ranked (bar: 70%), with many ties. The fact, unsupported and testing grades agreed at 95% to 98%. Result and the changes made are in `RESULTS-DEV.md`. For the test set, Claude grades the ranks; Gemini's fact, unsupported and testing grades stand.
+- Grader rubric v2 (from round 1 on): boilerplate testing lines, mentions of the notes or session and headings on small changes count against a description, and ties only when equal.
+- Tuning round 1: a Tested line only when something ran (design call, with the evidence above); arm C2 added.
