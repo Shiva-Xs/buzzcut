@@ -1,0 +1,170 @@
+[
+ {
+  "id": "pr01",
+  "url": "https://github.com/mochajs/mocha/pull/4601",
+  "size": "tiny",
+  "lines": 19,
+  "title": "Add build to GH actions run"
+ },
+ {
+  "id": "pr02",
+  "url": "https://github.com/laravel/framework/pull/37495",
+  "size": "tiny",
+  "lines": 4,
+  "title": "[8.x] Fix types of Console\\Command properties"
+ },
+ {
+  "id": "pr03",
+  "url": "https://github.com/pallets/flask/pull/4094",
+  "size": "tiny",
+  "lines": 4,
+  "title": "improve typing for `teardown_request` "
+ },
+ {
+  "id": "pr04",
+  "url": "https://github.com/eslint/eslint/pull/14607",
+  "size": "tiny",
+  "lines": 2,
+  "title": "Chore: use includes instead of indexOf"
+ },
+ {
+  "id": "pr05",
+  "url": "https://github.com/eslint/eslint/pull/14577",
+  "size": "tiny",
+  "lines": 11,
+  "title": "Upgrade: eslintrc for ModuleResolver fix"
+ },
+ {
+  "id": "pr06",
+  "url": "https://github.com/axios/axios/pull/3767",
+  "size": "tiny",
+  "lines": 17,
+  "title": "Adding documentation for the type guard `isAxiosError`"
+ },
+ {
+  "id": "pr07",
+  "url": "https://github.com/fish-shell/fish-shell/pull/8016",
+  "size": "tiny",
+  "lines": 2,
+  "title": "Fixed a typo in rc-update completion"
+ },
+ {
+  "id": "pr08",
+  "url": "https://github.com/laravel/framework/pull/37503",
+  "size": "tiny",
+  "lines": 18,
+  "title": "[8.x] Relax the lazy loading restrictions"
+ },
+ {
+  "id": "pr09",
+  "url": "https://github.com/gin-gonic/gin/pull/2711",
+  "size": "tiny",
+  "lines": 3,
+  "title": "Use `Duration.Truncate` for truncating precision"
+ },
+ {
+  "id": "pr10",
+  "url": "https://github.com/fish-shell/fish-shell/pull/7999",
+  "size": "tiny",
+  "lines": 6,
+  "title": "completions: fix pacmd completions when using pipewire-pulse."
+ },
+ {
+  "id": "pr11",
+  "url": "https://github.com/clap-rs/clap/pull/2452",
+  "size": "normal",
+  "lines": 109,
+  "title": "imp(validator): Case-insensitive required_if_eq when arg is case-insensitive"
+ },
+ {
+  "id": "pr12",
+  "url": "https://github.com/fastify/fastify/pull/3090",
+  "size": "normal",
+  "lines": 45,
+  "title": "feat: error on wrong decorator dependency type"
+ },
+ {
+  "id": "pr13",
+  "url": "https://github.com/pallets/flask/pull/4071",
+  "size": "normal",
+  "lines": 47,
+  "title": "Improve decorator factory typing"
+ },
+ {
+  "id": "pr14",
+  "url": "https://github.com/celery/celery/pull/6775",
+  "size": "normal",
+  "lines": 31,
+  "title": "Update wall of contributors"
+ },
+ {
+  "id": "pr15",
+  "url": "https://github.com/mochajs/mocha/pull/4638",
+  "size": "normal",
+  "lines": 35,
+  "title": "Limit the size of 'actual'/'expected' strings before generating a diff"
+ },
+ {
+  "id": "pr16",
+  "url": "https://github.com/eslint/eslint/pull/14580",
+  "size": "normal",
+  "lines": 153,
+  "title": "Update: no-restricted-imports custom message for patterns (fixes #11843)"
+ },
+ {
+  "id": "pr17",
+  "url": "https://github.com/serde-rs/serde/pull/2001",
+  "size": "normal",
+  "lines": 49,
+  "title": "Improve IpAddr/SocketAddr serialization by avoiding Display"
+ },
+ {
+  "id": "pr18",
+  "url": "https://github.com/clap-rs/clap/pull/2440",
+  "size": "normal",
+  "lines": 141,
+  "title": "setting: UseLongFormatForHelpSubcommand"
+ },
+ {
+  "id": "pr19",
+  "url": "https://github.com/clap-rs/clap/pull/2511",
+  "size": "normal",
+  "lines": 34,
+  "title": "refactor(parser): remove `bool` field in `ParseResult::FlagSubCommandShort`"
+ },
+ {
+  "id": "pr20",
+  "url": "https://github.com/mochajs/mocha/pull/4574",
+  "size": "normal",
+  "lines": 204,
+  "title": "fix(esm): allow `import` from mocha in parallel"
+ },
+ {
+  "id": "pr21",
+  "url": "https://github.com/eslint/eslint/pull/14612",
+  "size": "big",
+  "lines": 342,
+  "title": "Chore: merge all html formatter files into `html.js`"
+ },
+ {
+  "id": "pr22",
+  "url": "https://github.com/gohugoio/hugo/pull/8561",
+  "size": "big",
+  "lines": 310,
+  "title": "navigation: Cache and copy Menu for sotring"
+ },
+ {
+  "id": "pr23",
+  "url": "https://github.com/celery/celery/pull/6762",
+  "size": "big",
+  "lines": 455,
+  "title": "Add What's new for v5.1.0"
+ },
+ {
+  "id": "pr24",
+  "url": "https://github.com/axios/axios/pull/3688",
+  "size": "big",
+  "lines": 441,
+  "title": "JSON improvements: throw if JSON parsing failed; number, boolean can be passed directly as payload for encoding to JSON #2613, #61, #907"
+ }
+]
