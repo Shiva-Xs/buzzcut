@@ -81,12 +81,13 @@ export function shapeFor(kind: Kind, size: Size | null): string[] {
   const opening = 'Opening, 1 or 2 sentences: what changed and why, in plain words (no "What:" or "Why:" labels).';
   const tested = 'Tested: the commands you ran and what they returned. If nothing ran, "Not tested:" and what should be checked.';
   const risk = 'Optional, one line: a risk, breaking change, migration or follow-up.';
-  if (size === 'tiny') return [opening, 'Bullets only if there are 2 or more separate behavior changes.', risk, tested];
+  const carry = 'Carry over what you were given that a reviewer needs: the issue link with its word ("Closes #12"), other PRs cited and why, a question or feedback the author wants, what it leaves for later or still works, an example they gave. Cut padding, never these.';
+  if (size === 'tiny') return [opening, 'Bullets only if there are 2 or more separate behavior changes.', carry, risk, tested];
   const bullets =
     size === 'big'
       ? '2 to 5 bullets, more on a diff this big: the changes a reviewer would ask about, one per bullet in about 25 words, each with where to look and the values (old → new, limits, defaults). More bullets, not longer ones. Group by area, never file by file. Say which part is mechanical and roughly how much of the diff it is.'
       : '2 to 5 bullets: the changes a reviewer would ask about, one per bullet in about 25 words, each with where to look (function, setting, endpoint) and the values (old → new, limits, defaults). Group by area, never file by file.';
-  return [opening, bullets, risk, tested];
+  return [opening, bullets, carry, risk, tested];
 }
 
 // What each non-default length asks of the writer. The facts rules are the same at every length.

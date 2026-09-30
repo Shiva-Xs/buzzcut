@@ -13,7 +13,7 @@ When the user asks you to push or ship: commit (step 1 below), push, and open th
 
 1. Look before you write: `npx -y buzzcut context` for a commit, `npx -y buzzcut context --kind pr` for a PR. It maps the diff by area with line counts, lists the test, doc and generated files and the pure renames, shows the branch's commits, and gives the shape and word range for a diff this size, plus how this repo writes its commits.
 2. Write the draft to a file: `.git/BUZZCUT_MSG` for a commit, a temp file for a PR body.
-3. Reread every line against the diff before buzzcut sees it (see "Say exactly what the diff does" below). buzzcut checks file names and line counts, not what the code does, so this pass is yours.
+3. Reread the draft twice before buzzcut sees it. Once against the diff (see "Say exactly what the diff does" below): buzzcut looks up names and files, but not what the code does, so this pass is yours. Once against what you were given (the author's notes, the issue, the conversation, an old description): anything from there that a reviewer needs and isn't in the draft goes in (see "Carry over what you were given").
 4. Check it:
    - Commit: `npx -y buzzcut check .git/BUZZCUT_MSG` (compares against the staged diff)
    - PR: `npx -y buzzcut pr <body-file> --title "<title>"` (compares against the base branch; add `--base <branch>` if it isn't main or master)
@@ -27,7 +27,18 @@ If buzzcut can't run at all (no npx, no network), follow the rules below without
 
 ## Keep the facts, cut the yap
 
-Short means no padding, not fewer facts. A description that's too thin fails the reviewer as badly as one that's padded, and buzzcut's word range is a ceiling, not a target. If a big change is mostly facts, a long description is fine: buzzcut gives dense text more room and only blocks padding.
+Short means no padding, not fewer facts. A description that's too thin fails the reviewer as badly as one that's padded, and buzzcut's word range is a ceiling, not a target. If keeping a fact puts you over the range, keep the fact. If a big change is mostly facts, a long description is fine: buzzcut gives dense text more room and only blocks padding.
+
+**Carry over what you were given.** The author already told you things a reviewer needs. Go through what you have (the author's notes, the issue, the conversation, an old description) and make sure each of these is in yours, if it's there:
+
+- the issue link with its word: `Closes #12` or `Fixes #12`, not just `#12`
+- other PRs and issues they mention, and why (merge this first, a related fix, who asked)
+- a question they're asking, feedback they want, or that it's a draft
+- what it doesn't do or leaves for later, and what still works as before
+- an example, expected output or config they gave
+- the reason, in their words
+
+What you cut is what's left: restating the title, the file-by-file tour, generic claims, and the boilerplate of a PR template.
 
 **Keep, always:**
 
@@ -67,8 +78,8 @@ Body, in this order:
 
 Scale it with the diff (`buzzcut context` says which one this is):
 
-- **Tiny** (under ~30 changed lines): the opening and the Tested line. Bullets only if there are 2 or more separate behavior changes.
-- **Normal** (~30 to 300 lines): the opening, 2 to 5 bullets, the Tested line.
+- **Tiny** (under ~30 changed lines): the opening, what you were given that a reviewer needs, and the Tested line. Bullets only if there are 2 or more separate behavior changes.
+- **Normal** (~30 to 300 lines): the opening, 2 to 5 bullets, what you were given that a reviewer needs, the Tested line.
 - **Big** (300+ lines): the same, and a few short plain headers are fine (Behavior changes / What's mechanical / How to review / Risk). See "Big changes" below.
 
 The diff tells you what changed, where, and the values. Only the session tells you why and what was tested: take those from the conversation and the commands you ran, never from the diff. If the repo has a PR template, fill it in briefly in this shape; buzzcut doesn't count its boilerplate. Prefer this shape over generic "Summary / Changes / Test plan" templates unless the user or the repo asks for one.
