@@ -15,10 +15,10 @@ The skill text is identical in A and B. Judged blind by Claude (labels shuffled 
 | median words | 101 | 61 | 56 | 76 |
 | sent back by 0.1.2 / by this branch | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
 | has a Tested or Not tested line | 0% | 100% | 100% | 100% |
-| a name or file the diff and repo lack | 0 | 0 | 0 | 0 |
+| a name or file the diff and repo lack | 1 | 1 | 1 | 1 |
 | the author's numbers, links and refs kept | 100% | 41% | 44% | 53% |
 
-All three arms pass both checkers, and no arm invented a checkable name or file, so the lookups had nothing to catch here. (One figure was flagged in C; it was a false alarm: the notes have the issue as a URL and C wrote `#3732`.) The writers dropped between 47% and 59% of the author's numbers, links and refs; the skill arms dropped the most.
+All three arms pass both checkers, and no arm invented a checkable name or file, so the lookups had nothing real to catch here. The one name flagged in every arm, and in the original text, is `NonInvariantDocblockPropertyType`, a Psalm error name the author wrote in their own notes. (One figure was flagged in C; a false alarm: the notes have the issue as a URL and C wrote `#3732`.) An earlier scoring, run without the repo snapshots, showed no flags at all, and a later one flagged a real name, `Blueprint.add_url_rule`; that exposed two lookup bugs, fixed in a separate commit. The table is the post-fix run. The writers dropped between 47% and 59% of the author's numbers, links and refs; the skill arms dropped the most.
 
 ## Blind judge
 
