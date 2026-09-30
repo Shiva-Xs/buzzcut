@@ -5,11 +5,13 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { analyze, parseCommit, prMessage } from '../src/analyze.js';
+import { analyze, parseCommit, passes, prMessage } from '../src/analyze.js';
 import { buildDiff } from '../src/diff.js';
 import { stagedDiff } from '../src/git.js';
 import { claimsIn, codeShaped, factsIn, gitRepoSearch, makeResolver, norm, passedClaims, pathOf, type RepoSearch } from '../src/lookup.js';
 import type { SessionFacts } from '../src/rules/rule.js';
+import { LEVELS } from '../src/rules/sourced.js';
+import { agentHook } from '../src/hooks.js';
 import { analyzeText } from '../src/text.js';
 import type { Report } from '../src/types.js';
 import { finding } from './helpers.js';
@@ -53,9 +55,9 @@ describe('names and files', () => {
     expect(sourced(r)).toEqual([]);
   });
 
-  it('sends back a name the change is said to add that exists nowhere', () => {
+  it('flags a name the change is said to add that exists nowhere', () => {
     const f = finding(check('Adds an `X-Retry-Budget` header so receivers can see the attempts left, and retries `send()` on 5xx.'), 'unsourced-name');
-    expect(f?.severity).toBe('error');
+    expect(f?.severity).toBe('warn');
     expect(f?.message).toContain('`X-Retry-Budget`');
     expect(f?.message).toContain("isn't in the diff or anywhere in the repo");
   });
@@ -81,9 +83,9 @@ describe('names and files', () => {
     expect(f?.severity).toBe('warn');
   });
 
-  it('sends back a name a sentence says the change does something with, whatever the verb', () => {
+  it('flags a name a sentence says the change does something with, whatever the verb', () => {
     for (const s of ['Handles the case where the `RetryBudgetManager` gives up.', 'Outlines the limits for `RetryBudgetManager`.', 'Also whitelists `RetryBudgetManager` in the linter.', 'Ensures unexpected states throw `RetryBudgetException`.']) {
-      expect(finding(check(s), 'unsourced-name')?.severity, s).toBe('error');
+      expect(finding(check(s), 'unsourced-name')?.severity, s).toBe('warn');
     }
   });
 
@@ -94,22 +96,22 @@ describe('names and files', () => {
   });
 
   it('looks at the words just before a name for a negation, not the whole sentence', () => {
-    expect(finding(check('Also initializes `RetryBudgetManager` when no CLI options are supplied.'), 'unsourced-name')?.severity).toBe('error');
+    expect(finding(check('Also initializes `RetryBudgetManager` when no CLI options are supplied.'), 'unsourced-name')?.severity).toBe('warn');
     expect(sourced(check('Does not add `RetryBudgetManager` yet.'))).toEqual([]);
     expect(sourced(check('Works without `RetryBudgetManager`.'))).toEqual([]);
   });
 
   it('checks a bare file name in backticks, and files with any common extension', () => {
-    expect(finding(check('Adds an exclude directive for `release_checklist.py`.'), 'unsourced-name')?.severity).toBe('error');
-    expect(finding(check('Updates `docs/topics/url-length-benchmarks.rst`.'), 'unsourced-name')?.severity).toBe('error');
-    expect(finding(check('Updates `ui/app/templates/role.hbs`.'), 'unsourced-name')?.severity).toBe('error');
+    expect(finding(check('Adds an exclude directive for `release_checklist.py`.'), 'unsourced-name')?.severity).toBe('warn');
+    expect(finding(check('Updates `docs/topics/url-length-benchmarks.rst`.'), 'unsourced-name')?.severity).toBe('warn');
+    expect(finding(check('Updates `ui/app/templates/role.hbs`.'), 'unsourced-name')?.severity).toBe('warn');
     expect(sourced(check('Updates `webhook.js`.'))).toEqual([]); // in the diff
     expect(sourced(check('Runs on Node.js 20.'))).toEqual([]); // "Node.js" is not a file
   });
 
-  it('with a session, even a name only mentioned that no command showed is made up', () => {
+  it('with a session, even a name only mentioned that no command showed is flagged as made up', () => {
     const s = session({ text: 'saw retryPolicy in policy.js' });
-    expect(finding(check('The `RetryBudgetManager` was the cause of the outage.', { session: s }), 'unsourced-name')?.severity).toBe('error');
+    expect(finding(check('The `RetryBudgetManager` was the cause of the outage.', { session: s }), 'unsourced-name')?.severity).toBe('warn');
     expect(sourced(check('The `retryPolicy` was the cause of the outage.', { session: s }))).toEqual([]);
   });
 
@@ -122,8 +124,8 @@ describe('names and files', () => {
     expect(finding(check('Adds `X-Legacy` support.'), 'unsourced-name')?.message).toContain('the diff only removes');
   });
 
-  it('sends back a file the change is said to touch that exists nowhere, and accepts one in the diff or the repo', () => {
-    expect(finding(check('Updates `src/retry/policy.ts` to cap the delay.'), 'unsourced-name')?.severity).toBe('error');
+  it('flags a file the change is said to touch that exists nowhere, and accepts one in the diff or the repo', () => {
+    expect(finding(check('Updates `src/retry/policy.ts` to cap the delay.'), 'unsourced-name')?.severity).toBe('warn');
     expect(sourced(check('Updates `src/webhook.js` and reads `src/policy.js`.'))).toEqual([]);
     const f = sourced(check('Adds `src/policy.js` with the retry limits.'));
     expect(f.map((x) => x.severity)).toEqual(['info']);
@@ -155,9 +157,22 @@ describe('names and files', () => {
     expect(sourced(check('Adds an `X-Retry-Budget` header and touches `src/retry/policy.ts`.', { repo: broken }))).toEqual([]);
   });
 
-  it('still sends back an invented name in a commit message', () => {
+  it('still flags an invented name in a commit message', () => {
     const r = analyze(parseCommit('Add RetryBudgetManager for the webhook delays\n\nAdds `RetryBudgetManager` so sends back off together.'), diff, { repo });
+    expect(finding(r, 'unsourced-name')?.severity).toBe('warn');
+  });
+
+  it('never blocks by default: the measured false-alarm rate on honest PRs was too high (see LEVELS)', () => {
+    const r = check('Adds an `X-Retry-Budget` header so receivers can see the attempts left.');
+    expect(finding(r, 'unsourced-name')?.severity).toBe('warn');
+    expect(passes(r, 35)).toBe(true);
+    expect(LEVELS.nameNowhere).toBe('warn');
+  });
+
+  it('blocks when the repo opts in with "rules": { "unsourced-name": "error" }', () => {
+    const r = analyze(prMessage('Retry webhook sends', 'Adds an `X-Retry-Budget` header so receivers can see the attempts left.'), diff, { repo, rules: { 'unsourced-name': 'error' } });
     expect(finding(r, 'unsourced-name')?.severity).toBe('error');
+    expect(passes(r, 35)).toBe(false);
   });
 
   it('can be switched off like any rule', () => {
@@ -307,5 +322,30 @@ describe('the repo search', () => {
   it('checks that a file exists', () => {
     expect(repo.hasFile('src/policy.js')).toBe(true);
     expect(repo.hasFile('src/retry/policy.ts')).toBe(false);
+  });
+});
+
+describe('what an agent is told', () => {
+  // one -m per paragraph, as git joins them: real newlines, not a backslash-n inside the quotes
+  const payload = (message: string) => JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'git commit ' + message.split('\n\n').map((m) => `-m ${JSON.stringify(m)}`).join(' ') }, cwd: dir });
+  const run = (message: string) => agentHook(payload(message), 'claude', { cwd: dir, env: {}, color: false });
+
+  it('passes a commit with a made-up name, and hands the agent the note instead of blocking', () => {
+    const r = run('Retry sends on 5xx\n\nAdds an `X-Retry-Budget` header so receivers can see the attempts left.');
+    expect(r.code).toBe(0);
+    const out = JSON.parse(r.stdout).hookSpecificOutput;
+    expect(out.permissionDecision).toBeUndefined();
+    expect(out.additionalContext).toContain('these notes are for you. Nothing was blocked');
+    expect(out.additionalContext).toContain('X-Retry-Budget');
+  });
+
+  it('says nothing about a commit whose names are all real', () => {
+    const r = run('Retry sends on 5xx\n\nAdds `MAX_BACKOFF_MS` to cap the wait between attempts.');
+    expect(r.stdout).toBe('');
+  });
+
+  it('still blocks what is wrong for other reasons, and includes the notes in that feedback', () => {
+    const r = run('fix bug\n\nAdds an `X-Retry-Budget` header.');
+    expect(JSON.parse(r.stdout).hookSpecificOutput.permissionDecision).toBe('deny');
   });
 });

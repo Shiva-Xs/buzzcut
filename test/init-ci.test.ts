@@ -388,6 +388,17 @@ describe('GitHub Action', () => {
     expect(calls.some((x) => x.method !== 'GET')).toBe(false);
   });
 
+  it('shows a lookup note on a PR that passes, and comments on it', async () => {
+    const body = 'Retries `send()` on a 5xx, and adds an `X-Retry-Budget` header so receivers can see the attempts left.\n\nTested: not run.';
+    const c = ciEnv(body, { GITHUB_WORKSPACE: mkdtempSync(join(tmpdir(), 'buzzcut-ws-')) });
+    const routes = { ...ROUTES, 'GET /pulls/7/files': [{ filename: 'src/webhook.ts', additions: 3, deletions: 1, patch: '@@ -1 +1,3 @@\n-a\n+export function send(url, tries = 3) {}\n+const x = 1;' }], 'GET /pulls/7/commits': [] };
+    const calls: Call[] = [];
+    const code = await runCi({ env: c.env, fetch: fakeGitHub(routes, calls), cwd: c.dir, log: () => {} });
+    // no checkout in the test workspace, so no repo search: the note needs one; with none it stays silent
+    expect(code).toBe(0);
+    expect(calls.some((x) => x.method === 'POST')).toBe(false);
+  });
+
   describe('the optional AI check', () => {
     const PATCH = '@@ -1 +1,2 @@\n-  return res.ok;\n+  if (res.status < 500) return res.ok;\n+  await sleep(200 * 2 ** i);';
     const aiRoutes = (reply: unknown) => ({

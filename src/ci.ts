@@ -9,6 +9,7 @@ import { analyze, parseCommit, passes, prMessage } from './analyze.js';
 import { DEFAULTS, isIgnored, loadConfig, type Config } from './config.js';
 import { buildDiff } from './diff.js';
 import { gitRepoSearch } from './lookup.js';
+import { isLookupNote } from './rules/sourced.js';
 import { aiCheck, DEFAULT_MODEL, providerOf, renderAi } from './verify.js';
 import { createClient, fetchPrFiles, fetchTemplate, fileChange, GitHubError, isBot, isCodingAgent, type ApiFile, type ApiPull, type Client } from './github.js';
 import { RULE_IDS } from './rules/index.js';
@@ -60,6 +61,13 @@ export function renderMarkdown(pr: Report, commits: CommitResult[], max: number,
     out.push(`### buzzcut: yap score ${pr.score}/100 (${pr.grade}) ✓`, '');
     const passed = checkedCommits ? `The description and ${checkedCommits} commit message${checkedCommits > 1 ? 's' : ''} pass.` : 'The description passes.';
     const advice = pr.findings.filter((f) => f.severity === 'warn');
+    const looked = pr.findings.filter(isLookupNote);
+    if (looked.length && (pr.grade === 'A' || pr.grade === 'B')) {
+      // Passes, but the lookups found names, files or figures that aren't anywhere: worth a line.
+      out.push('The description passes. The checks that look names, files and figures up found:', '', '| | Finding | How to fix |', '|---|---|---|');
+      for (const f of looked) out.push(`| ${ICON[f.severity]} | ${cell(f.message)} | ${cell(f.hint)} |`);
+      return out.join('\n');
+    }
     if (pr.grade === 'A' || pr.grade === 'B' || !advice.length) {
       out.push(`Short and specific. ${passed}`);
       return out.join('\n');
@@ -274,7 +282,7 @@ export async function runCi(run: CiRun): Promise<number> {
       if (existing) {
         await client.send('PATCH', `/repos/${owner}/${repo}/issues/comments/${existing.id}`, { body: markdown });
         log(`buzzcut: updated comment ${existing.id}`);
-      } else if (!allPass || aiUnsupported > 0) {
+      } else if (!allPass || aiUnsupported > 0 || prReport.findings.some(isLookupNote)) {
         await client.send('POST', `/repos/${owner}/${repo}/issues/${pull.number}/comments`, { body: markdown });
         log('buzzcut: posted a comment');
       }

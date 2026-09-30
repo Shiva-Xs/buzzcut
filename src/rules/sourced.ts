@@ -7,18 +7,28 @@ import type { Finding, Severity } from '../types.js';
 import type { Rule } from './rule.js';
 
 /**
- * How hard each finding hits. A check is an error, which sends an agent back, only when the
- * held-out numbers say it may (bench/README.md); otherwise it is advice.
+ * How hard each finding hits. A check sends a message back only when its false-alarm rate on
+ * honest PRs was measured at 1% or less. On the held-out test half (212 PRs by people from before
+ * AI coding tools) the name, file and "adds what it removes" checks together sent back 7 (3.3%),
+ * so they ship as notes: an agent is shown them, nothing is blocked. To block on them anyway, set
+ * `"rules": { "unsourced-name": "error" }` in .buzzcut.json.
+ * `testCount` can't be measured on held-out PRs (they have no session): it fires only when a
+ * transcript shows a count no run printed, and it is covered by unit tests, not by the benchmark.
  */
 export const LEVELS: Record<'nameNowhere' | 'fileNowhere' | 'nameWeak' | 'addedButRemoved' | 'existsUntouched' | 'fact' | 'testCount', Severity> = {
-  nameNowhere: 'error',
-  fileNowhere: 'error',
+  nameNowhere: 'warn',
+  fileNowhere: 'warn',
   nameWeak: 'warn',
-  addedButRemoved: 'error',
+  addedButRemoved: 'warn',
   existsUntouched: 'info',
   fact: 'warn',
   testCount: 'error',
 };
+
+/** The rules that look something up. Their notes are shown to an agent and in CI even when the message passes. */
+export const LOOKUP_RULES = new Set(['unsourced-name', 'unsourced-fact', 'unmentioned-area']);
+/** True for a finding worth showing although nothing blocks: a lookup rule's warning or error. */
+export const isLookupNote = (f: Finding) => LOOKUP_RULES.has(f.rule) && f.severity !== 'info';
 
 /** "`a`, `b`, `c` and 2 more" */
 function list(items: string[], max = 3): string {
@@ -76,7 +86,7 @@ export const unsourcedName: Rule = {
       out.push({
         rule: 'unsourced-name',
         severity: errors ? 'error' : 'warn',
-        points: Math.min(24, 20 * (errors ? 1 : 0.3) + 4 * (sure.length - 1)),
+        points: Math.min(24, (errors ? 20 : 6) + 4 * (sure.length - 1)),
         message: `Says the change adds or touches ${list(sure.map((c) => c.text))}, but ${sure.length > 1 ? "they aren't" : "it isn't"} in the diff or anywhere in the repo`,
         hint: 'Use the name the diff really has (check the spelling against it) or drop the sentence. If it comes from outside this repo, say where.',
         line: first(sure),
