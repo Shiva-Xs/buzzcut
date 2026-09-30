@@ -333,8 +333,12 @@ export function gitRepoSearch(cwd: string): RepoSearch {
         if (err.status === 1) return new Set(); // git grep's "no match"
         return null; // a timeout or an error: we don't know
       }
-      const printed = new Set(out.split('\n').map((l) => norm(l)));
-      return new Set(names.filter((n) => printed.has(norm(n))));
+      // `git grep -o` prints non-overlapping matches, so a name inside a longer one that matched
+      // (`Policy` in `retryPolicy`) is never printed on its own: a name is found when any printed
+      // match is it or contains it.
+      const printed = out.split('\n').map((l) => norm(l)).filter(Boolean);
+      const exact = new Set(printed);
+      return new Set(names.filter((n) => exact.has(norm(n)) || printed.some((t) => t.includes(norm(n)))));
     },
     hasFile(path) {
       const top = toplevel();
@@ -421,7 +425,14 @@ export function makeResolver(s: Sources): Resolver | null {
     sessionKnown: Boolean(session),
     prime(names) {
       if (!s.repo) return;
-      const todo = [...new Set(names)].filter((n) => !inRepo.has(n) && !local(norm(n)));
+      // A dotted name (`Blueprint.add_url_rule`) is accepted when each of its parts is somewhere, so
+      // the parts are searched with it: `where()` reads them from here.
+      const all = new Set<string>();
+      for (const n of names) {
+        all.add(n);
+        if (n.includes('.')) for (const part of n.split('.')) if (norm(part).length >= 3) all.add(part);
+      }
+      const todo = [...all].filter((n) => !inRepo.has(n) && !local(norm(n)));
       if (!todo.length) return;
       const found = s.repo.find(todo);
       for (const n of todo) inRepo.set(n, found ? found.has(n) : null);

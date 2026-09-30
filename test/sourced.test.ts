@@ -78,6 +78,12 @@ describe('names and files', () => {
     expect(sourced(check('Retries on 5xx and sends a Retry-After header, and reads the Content-Type header.'))).toEqual([]);
   });
 
+  it('accepts a dotted name when each part is in the repo, and flags one whose parts are not', () => {
+    // Policy and retryPolicy are both in the fixture repo; neither part of Ledger.spendUnits is
+    expect(sourced(check('Uses `Policy.retryPolicy` in the retry loop.'))).toEqual([]);
+    expect(finding(check('Uses `Ledger.spendUnits` in the retry loop.'), 'unsourced-name')?.severity).toBe('warn');
+  });
+
   it('notes, without blocking, a name that is only mentioned and exists nowhere', () => {
     const f = finding(check('The `RetryBudgetManager` was the cause of the outage.'), 'unsourced-name');
     expect(f?.severity).toBe('warn');
