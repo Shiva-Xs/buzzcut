@@ -1,6 +1,7 @@
 // Scores the three arms' descriptions with no model: both checkers on every output, invented
 // names and figures, and how many of the author's own facts each one kept.
 //   npm run build && node bench/eval/threearm/score.mjs
+//   ARMS=orig,B1,B,C node bench/eval/threearm/score.mjs     (B1 is round 1's arm B, kept in out/B-v1)
 //
 // The lookups are this branch's, so arm B was steered by the same detector that measures it here.
 // Compare A with C for an unsteered reading; B against A shows what steering by it did.
@@ -8,6 +9,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = (p) => fileURLToPath(new URL(p, import.meta.url));
+const dirOf = (arm) => (arm === 'B1' ? 'B-v1' : arm);
 const NEW = await import('../../../dist/index.js');
 const OLD = await import(pathToFileURL(here('old/node_modules/buzzcut/dist/index.js')).href);
 const manifest = JSON.parse(readFileSync(here('manifest.json'), 'utf8'));
@@ -30,7 +32,7 @@ const SHAPE = ['template-on-tiny', 'diff-echo', 'bold-spam', 'emoji', 'ai-vocab'
 function scoreOne(arm, m) {
   const d = JSON.parse(readFileSync(here(`data/${m.id}.json`), 'utf8'));
   const notes = readFileSync(here(`prs/${m.id}/notes.md`), 'utf8');
-  const raw = arm === 'orig' ? `${d.title}\n\n${notes}` : readFileSync(here(`out/${arm}/${m.id}.md`), 'utf8');
+  const raw = arm === 'orig' ? `${d.title}\n\n${notes}` : readFileSync(here(`out/${dirOf(arm)}/${m.id}.md`), 'utf8');
   const { title, body } = split(raw);
   const oldR = OLD.analyze(OLD.prMessage(title, body), diffOf(OLD, d, false));
   const newR = NEW.analyze(NEW.prMessage(title, body), diffOf(NEW, d, true), { repo: NEW.gitRepoSearch(d.snapshot) });
@@ -59,11 +61,11 @@ function scoreOne(arm, m) {
   };
 }
 
-const arms = ['orig', 'A', 'B', 'C'];
-const rows = Object.fromEntries(arms.map((a) => [a, manifest.filter((m) => a === 'orig' || existsSync(here(`out/${a}/${m.id}.md`))).map((m) => scoreOne(a, m))]));
+const arms = (process.env.ARMS ?? 'orig,A,B,C').split(',');
+const rows = Object.fromEntries(arms.map((a) => [a, manifest.filter((m) => a === 'orig' || existsSync(here(`out/${dirOf(a)}/${m.id}.md`))).map((m) => scoreOne(a, m))]));
 writeFileSync(here('out/scores.json'), JSON.stringify(rows, null, 1));
 
-const label = { orig: 'the original PR text (the notes)', A: 'A: skill + published 0.1.2', B: 'B: skill + this branch', C: 'C: plain prompt' };
+const label = { orig: 'the original PR text (the notes)', A: 'A: skill + published 0.1.2', B1: 'B round 1: old skill + this branch', B: 'B round 2: new skill + this branch', C: 'C: plain prompt' };
 const cols = arms;
 const line = (name, f) => `| ${name} | ${cols.map((a) => f(rows[a])).join(' | ')} |`;
 console.log(`| ${cols.map((a) => label[a]).join(' | ').replace(/^/, '')} |`.replace('|', '| measure |'));
@@ -79,7 +81,7 @@ console.log(line('shape problems (form, tour, bold, buzzwords)', (r) => r.filter
 console.log(line('PRs with a name/file the diff and repo lack', (r) => `${r.filter((x) => x.inventedNames > 0).length} (${r.reduce((n, x) => n + x.inventedNames, 0)} names)`));
 console.log(line('PRs with a figure not in the notes or diff', (r) => `${r.filter((x) => x.badFigures.length > 0).length} (${r.reduce((n, x) => n + x.badFigures.length, 0)} figures)`));
 console.log(line('author facts kept (mean of notes\' numbers, links, refs)', (r) => pct(r.reduce((n, x) => n + (x.keptOf - x.dropped), 0), r.reduce((n, x) => n + x.keptOf, 0))));
-for (const a of ['A', 'B', 'C']) {
+for (const a of arms.filter((x) => x !== 'orig')) {
   const bad = rows[a].filter((x) => x.inventedNames > 0 || x.badFigures.length);
   if (bad.length) console.log(`\n${label[a]}: ${bad.map((x) => `${x.id}${x.nameMsgs.length ? ' [' + x.nameMsgs.map((m) => m.match(/`[^`]+`/g)?.join(' ')).join('; ') + ']' : ''}${x.badFigures.length ? ' figures ' + x.badFigures.join(',') : ''}`).join('  |  ')}`);
 }

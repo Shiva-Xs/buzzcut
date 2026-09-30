@@ -1,0 +1,602 @@
+{
+ "pr01": {
+  "arms": {
+   "C": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 1
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "Y drops the capability renames the diff makes; X keeps the author's 'promotes MochaJS' filler",
+  "labels": {
+   "X": "C",
+   "Y": "B1",
+   "Z": "B"
+  }
+ },
+ "pr02": {
+  "arms": {
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "all accurate; Z leaves the before/after to the title",
+  "labels": {
+   "X": "C",
+   "Y": "B",
+   "Z": "B1"
+  }
+ },
+ "pr03": {
+  "arms": {
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 1
+   }
+  },
+  "note": "Y loses the changelog entry and the fixes keyword; Z loses the changelog",
+  "labels": {
+   "X": "C",
+   "Y": "B1",
+   "Z": "B"
+  }
+ },
+ "pr04": {
+  "arms": {
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "tie",
+  "labels": {
+   "X": "C",
+   "Y": "B1",
+   "Z": "B"
+  }
+ },
+ "pr05": {
+  "arms": {
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "Y names the internal path that goes away",
+  "labels": {
+   "X": "B",
+   "Y": "C",
+   "Z": "B1"
+  }
+ },
+ "pr06": {
+  "arms": {
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "X loses the closes keyword and the second PR the author cited",
+  "labels": {
+   "X": "B1",
+   "Y": "B",
+   "Z": "C"
+  }
+ },
+ "pr07": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "tie",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr08": {
+  "arms": {
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 1
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "Y never mentions the test the change adds",
+  "labels": {
+   "X": "C",
+   "Y": "B1",
+   "Z": "B"
+  }
+ },
+ "pr09": {
+  "arms": {
+   "B1": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "X and Y tie the Go version to the workaround going away; Z doesn't",
+  "labels": {
+   "X": "B1",
+   "Y": "C",
+   "Z": "B"
+  }
+ },
+ "pr10": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 1
+   }
+  },
+  "note": "Z drops the author's open question about a fallback",
+  "labels": {
+   "X": "B",
+   "Y": "C",
+   "Z": "B1"
+  }
+ },
+ "pr11": {
+  "arms": {
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 1
+   },
+   "B1": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 1
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "X and Y leave out the docs change; Z is prose but complete",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr12": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 2,
+    "unsupported": 1,
+    "missing": 0
+   },
+   "C": {
+    "rank": 2,
+    "unsupported": 1,
+    "missing": 0
+   }
+  },
+  "note": "Y adds 'when array methods are called'; Z says the error is defined in decorate.js",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr13": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 3
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 1
+   }
+  },
+  "note": "X keeps the author's scope limit (more Callable typing left for later) but not why add_url_rule changed or the changelog; Z has those two but not the scope limit; Y has none of the three",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr14": {
+  "arms": {
+   "B1": {
+    "rank": 3,
+    "unsupported": 1,
+    "missing": 0
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "X says 29 contributors credited in earlier releases were removed and that two are retained; the diff can't show that",
+  "labels": {
+   "X": "B1",
+   "Y": "B",
+   "Z": "C"
+  }
+ },
+ "pr15": {
+  "arms": {
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 1
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "X and Z keep closes and the later jsdiff alternative; Z also keeps the Node assert precedent; Y drops closes and the alternative",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr16": {
+  "arms": {
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 1
+   }
+  },
+  "note": "X keeps the author's example and backward compatibility; Z keeps backward compatibility and the author's offer to add cases; Y keeps neither",
+  "labels": {
+   "X": "C",
+   "Y": "B1",
+   "Z": "B"
+  }
+ },
+ "pr17": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "C": {
+    "rank": 2,
+    "unsupported": 1,
+    "missing": 0
+   }
+  },
+  "note": "Z states the itoa comparison as fact; the author struck it through and wrote Done (round 1 missed this for its equivalent). Y drops that it is a draft and the question",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr18": {
+  "arms": {
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 1
+   }
+  },
+  "note": "X has no closes keyword and no changelog or docs; Z has closes but not the changelog or docs",
+  "labels": {
+   "X": "B1",
+   "Y": "C",
+   "Z": "B"
+  }
+ },
+ "pr19": {
+  "arms": {
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "all three give the reason and the removed unwrap; Y keeps the author's 'fully encoded' wording",
+  "labels": {
+   "X": "B",
+   "Y": "C",
+   "Z": "B1"
+  }
+ },
+ "pr20": {
+  "arms": {
+   "C": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 2
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 3
+   },
+   "B": {
+    "rank": 1,
+    "unsupported": 1,
+    "missing": 1
+   }
+  },
+  "note": "Z keeps closes and the patch release but says worker threads, which the diff does not show; X keeps closes only; Y refs the issue without closing it. None keep the full-ESM alternative",
+  "labels": {
+   "X": "C",
+   "Y": "B1",
+   "Z": "B"
+  }
+ },
+ "pr21": {
+  "arms": {
+   "B": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 1,
+    "missing": 1
+   },
+   "C": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "Y asserts behavior is unchanged (not in the notes) and drops the docs page link; Z has the full release story with both links",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr22": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 3,
+    "unsupported": 1,
+    "missing": 1
+   },
+   "C": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "Y drops Closes and says during site builds, which nobody said; X and Z keep the Pages-already-does-this point",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr23": {
+  "arms": {
+   "B": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "B1": {
+    "rank": 2,
+    "unsupported": 0,
+    "missing": 0
+   },
+   "C": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 0
+   }
+  },
+  "note": "all keep the minor-version reason for leaving the 5.0 notices; differences are style",
+  "labels": {
+   "X": "B",
+   "Y": "B1",
+   "Z": "C"
+  }
+ },
+ "pr24": {
+  "arms": {
+   "B1": {
+    "rank": 1,
+    "unsupported": 0,
+    "missing": 1
+   },
+   "C": {
+    "rank": 2,
+    "unsupported": 1,
+    "missing": 0
+   },
+   "B": {
+    "rank": 3,
+    "unsupported": 0,
+    "missing": 2
+   }
+  },
+  "note": "Y says tested as the axios-lab fork where the author said published, then also says Not tested; X drops the fork link; Z also drops the transformers-context change",
+  "labels": {
+   "X": "B1",
+   "Y": "C",
+   "Z": "B"
+  }
+ }
+}
