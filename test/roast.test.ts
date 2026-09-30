@@ -98,7 +98,7 @@ describe('the PR roast card', () => {
     expect(c.grade).toBe('B');
     expect(c.heat).toBe('nit');
     expect(c.burns.length).toBeLessThanOrEqual(2);
-    expect(c.burns.map((b) => b.text)).toContain('3 section headers for a 13-line change. An opening and a Tested line would do.');
+    expect(c.burns.map((b) => b.text)).toContain('3 section headers for a 13-line change. An opening and a bullet or two would do.');
     expect(c.basics.why).toEqual({ mark: 'ok', text: '"Page 2 of the orders list repeated the last row of page 1, because the cursor query used `<=`."' });
     expect(c.keep).toBeNull();
   });

@@ -65,7 +65,7 @@ const ROASTS: Record<string, Line[]> = {
 // For a good PR with a rough edge: say it once, kindly.
 const NITS: Record<string, Line> = {
   length: (f, s) => `A little long: ${s.words} words where about ${s.budget} would do.`,
-  'template-on-tiny': (f) => `${f.data?.headers} section headers for a ${f.data?.lines}-line change. An opening and a Tested line would do.`,
+  'template-on-tiny': (f) => `${f.data?.headers} section headers for a ${f.data?.lines}-line change. An opening and a bullet or two would do.`,
   'diff-echo': (f) => `Walks through ${f.data?.count} files the diff already shows.`,
   'unbacked-claim': (f) => `"${f.quote}" could use a number.`,
   'ticked-boxes': (f) => `${f.data?.count} ticked boxes. Name the command instead.`,
@@ -76,7 +76,7 @@ const NITS: Record<string, Line> = {
   emoji: () => 'The emoji headers can go.',
   'bold-spam': (f) => `${f.data?.count} bold phrases. Bold one thing, at most.`,
   'bullet-bloat': (f) => `${f.data?.count} bullets. Keep the ones a reviewer would ask about.`,
-  'thin-description': (f) => (/tested/.test(f.message) ? 'Add a Tested line: what ran, and what it returned.' : `${f.data?.words} words for ${changed(Number(f.data?.lines))}. The reviewer needs a map.`),
+  'thin-description': (f) => `${f.data?.words} words for ${changed(Number(f.data?.lines))}. The reviewer needs a map.`,
   'long-bullet': (f) => `A ${f.data?.longest}-word bullet. One change per bullet, about 25 words.`,
   'subject-length': () => 'The title could be shorter.',
   'commit-changelog': (f) => `${f.data?.bullets} bullets in a commit body. git log reads better as prose.`,

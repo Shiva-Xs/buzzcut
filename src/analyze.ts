@@ -37,7 +37,7 @@ export function sizeOf(diff: DiffFacts): Size {
 
 /**
  * How many prose words a description deserves, as a range. Both ends grow with the square root
- * of the diff. For a PR, a 9-line fix gets about 15 to 85 words (an opening and a Tested line),
+ * of the diff. For a PR, a 9-line fix gets about 15 to 85 words (an opening, and what ran if anything did),
  * 100 lines about 40 to 140 (plus a few bullets), 1,000 lines about 100 to 310.
  * The ceiling is the budget the length rule checks; the floor is advice for `buzzcut context`.
  * A repo's `length` setting scales both ends (short 0.6×, detailed 1.6×).
@@ -123,7 +123,7 @@ export const YAP_RULES = new Set([
 
 /**
  * The most that every other warning and note (length, bullet count, title length, em dashes,
- * a missing why or Tested line, house style) counts toward a send-back. They're about how much
+ * a missing why, house style) counts toward a send-back. They're about how much
  * is written, not whether it reads well, so on their own they stay advice: a long PR with facts
  * in it is never sent back for being long and listing its changes. The yap score itself isn't
  * capped.

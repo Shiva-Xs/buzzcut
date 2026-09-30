@@ -12,7 +12,7 @@ The details behind the [README](../README.md): every rule, how the yap score and
 | `unverified-in-session` | "Tests pass", "verified manually" when the agent ran nothing in this session |
 | `length` | Word count over a budget that grows with the diff, and with how specific the writing is |
 | `template-on-tiny` | A form of template sections (Summary / Key Changes / Files Changed / Notes) on a small diff |
-| `thin-description` | An empty or one-line description on a 300+ line diff, or no Tested / Not tested line (advice only) |
+| `thin-description` | An empty or one-line description on a 300+ line diff (advice only) |
 | `diff-echo` | A file-by-file tour of files the reviewer can already see |
 | `type-mismatch` | `feat:` on a docs-only diff, `docs:` that touches code |
 | `ticked-boxes`, `vague-verification` | "✅ All tests pass" with no command and no result |

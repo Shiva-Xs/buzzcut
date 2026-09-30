@@ -79,7 +79,7 @@ export function shapeFor(kind: Kind, size: Size | null): string[] {
     ];
   }
   const opening = 'Opening, 1 or 2 sentences: what changed and why, in plain words (no "What:" or "Why:" labels).';
-  const tested = 'Tested: the commands you ran and what they returned. If nothing ran, "Not tested:" and what should be checked.';
+  const tested = 'Tested: only if you ran something: the command and what it returned. If nothing ran, leave testing out (no "Not tested" line); a risk nothing exercised goes in the risk line.';
   const risk = 'Optional, one line: a risk, breaking change, migration or follow-up.';
   const carry = 'Carry over what you were given that a reviewer needs: the issue link with its word ("Closes #12"), other PRs cited and why, a question or feedback the author wants, what it leaves for later or still works, an example they gave. Cut padding, never these.';
   if (size === 'tiny') return [opening, 'Bullets only if there are 2 or more separate behavior changes.', carry, risk, tested];
@@ -92,7 +92,7 @@ export function shapeFor(kind: Kind, size: Size | null): string[] {
 
 // What each non-default length asks of the writer. The facts rules are the same at every length.
 const LENGTH_NOTE: Record<Exclude<Length, 'normal'>, string> = {
-  short: 'Fewer, tighter bullets and no extra background; still say what changed and why, keep every fact, and keep the Tested line.',
+  short: 'Fewer, tighter bullets and no extra background; still say what changed and why, and keep every fact and anything you ran.',
   detailed: 'More room for reasoning: the design choices, what was ruled out and why, and the risks, still grouped by area, never file by file.',
 };
 
@@ -228,7 +228,7 @@ export function renderContext(c: AgentContext): string {
     out.push(`Words: about ${n(c.range.floor)} to ${n(c.range.budget)}. Text dense with numbers, code and links gets up to 2.5× the top; padding doesn't.`);
     out.push(
       '',
-      'From your session, not the diff: the why (the bug, the error message quoted, the issue link, who asked) and the Tested line (the commands you ran in this session and what they returned).',
+      'From your session, not the diff: the why (the bug, the error message quoted, the issue link, who asked) and what you ran, if anything (the commands and what they returned).',
     );
   } else {
     out.push(`Body words: ${n(c.range.budget)} at most, up to 2.5× more if it's dense with specifics (numbers, code references, links). A body is optional.`);

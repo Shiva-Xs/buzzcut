@@ -67,22 +67,22 @@ Write in the language the repo's commits and PRs already use (`git log --oneline
 
 Title: what changed, specific, 72 characters or fewer ("Retry webhook deliveries on 5xx and 429", not "Webhook improvements"). Follow the repo's title style: if its commits or PRs use prefixes (`ci:`, `fix(api):`), so does yours. Plain words, no filler: "Build math.pdf in the docs job", not "…so math.pdf actually compiles". If the PR already has a title that's specific and in the repo's style, keep it.
 
-Updating a description that's already clear (says what and why, true to the diff)? Change only what's missing, usually the Tested line, and keep its structure. Don't restyle a good PR to match this shape.
+Updating a description that's already clear (says what and why, true to the diff)? Change only what's missing, usually the why or a fact that was dropped, and keep its structure. Don't restyle a good PR to match this shape.
 
 Body, in this order:
 
 1. **Opening, 1 or 2 sentences: what changed and why.** The why comes from this session: the bug, the error message (quote it), the issue link, who asked for it. Say it in plain words, with no "What:" or "Why:" labels. If the session never says why, say what changed and leave the why out: a guessed reason is worse than none, and buzzcut's "never says why" is advice, not a reason to invent one.
 2. **Bullets, 2 to 5 (more on big diffs): the changes a reviewer would ask about.** One change per bullet, about 25 words at most: where to look (the function, setting or endpoint) and the concrete values, old → new, limits, defaults. A bullet that runs past that is two changes or has reasoning in it: split it, and put the reasoning in the opening. Group by area, never file by file. Say which part is mechanical and roughly how much of the diff it is.
 3. **Optional, one line:** a risk, breaking change, migration or follow-up.
-4. **`Tested:`** with the commands you actually ran in this session and what they returned (`npm test`, 212 passed). If you ran nothing, write `Not tested:` and what should be checked. Write what you saw, no more: "ran `cargo test`" isn't "`cargo test` passed" unless you saw it pass, and a test plan or a "How to test" list isn't a run: those steps go under `Not tested:`. buzzcut reads the session and blocks "tests pass" when nothing ran. Never tick a checkbox you didn't check.
+4. **`Tested:`, only if you ran something.** The commands you actually ran in this session and what they returned (`npm test`, 212 passed). Write what you saw, no more: "ran `cargo test`" isn't "`cargo test` passed" unless you saw it pass, and a test plan or a "How to test" list isn't a run. If you ran nothing, leave testing out: no "Not tested" line, because a reviewer learns nothing from it (CI and review are how an unrun change gets checked). If something a reviewer should look at was never exercised, say so in the risk line (step 3), in plain words. buzzcut reads the session and blocks "tests pass" when nothing ran. Never tick a checkbox you didn't check.
 
 Scale it with the diff (`buzzcut context` says which one this is):
 
-- **Tiny** (under ~30 changed lines): the opening, what you were given that a reviewer needs, and the Tested line. Bullets only if there are 2 or more separate behavior changes.
-- **Normal** (~30 to 300 lines): the opening, 2 to 5 bullets, what you were given that a reviewer needs, the Tested line.
+- **Tiny** (under ~30 changed lines): the opening and what you were given that a reviewer needs, then what you ran if you ran something. Bullets only if there are 2 or more separate behavior changes.
+- **Normal** (~30 to 300 lines): the opening, 2 to 5 bullets, what you were given that a reviewer needs, then what you ran if you ran something.
 - **Big** (300+ lines): the same, and a few short plain headers are fine (Behavior changes / What's mechanical / How to review / Risk). See "Big changes" below.
 
-The diff tells you what changed, where, and the values. Only the session tells you why and what was tested: take those from the conversation and the commands you ran, never from the diff. If the repo has a PR template, fill it in briefly in this shape; buzzcut doesn't count its boilerplate. Prefer this shape over generic "Summary / Changes / Test plan" templates unless the user or the repo asks for one.
+The diff tells you what changed, where, and the values. Only the session tells you why and what you ran: take those from the conversation and the commands you ran, never from the diff. If the repo has a PR template, fill it in briefly in this shape; buzzcut doesn't count its boilerplate. Prefer this shape over generic "Summary / Changes / Test plan" templates unless the user or the repo asks for one.
 
 ## Big changes (refactors, migrations, thousands of lines)
 

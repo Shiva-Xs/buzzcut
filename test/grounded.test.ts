@@ -364,11 +364,10 @@ describe('thin-description', () => {
     expect(f?.severity).toBe('warn');
   });
 
-  it("asks for a Tested line on a normal diff that doesn't say how it was checked", () => {
+  it("doesn't ask for a testing line: saying nothing about testing is normal", () => {
     const body = 'Webhook sends to Stripe fail with 502s during their deploys, so 5xx responses now retry 3 times.';
-    expect(finding(pr(body, diff('src/webhook.ts:40:10')), 'thin-description')?.message).toMatch(/how it was tested/);
+    expect(finding(pr(body, diff('src/webhook.ts:40:10')), 'thin-description')).toBeUndefined();
     expect(finding(pr(`${body}\n\nTested: \`npm test\`, 84 passed.`, diff('src/webhook.ts:40:10')), 'thin-description')).toBeUndefined();
-    expect(finding(pr(`${body}\n\nNot tested: no Stripe sandbox here.`, diff('src/webhook.ts:40:10')), 'thin-description')).toBeUndefined();
   });
 
   it('leaves tiny and docs-only diffs alone', () => {
