@@ -12,8 +12,9 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 const run = promisify(execFile);
-const frozen = JSON.parse(readFileSync(new URL('heldout.json', import.meta.url), 'utf8'));
-const cacheDir = fileURLToPath(new URL('cache/heldout/', import.meta.url));
+// POOL_FILE / POOL_CACHE point this at another frozen list (eval/v3/pool.json), same format.
+const frozen = JSON.parse(readFileSync(process.env.POOL_FILE || new URL('heldout.json', import.meta.url), 'utf8'));
+const cacheDir = process.env.POOL_CACHE || fileURLToPath(new URL('cache/heldout/', import.meta.url));
 const snapDir = process.env.HELDOUT_SNAPSHOTS || fileURLToPath(new URL('cache/snapshots/', import.meta.url));
 mkdirSync(cacheDir, { recursive: true });
 mkdirSync(snapDir, { recursive: true });
