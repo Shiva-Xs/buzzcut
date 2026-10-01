@@ -30,6 +30,15 @@ Three chats, each in a fresh chat, same folder rules. The old B and B0 outputs a
 
 When they're done, Claude builds the round-2 packets (D, C, C2, B0, B) and gives you the grading message with `ROUND=2`.
 
-## Test (once, after the skill is frozen)
+## Test (once; the skill is frozen, see FROZEN.md)
 
-Same messages with `SETS=testR,testT`. Nobody opens `sets/test*` before then.
+Nobody opens `sets/test*` or anything under `out/test*` or `grade/test*`. Six chats, each fresh, can run side by side:
+
+1. `Read bench/eval/v3/TASK-CHECKLIST.md with SETS=testR,testT and do the task`
+2. `Read bench/eval/v3/TASK-D.md with SETS=testR,testT and do the task`
+3. `Read bench/eval/v3/TASK-C.md with SETS=testR,testT and do the task`
+4. `Read bench/eval/v3/TASK-C2.md with SETS=testR,testT and do the task`
+5. `Read bench/eval/v3/TASK-B0.md with SETS=testR,testT and do the task`
+6. `Read bench/eval/v3/TASK-B.md with SETS=testR,testT and do the task`
+
+Each is 70 files (35 PRs, two kinds of notes). When all six are done, tell Claude: it scores them with no model, builds the packets and gives you the grading message (`ROUND=1`, `SETS=testR,testT`). Claude then audits 25% of the grades blind and reports the result against the bar in PREREG.md, whichever way it goes.
