@@ -59,6 +59,6 @@ What the test cannot show is written in the results: one writer model, human PR 
 
 ## Changes after round 0 (kept for the record)
 
-- Round 0 audit: the grader's arm order agreed with Claude's on 68% of the pairs both ranked (bar: 70%), with many ties. The fact, unsupported and testing grades agreed at 95% to 98%. Result and the changes made are in `RESULTS-DEV.md`. For the test set, Claude grades the ranks; Gemini's fact, unsupported and testing grades stand.
+- Round 0 audit: the grader's arm order agreed with Claude's on 68% of the pairs both ranked (bar: 70%), with many ties. The fact, unsupported and testing grades agreed at 95% to 98%. Result and the changes made are in `RESULTS-DEV.md`. After round 0 I wrote that Claude would grade the test ranks itself. Round 2, under rubric v2, agreed on 85% of the pairs (no ties), so before the test is run the rule goes back to the original one: Gemini grades under rubric v2 and Claude audits 25% of the test PRs blind; if the order agrees on under 70% of the pairs, Claude grades all of them.
 - Grader rubric v2 (from round 1 on): boilerplate testing lines, mentions of the notes or session and headings on small changes count against a description, and ties only when equal.
 - Tuning round 1: a Tested line only when something ran (design call, with the evidence above); arm C2 added.
