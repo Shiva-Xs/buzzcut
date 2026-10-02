@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- **Names, files and test counts are looked up.** `buzzcut` now reads the changed lines, searches the repo as it stood before the PR, and reads the agent's session. A function, file, header or number a description cites that isn't in any of them is shown as a note (`unsourced-name`, `unsourced-fact`), "adds X" about something the diff removes too, and a test count that isn't what the agent's own run printed blocks (`test-count-mismatch`). `unmentioned-area` advises when an area holding 40% of the changed lines isn't mentioned. These are lookups, not a fact-check: a wrong number or a wrong account of what the code does isn't caught. On 212 honest PRs from repos nobody tuned on they add notes to 6, and send back none that 0.1.2 didn't. To make the name checks block, set `"rules": {"unsourced-name": "error"}`.
+- **A testing line only when something ran.** The skill, `buzzcut context` and the Copilot instruction no longer ask for a "Not tested" line: say what you ran and what it returned, and leave testing out when you ran nothing. `thin-description` no longer asks for one. Claiming tests that didn't run is still blocked.
+- **The skill keeps what the author gave.** A "Carry over what you were given" list: `Closes #12` with its keyword, other PRs and why, a question or draft status, what it leaves for later, an example, the reason. In a blind comparison the skill's writing rules beat a plain prompt on 35 held-out PRs it hadn't seen; see docs/how-it-works.md for the numbers and what isn't shown.
+- **The Action fails agents, not people, by default.** A person's PR gets the comment and a warning; set `fail: always` (or `"block": "always"`) to fail everyone. An agent's PR is recognized by its account, or by an agent footer in the PR text or a commit trailer.
+- **Optional AI check in the Action** (`ai: true`, with your own `ai-api-key`; Anthropic or Gemini). Off by default, advice only, and it must quote the diff to back what it says.
+- Agent hooks hand lookup notes to the agent as advice (Claude Code, Cursor); GitHub PR checks show them.
+- The package description and the site no longer say "checked against the actual diff" or "no LLM" without qualification, and the "20 to 40 ms" figure is "tens of milliseconds".
+
 ## 0.1.2
 
 - The website moved to trybuzzcut.pages.dev (buzzcut-pr.pages.dev redirects there), and the README links follow.

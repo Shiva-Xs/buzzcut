@@ -514,13 +514,13 @@
 
   // What went, in the order a reviewer would care about it.
   const LEDGER = [
-    ['cut', '✂', '3 form headers', 'an opening, two bullets and a Tested line do the job'],
+    ['cut', '✂', '3 form headers', 'an opening and two bullets do the job'],
     ['cut', '✂', 'The opener and the buzzwords', 'comprehensive, robust, enhancing…'],
     ['cut', '✂', 'A tour of the diff', 'GitHub already shows src/webhook.ts'],
     ['cut', '✂', 'A claim with nothing behind it', 'readability and maintainability'],
     ['cut', '✂', 'A checklist and a sign-off', 'ticked boxes, "Overall, these changes…"'],
     ['ok', '✓', 'Every fact kept', '502s and 503s, 2%, 3 tries, 200/400/800ms, jitter, 429'],
-    ['ok', '✓', 'A Tested line', 'the command and the check that actually ran'],
+    ['ok', '✓', 'Real testing', 'the command and the check that actually ran'],
   ];
 
   function renderAfter() {

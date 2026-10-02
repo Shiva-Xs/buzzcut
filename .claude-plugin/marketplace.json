@@ -4,13 +4,13 @@
     "name": "Shivateja Janjirala"
   },
   "metadata": {
-    "description": "Commit messages and PR descriptions from coding agents that say what changed and why, checked against the actual diff."
+    "description": "Commit messages and PR descriptions from coding agents that say what changed and why, with the names, files and test counts they cite checked against the diff and the repo."
   },
   "plugins": [
     {
       "name": "buzzcut",
       "source": "./",
-      "description": "Commit messages and PR descriptions that say what changed and why, checked against the actual diff."
+      "description": "Commit messages and PR descriptions that say what changed and why, with the names, files and test counts they cite checked against the diff and the repo."
     }
   ]
 }

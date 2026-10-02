@@ -12,6 +12,9 @@ The details behind the [README](../README.md): every rule, how the yap score and
 | `unverified-in-session` | "Tests pass", "verified manually" when the agent ran nothing in this session |
 | `length` | Word count over a budget that grows with the diff, and with how specific the writing is |
 | `template-on-tiny` | A form of template sections (Summary / Key Changes / Files Changed / Notes) on a small diff |
+| `test-count-mismatch` | A test count that isn't what the agent's own run printed (error) |
+| `unsourced-name`, `unsourced-fact` | A name, file, header or number the description cites that isn't in the changed lines, the repo before the change, or the session (a note; opt in to blocking with `"rules": {"unsourced-name": "error"}`) |
+| `unmentioned-area` | An area with 40% or more of the changed lines that the description never mentions (advice only) |
 | `thin-description` | An empty or one-line description on a 300+ line diff (advice only) |
 | `diff-echo` | A file-by-file tour of files the reviewer can already see |
 | `type-mismatch` | `feat:` on a docs-only diff, `docs:` that touches code |
@@ -50,7 +53,7 @@ Of the 64 PRs by people in the benchmark with 1,000 or more changed lines, 1 is 
 
 Two tests, both on real PRs. **buzzcut's checks** ran on all **3,366 PRs and commits** downloaded from GitHub (`npm run bench`): 2,640 PRs from over 1,000 repos, 1,275 of them opened by coding agents, and 726 commits. That needs no model and answers whether it flags good writing and catches slop. **The PRs an agent writes with buzzcut** need a model to write them, so that test runs on samples of 30 ([bench/eval/corpus/](../bench/eval/corpus)). Everything is in [`bench/`](../bench) so you can rerun it.
 
-**It leaves good writing alone.** The ground truth is work from before AI coding assistants existed, merged between 2018 and May 2021 in 75 projects (kubernetes, rust, node, cpython, pytorch, linux, git, postgres…), so anything flagged there is a false alarm:
+**It leaves good writing alone.** The ground truth is work from before AI coding assistants existed, merged between 2018 and May 2021 in 75 projects (kubernetes, rust, node, cpython, pytorch, linux, git, postgres…), so anything flagged there counts as a false alarm (some of it is weak writing, like a commit titled "Update README.md"):
 
 | Set | Items | Sent back for an agent |
 |---|---|---|
@@ -74,7 +77,7 @@ An earlier build sent back 10 of the PRs from before AI, 25 by people in 2026 an
 
 Not perfect: the fact check found a detail the diff contradicts in 8 of the 30 (a version number, which table a record lands in), and one test result the notes didn't report. In real use the agent wrote the code and `unverified-in-session` checks its test claims against the session; the eval has neither.
 
-With a smaller model, the same 30 written by Gemini 3.8 Flash all pass, all have a Tested line, 29 say why (the 30th's author never did), and none keep a bold label on every line, a file tour or a buzzword, against 7, 4 and 3 of the originals. A blind Gemini judge preferred the rewrite in 30 of 30, with 4 missing facts against the originals' 31; it's the same model as the writer, so read that as a second opinion, not proof ([heldout-gemini](../bench/eval/corpus)).
+With a smaller model, the same 30 written by Gemini 3.8 Flash all pass, 29 say why (the 30th's author never did), and none keep a bold label on every line, a file tour or a buzzword, against 7, 4 and 3 of the originals. A blind Gemini judge preferred the rewrite in 30 of 30, with 4 missing facts against the originals' 31; it's the same model as the writer, so read that as a second opinion, not proof ([heldout-gemini](../bench/eval/corpus)).
 
 **The shape itself, before the eval above.** 30 real agent PRs (10 tiny, 10 normal, 10 big, from Claude Code, Copilot's agent, Cursor, Devin, Jules and Amp), each written two ways from its real diff and its original description, used as the agent's notes: facts kept, none added. A separate model judged every pair blind ([bench/eval/format.md](../bench/eval/format.md)):
 
@@ -86,3 +89,20 @@ With a smaller model, the same 30 written by Gemini 3.8 Flash all pass, all have
 It isn't shorter: the new shape's median is 126 words, against 104 for the originals. What changes is what's there. Against the originals, the judges flagged 19 unsupported claims in the originals and 1 in the new shape, and all 60 rewrites pass buzzcut.
 
 **Where it falls short:** one writer wrote both rewrites of every PR, knowing which was the new shape; each pair got one verdict from one model; and the old style was held to one paragraph even on big diffs, where the old skill allowed headers. Twice the judge preferred the original, because it explained design choices the rewrite had cut.
+
+### Checking names, files and test counts
+
+0.3 reads the changed lines (not only which files changed), searches the repo as it stood before the PR, and reads the agent's session, then looks up what a description cites. A function, file, header or number it names that is nowhere in the changed lines, the repo or the session is shown as a note; "adds X" about something the diff removes is too. A test count that isn't what the agent's own run printed blocks. Finding a name doesn't prove the sentence around it is true, so this is a lookup, not a fact-check: it can't catch a wrong number or a wrong description of what the code does.
+
+How it was measured, on a held-out set of 311 PRs from 27 repos that appear nowhere else in the data, frozen before the rules were written ([`bench/heldout.json`](../bench/heldout.json)), split by repo into a half the rules were tuned on and a half opened once:
+
+- **Honest PRs.** On the 212 in the sealed half, the new checks add notes to 6 (2.8%), and the same 2 (0.9%) are sent back by the existing rules in 0.1.2 and now. A first version blocked 7 on the sealed half, over the 1% bar set beforehand, so the name, file and "adds what it removes" checks ship as notes, not blocks.
+- **Planted errors.** Another model (Gemini) planted errors in real PRs: invented names flagged on 54 of 62, invented files 37 of 39, removals described as additions 16 of 18, wrong numbers 3 of 32, wrong behaviors 3 of 41. 0.1.2 flagged about none of them. The list is frozen in [`bench/eval/planted/`](../bench/eval/planted).
+
+### Writing, against a plain prompt
+
+[`bench/eval/v3/`](../bench/eval/v3) has the plan, the arms and the results. Gemini 3.8 Flash wrote descriptions for real PRs, each with the author's full text as notes and with only its first sentences; a second pass graded them against a checklist of facts from the notes, with the arm letters shuffled. 36 PRs to tune on, then 35 from repos not used anywhere else, run once after the skill was frozen (61 of the 70 test packets were graded when this was written).
+
+- **Against a bare "write the PR description", the skill wins.** It keeps 81 to 92% of the facts the author gave against 64%, and on the test set a bare prompt made 16 unsupported claims across 13 descriptions. On the test set the skill with its checker beat the bare prompt in 35 of 61 PRs, and the skill text alone in 47 of 61.
+- **Against a good plain prompt, the skill's writing rules win, the checker is unproven.** The skill text alone beat a plain prompt that says "keep the facts, add nothing, leave testing out if nothing ran" in 55 of 61 test PRs (45 of 72 on the tuning set). The full tool (skill, `buzzcut context`, checker loop) beat it 50 of 72 on the tuning set and 40 of 61 on the test set, but kept fewer of the author's facts on the test set (81% against 88%), and was behind the skill text alone there (23 to 38). The checker helped on the tuning set and hurt on the test set, so it is not shown to help.
+- **Not shown:** that this holds for other models, or for descriptions written from a real agent session instead of an author's notes. The grader and the writer are the same model family. A blind audit by Claude agreed with the grader on 85% of arm orderings on the tuning set; the test set was not audited, because the grading run stopped at 61 of 70 packets and the release didn't wait. One more caveat on the test grades: the full tool was marked down for "about 90% of the diff" lines that come from `buzzcut context`, which the grader couldn't see.

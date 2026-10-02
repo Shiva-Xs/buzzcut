@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // src/cli.ts
-import { execFileSync as execFileSync4 } from "child_process";
+import { execFileSync as execFileSync5 } from "child_process";
 import { readFileSync as readFileSync10 } from "fs";
 import { homedir as homedir2 } from "os";
 import { basename, resolve as resolve7 } from "path";
@@ -9,8 +9,8 @@ import { basename, resolve as resolve7 } from "path";
 // package.json
 var package_default = {
   name: "buzzcut",
-  version: "0.1.2",
-  description: "Makes coding agents write commits and PRs a reviewer can read: what changed and why, checked against the actual diff. No API key, no LLM.",
+  version: "0.3.0",
+  description: "Makes coding agents write commits and PRs a reviewer can read: what changed and why, with the names, files and test counts they cite checked against the diff and the repo. No API key needed.",
   type: "module",
   bin: {
     buzzcut: "dist/cli.js"
@@ -33,6 +33,7 @@ var package_default = {
     node: ">=20"
   },
   scripts: {
+    dev: "npm run build:site && npx -y live-server site",
     build: "tsup",
     "build:site": "node scripts/build-site.mjs",
     test: "tsup && vitest run",
@@ -172,6 +173,66 @@ function applyRuleSettings(findings, rules) {
   return out;
 }
 
+// src/patch.ts
+var MAX_FILE_TEXT = 2e5;
+var MAX_TOTAL_TEXT = 2e6;
+function splitPatch(patch) {
+  const added = [];
+  const removed = [];
+  for (const l of patch.split("\n")) {
+    if (l.startsWith("+")) added.push(l.slice(1));
+    else if (l.startsWith("-")) removed.push(l.slice(1));
+  }
+  return { added: added.join("\n").slice(0, MAX_FILE_TEXT), removed: removed.join("\n").slice(0, MAX_FILE_TEXT) };
+}
+function patchStart(out) {
+  return out.startsWith("diff --git ") ? 0 : out.indexOf("\ndiff --git ") + 1 || out.length;
+}
+function parseGitPatch(patch) {
+  const byPath = /* @__PURE__ */ new Map();
+  let cur = null;
+  let path = null;
+  let oldPath = null;
+  let inHunk = false;
+  let sawHunk = false;
+  const flush = () => {
+    if (path && cur && sawHunk) byPath.set(path, { added: cur.added.join("\n").slice(0, MAX_FILE_TEXT), removed: cur.removed.join("\n").slice(0, MAX_FILE_TEXT) });
+    cur = null;
+    path = null;
+    oldPath = null;
+    inHunk = false;
+    sawHunk = false;
+  };
+  const strip = (p) => p.replace(/\t.*$/, "");
+  for (const l of patch.split("\n")) {
+    if (l.startsWith("diff --git ")) {
+      flush();
+      cur = { added: [], removed: [] };
+      const m = l.match(/^diff --git a\/(.+) b\/(.+)$/);
+      path = m ? m[2] : null;
+    } else if (!inHunk && l.startsWith("--- ")) {
+      oldPath = l.startsWith("--- a/") ? strip(l.slice(6)) : null;
+    } else if (!inHunk && l.startsWith("+++ ")) {
+      if (l.startsWith("+++ b/")) path = strip(l.slice(6));
+      else if (oldPath) path = oldPath;
+    } else if (l.startsWith("@@")) {
+      inHunk = true;
+      sawHunk = true;
+    } else if (inHunk && cur) {
+      if (l.startsWith("+")) cur.added.push(l.slice(1));
+      else if (l.startsWith("-")) cur.removed.push(l.slice(1));
+    }
+  }
+  flush();
+  return byPath;
+}
+function attach(files, changed2) {
+  return files.map((f) => {
+    const c = changed2.get(f.path);
+    return c ? { ...f, added: c.added, removed: c.removed } : f;
+  });
+}
+
 // src/diff.ts
 var TEST = [
   // a directory of tests anywhere in the path, hidden ones included (examples/.test/)
@@ -215,7 +276,38 @@ function buildDiff(files, totals, truncated = false) {
   const docs = files.filter((f) => isDoc(f.path));
   const source = files.filter((f) => !isTest(f.path) && !isDoc(f.path));
   const generated = files.filter(generatedFile).reduce((n3, f) => n3 + f.additions + f.deletions, 0);
-  return { files, additions, deletions, changedLines: Math.max(0, additions + deletions - generated), tests, docs, source, truncated };
+  return { files, additions, deletions, changedLines: Math.max(0, additions + deletions - generated), tests, docs, source, truncated, searchable: isSearchable(files, truncated) };
+}
+function isSearchable(files, truncated) {
+  if (truncated) return false;
+  let size = 0;
+  for (const f of files) {
+    if (generatedFile(f) || f.additions + f.deletions === 0) continue;
+    if (f.added === void 0) return false;
+    size += f.added.length + (f.removed?.length ?? 0);
+  }
+  return size <= MAX_TOTAL_TEXT;
+}
+var cache = /* @__PURE__ */ new WeakMap();
+function changedText(d) {
+  const hit = cache.get(d);
+  if (hit) return hit;
+  const added = [];
+  const removed = [];
+  for (const f of d.files) {
+    if (generatedFile(f)) continue;
+    if (f.added) added.push(f.added);
+    if (f.removed) removed.push(f.removed);
+  }
+  const out = { added: added.join("\n"), removed: removed.join("\n") };
+  cache.set(d, out);
+  return out;
+}
+function parseDiffOutput(out) {
+  const at = patchStart(out);
+  const files = parseNumstat(out.slice(0, at));
+  if (at >= out.length || out.length > 8 * MAX_TOTAL_TEXT) return files;
+  return attach(files, parseGitPatch(out.slice(at)));
 }
 function diffSignature(d) {
   return d.files.map((f) => `${f.path}:${f.additions}:${f.deletions}`).sort().join("|");
@@ -241,13 +333,16 @@ function parseNumstat(out) {
   }
   return files;
 }
+function areaOf(path) {
+  const parts = path.split("/");
+  const deep = parts.length > 2 && /^(src|lib|packages|apps|crates|pkg|internal|cmd|app|services)$/.test(parts[0]);
+  return parts.length === 1 ? "(root)" : deep ? `${parts[0]}/${parts[1]}` : parts[0];
+}
 function areasOf(files, max = 6) {
   const by = /* @__PURE__ */ new Map();
   for (const f of files) {
     if (generatedFile(f)) continue;
-    const parts = f.path.split("/");
-    const deep = parts.length > 2 && /^(src|lib|packages|apps|crates|pkg|internal|cmd|app|services)$/.test(parts[0]);
-    const area = parts.length === 1 ? "(root)" : deep ? `${parts[0]}/${parts[1]}` : parts[0];
+    const area = areaOf(f.path);
     const a = by.get(area) ?? { lines: 0, files: 0 };
     a.lines += f.additions + f.deletions;
     a.files++;
@@ -293,14 +388,16 @@ function markGenerated(files, cwd) {
   for (let i = 0; i + 2 < parts.length; i += 3) if (parts[i + 2] === "true" || parts[i + 2] === "set") marked.add(parts[i]);
   return marked.size ? files.map((f) => marked.has(f.path) ? { ...f, generated: true } : f) : files;
 }
-var diffOf = (out, cwd) => buildDiff(markGenerated(parseNumstat(out), cwd));
+var diffOf = (out, cwd) => buildDiff(markGenerated(parseDiffOutput(out), cwd));
+var PATCH = ["-c", "core.quotepath=false", "diff", "-U0", "--no-color", "--no-ext-diff", "--numstat", "-p", "-M"];
+var patchDiff = (extra, cwd) => git([...PATCH, ...extra], cwd);
 function stagedDiff(cwd) {
-  const out = git(["diff", "--cached", "--numstat", "-M"], cwd);
+  const out = patchDiff(["--cached"], cwd);
   if (!out?.trim()) return null;
   return diffOf(out, cwd);
 }
 function commitDiff(rev, cwd) {
-  const out = git(["show", "--numstat", "--format=", "-M", rev], cwd);
+  const out = git(["-c", "core.quotepath=false", "show", "-U0", "--no-color", "--no-ext-diff", "--numstat", "-p", "--format=", "-M", rev], cwd);
   if (out == null) return null;
   return diffOf(out, cwd);
 }
@@ -324,7 +421,7 @@ function branchCommits(base, cwd, max = 30) {
   return all.length > max ? all.slice(-max) : all;
 }
 function branchDiff(base, cwd, head = "HEAD") {
-  const out = git(["diff", "--numstat", "-M", `${base}...${head}`], cwd);
+  const out = patchDiff([`${base}...${head}`], cwd);
   if (out == null) return null;
   return diffOf(out, cwd);
 }
@@ -332,30 +429,34 @@ var EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 function amendDiff(cwd) {
   if (git(["rev-parse", "--verify", "-q", "HEAD"], cwd) == null) return stagedDiff(cwd);
   const parent = git(["rev-parse", "--verify", "-q", "HEAD^"], cwd)?.trim() || EMPTY_TREE;
-  const out = git(["diff", "--cached", "--numstat", "-M", parent], cwd);
+  const out = patchDiff(["--cached", parent], cwd);
   return out?.trim() ? diffOf(out, cwd) : null;
 }
-function lineCount(path) {
+function readNew(path) {
   try {
     const st = statSync(path);
-    if (!st.isFile() || st.size > 2 * 1024 * 1024) return 0;
+    if (!st.isFile()) return { lines: 0, text: "" };
+    if (st.size > 2 * 1024 * 1024) return { lines: 1, text: null };
     const buf = readFileSync2(path);
-    if (buf.includes(0)) return 0;
+    if (buf.includes(0)) return { lines: 0, text: "" };
     let n3 = 0;
     for (const b of buf) if (b === 10) n3++;
-    return n3 + (buf.length && buf[buf.length - 1] !== 10 ? 1 : 0);
+    return { lines: n3 + (buf.length && buf[buf.length - 1] !== 10 ? 1 : 0), text: buf.toString("utf8") };
   } catch {
-    return 0;
+    return { lines: 1, text: null };
   }
 }
 function worktreeDiff(cwd, opts = { untracked: true }) {
   const root = git(["rev-parse", "--show-toplevel"], cwd)?.trim();
   if (!root) return null;
   const hasHead = git(["rev-parse", "--verify", "-q", "HEAD"], root) != null;
-  const files = parseNumstat((hasHead ? git(["diff", "HEAD", "--numstat", "-M"], root) : git(["diff", "--cached", "--numstat"], root)) ?? "");
+  const files = parseDiffOutput((hasHead ? patchDiff(["HEAD"], root) : patchDiff(["--cached"], root)) ?? "");
   if (opts.untracked) {
     const others = (git(["ls-files", "--others", "--exclude-standard", "-z"], root) ?? "").split("\0").filter(Boolean);
-    for (const p of others.slice(0, 1e3)) files.push({ path: p, additions: lineCount(join2(root, p)), deletions: 0 });
+    for (const p of others.slice(0, 1e3)) {
+      const { lines: lines2, text } = readNew(join2(root, p));
+      files.push({ path: p, additions: lines2, deletions: 0, ...text === null ? {} : { added: text.slice(0, 2e5), removed: "" } });
+    }
   }
   return files.length ? buildDiff(markGenerated(files, root)) : null;
 }
@@ -562,13 +663,13 @@ function analyzeText(body, firstLine = 1, skip) {
     if (TICKED.test(t)) facts.ticked.push(line);
     else if (BULLET.test(t) && !CHECKBOX.test(t)) {
       facts.bullets.push(line);
-      let words = countWords(t);
+      let words2 = countWords(t);
       for (let j = i + 1; j < lines2.length; j++) {
         const next2 = lines2[j].text;
         if (!next2.trim() || BULLET.test(next2) || CHECKBOX.test(next2) || HEADING.test(next2) || /^\s*\|/.test(next2)) break;
-        words += countWords(next2);
+        words2 += countWords(next2);
       }
-      facts.bulletWords.push(words);
+      facts.bulletWords.push(words2);
     }
     if ((heading || BULLET.test(t)) && LEADING_EMOJI.test(t)) facts.emojiLed.push(line);
     facts.emoji += countEmoji(t);
@@ -600,8 +701,8 @@ var SPECIFIC = new RegExp(
   ].join("|"),
   "g"
 );
-function specificity(lines2, words, files = /* @__PURE__ */ new Set()) {
-  if (!words) return 0;
+function specificity(lines2, words2, files = /* @__PURE__ */ new Set()) {
+  if (!words2) return 0;
   let n3 = 0;
   for (const l of lines2) {
     for (const m of l.text.matchAll(SPECIFIC)) {
@@ -610,7 +711,7 @@ function specificity(lines2, words, files = /* @__PURE__ */ new Set()) {
       n3++;
     }
   }
-  return 100 * n3 / words;
+  return 100 * n3 / words2;
 }
 function latinShare(s) {
   const letters = s.replace(/`[^`]*`/g, " ").replace(/https?:\/\/\S+/g, " ").match(new RegExp("\\p{L}", "gu")) ?? [];
@@ -811,7 +912,7 @@ var tickedBoxes = {
     };
   }
 };
-var VAGUE_VERIFY = /\b(?:all |existing |the )?tests? (?:are |were |still |continue to )?(?:pass(?:es|ed|ing)?|green)\b|\bcontinue to pass\b|\bstill pass(?:es)?\b|\btested (?:locally|thoroughly|manually|extensively|and (?:verified|working))\b|\bverified (?:that )?(?:everything|it|the changes?) works?\b|\bworks as expected\b|\beverything works\b/i;
+var VAGUE_VERIFY = /\b(?:all |existing |the )?tests? (?:are |were |still |continue to )?(?:pass(?:es|ed|ing)?|green)\b|\bcontinue to pass\b|\bstill pass(?:es)?\b|\btested (?:locally|thoroughly|manually|extensively|and (?:verified|working))\b|\bverified (?:that )?(?:everything|it|the changes?) works?\b|\bworks as expected\b|\beverything works\b|\b(?:works?|worked|working) (?:fine|locally|well|great|correctly|properly|as intended)\b|\bon my machine\b|\bverified locally\b|\bsanity[- ]check(?:ed)?\b/i;
 var vagueVerification = {
   id: "vague-verification",
   kinds: ["commit", "pr"],
@@ -920,15 +1021,15 @@ var unbackedClaim = {
       }
     }
     if (!found.length) return null;
-    const first = found[0];
+    const first2 = found[0];
     return {
       rule: "unbacked-claim",
       severity: "warn",
       points: Math.min(20, 5 * found.length),
-      message: found.length > 1 ? `${found.length} claims with no evidence, e.g. "${first.q}"` : `"${first.q}" with no evidence`,
+      message: found.length > 1 ? `${found.length} claims with no evidence, e.g. "${first2.q}"` : `"${first2.q}" with no evidence`,
       hint: "Back it with a measurement (before \u2192 after, with numbers) or delete it.",
-      line: first.n,
-      quote: first.q,
+      line: first2.n,
+      quote: first2.q,
       data: { count: found.length }
     };
   }
@@ -967,7 +1068,6 @@ var missingWhy = {
   }
 };
 var BIG = 300;
-var VERIFIED = /\b(?:tested|untested|testing|verif(?:y|ied|ication)|validat(?:ed|ion)|reproduced|smoke[- ]test\w*|test plan|ran|(?:not|never) run|checked|confirmed|tried)\b|^\s*[-*+]\s+\[[xX ]\]|✅/im;
 var thinDescription = {
   id: "thin-description",
   kinds: ["pr"],
@@ -981,21 +1081,11 @@ var thinDescription = {
         severity: "warn",
         points: 12,
         message: text.words ? `A one-line description for a ${n3}-line diff` : `No description for a ${n3}-line diff`,
-        hint: "Give the reviewer a map: what changed and why (the bug, the request, the issue), the few behavior changes worth a real look and where they are, what's mechanical and roughly how much of the diff it is, and a Tested line with what you ran.",
+        hint: "Give the reviewer a map: what changed and why (the bug, the request, the issue), the few behavior changes worth a real look and where they are, what's mechanical and roughly how much of the diff it is, and what you ran if you ran something.",
         data: { lines: n3, words: text.words }
       };
     }
-    if (n3 < 30 || !text.words || !diff.source.length && !diff.tests.length) return null;
-    const all = [msg.title, ...prose.map((l) => l.text)].join("\n");
-    if (VERIFIED.test(all) || /\bCI\b/.test(all) || prose.some((l) => COMMAND.test(l.text) || RESULT.test(l.text))) return null;
-    return {
-      rule: "thin-description",
-      severity: "warn",
-      points: 4,
-      message: "Doesn't say how it was tested",
-      hint: 'End with a Tested line: the commands you ran in this session and what they returned (`npm test`, 212 passed). If nothing ran, write "Not tested" and what should be checked.',
-      data: { lines: n3, words: text.words }
-    };
+    return null;
   }
 };
 var typeMismatch = {
@@ -1063,6 +1153,432 @@ var groundedRules = [
   typeMismatch,
   droppedFacts
 ];
+
+// src/lookup.ts
+import { execFileSync as execFileSync2 } from "child_process";
+import { existsSync as existsSync5 } from "fs";
+import { join as join5 } from "path";
+function norm2(name) {
+  return name.toLowerCase().replace(/\(\)$/, "").replace(/[-_.\s]/g, "");
+}
+var flat = (s) => s.toLowerCase().replace(/[-_.]/g, "");
+var escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function words(name) {
+  return name.replace(/\(\)$/, "").replace(/([a-z0-9])([A-Z])/g, "$1 $2").split(/[-_.\s]+/).filter(Boolean);
+}
+function looseRegex(name) {
+  return words(name).map(escapeRe).join("[-_.]?");
+}
+var NOT_A_NAME = new Set(
+  "json http https url uri api cli todo readme license changelog javascript typescript github gitlab linkedin youtube postgresql mongodb graphql openapi oauth iphone ipad imac ios macos tvos watchos icloud ebay webos jquery grpc mtls npm pnpm nodejs devops nextjs nuxtjs vuejs reactjs openai chatgpt vscode".split(" ")
+);
+var PLACEHOLDER = /^(?:some|my|your|foo|bar|baz|qux|example|sample|dummy|placeholder|fake)(?:[A-Z_.-]|$)/i;
+var EXT = "js|mjs|cjs|ts|tsx|jsx|py|pyi|go|rs|java|kt|kts|scala|rb|php|html|htm|css|scss|sass|less|json|jsonc|ya?ml|toml|md|mdx|rst|adoc|txt|sh|bash|zsh|bat|cmd|ps1|sql|xml|xsl|lock|conf|cfg|ini|env|in|c|h|cc|cpp|hpp|cxx|cs|swift|m|mm|vue|svelte|hbs|ejs|erb|haml|pug|njk|liquid|dart|ex|exs|erl|hs|ml|lua|pl|pm|r|jl|tf|tfvars|proto|graphql|gql|gradle|mk|cmake|dockerfile";
+var PATH = new RegExp(String.raw`^(?:\.\/)?(?:[\w@.-]+\/)+[\w@.-]+\.(?:${EXT})$`);
+var DOMAINY = /(?:^|\/)[\w-]+\.(?:com|io|org|net|dev|app|co|ai)(?:\/|$)/;
+var FILENAME = new RegExp(String.raw`^[\w.-]+\.(?:${EXT})$`);
+function bareFileOf(s) {
+  const t = s.trim();
+  return FILENAME.test(t) && !/^\d/.test(t) && !/^v?\d+(?:\.\d+)+$/.test(t) && t.length >= 5 ? t : null;
+}
+function pathOf(s) {
+  const t = s.trim();
+  if (!PATH.test(t) || t.startsWith("/") || t.startsWith("~") || t.includes("..") || DOMAINY.test(t) || /(^|\/)node_modules\//.test(t)) return null;
+  return t.replace(/^\.\//, "");
+}
+function codeShaped(s) {
+  const t = s.replace(/\(\)$/, "");
+  if (!/^[A-Za-z_$][\w$]*(?:[.-][A-Za-z_$][\w$]*)*$/.test(t) || FILENAME.test(t)) return false;
+  if (norm2(t).length < 6 || NOT_A_NAME.has(norm2(t)) || PLACEHOLDER.test(t)) return false;
+  const camel = /[a-z0-9][A-Z]/.test(t);
+  const snake = /[A-Za-z0-9]_[A-Za-z0-9]/.test(t);
+  const screaming = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+$/.test(t);
+  const header = /^[A-Z][A-Za-z0-9]*(?:-[A-Z][A-Za-z0-9]*)+$/.test(t);
+  const dotted = t.includes(".") && !t.includes("-") && t.split(".").every((p) => p.length >= 2);
+  return camel || snake || screaming || header || dotted || s.endsWith("()");
+}
+var USING = /^(?:add\w*|introduc\w*|creat\w*|implement\w*|expos\w*|defin\w*|export\w*|emit\w*|attach\w*|use[sd]?|using|call\w*|invok\w*|set|sets|setting|return\w*|throw\w*|threw|rais\w*|configur\w*|initializ\w*|initialis\w*|regist\w*|provid\w*|support\w*|enabl\w*|pass(?:es|ed|ing)?|send\w*|sent|read|reads|reading|writ\w*|new|wrap\w*|inject\w*|generat\w*|load\w*|import\w*|require\w*|assign\w*)$/i;
+var ADD_VERB = String.raw`add(?:s|ed|ing)?|introduc(?:e|es|ed|ing)|creat(?:e|es|ed|ing)|implement(?:s|ed|ing)?|expos(?:e|es|ed|ing)|defin(?:e|es|ed|ing)|export(?:s|ed|ing)?|emit(?:s|ted)?|attach(?:es|ed)?|new`;
+var REMOVE_VERB = String.raw`remov(?:e|es|ed|ing)|delet(?:e|es|ed|ing)|drop(?:s|ped|ping)?|deprecat(?:e|es|ed|ing)|strip(?:s|ped)?|get(?:s)? rid of|no longer`;
+var TOUCH_VERB = String.raw`us(?:e|es|ed|ing)|call(?:s|ed|ing)?|updat(?:e|es|ed|ing)|chang(?:e|es|ed|ing)|modif(?:y|ies|ied)|renam(?:e|es|ed)|replac(?:e|es|ed)|wrap(?:s|ped)?|extend(?:s|ed)?|switch(?:es|ed)?|mov(?:e|es|ed)|handl(?:e|es|ed)|read(?:s)?|writ(?:e|es)|set(?:s)?|send(?:s)?|return(?:s|ed)?|pass(?:es|ed)?|check(?:s|ed)?|fix(?:es|ed)?`;
+var VERBS = new RegExp(String.raw`\b(?:(${ADD_VERB})|(${REMOVE_VERB})|(${TOUCH_VERB}))\b`, "gi");
+var NOT_ABOUT_THIS_CHANGE = /\b(?:(?:add|adds|added|put|puts|bring|brings|brought)\b[^.;]{0,25}\b(?:back|again)|re-?add\w*|restor\w*|revert\w*|e\.g\.|such as|for example|instead of|rather than|unlike|existing|already|pre-?existing|currently|previously|todo|follow[- ]?up|later|n\/a)\b/i;
+var NEGATED_NEAR = /\b(?:not|no|without|never|should|would|could|might|consider|pending)\b[^.;]{0,40}$|n't\b[^.;]{0,40}$/i;
+var EXTERNAL_CUE = /\b(?:(?:from|in|of|by|per|via)\s+(?:the\s+)?(?:[\w@./-]+\s+)?(?:sdk|api|library|package|module|crate|gem|docs?|documentation|spec|rfc|dependency|upstream|plugin|framework|runtime|kernel|stdlib|standard library|server|service|manual|standard)|third[- ]party|external|upstream|vendor(?:ed)?|built-?in|standard library|not (?:part of|in|included in|tracked in|checked in to|committed to) (?:the )?(?:repo|repository|tree|codebase|project)|outside (?:of )?(?:the )?(?:repo|repository)|git-?ignored|untracked|local(?:ly)?[- ]only)\b/i;
+var TESTED_LINE = /^\s*(?:[-*+]\s+)?(?:\*\*)?(?:not tested|tested|verified|ran)\b/i;
+function verbBefore(sentence2, at) {
+  let last = null;
+  for (const m of sentence2.slice(Math.max(0, at - 90), at).matchAll(VERBS)) last = { kind: m[1] ? "add" : m[2] ? "remove" : "touch", word: m[0] };
+  return last;
+}
+var PLAIN_NAMES = [
+  String.raw`\b[A-Za-z_][\w.]*\(\)`,
+  // send(), Ledger.post()
+  String.raw`\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b`,
+  // max_order_usd
+  String.raw`\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b`,
+  // MAX_RETRIES
+  String.raw`\b[a-z]+(?:[A-Z][a-z0-9]*)+\b`,
+  // retryPolicy
+  String.raw`\bX-[A-Z][A-Za-z0-9]*(?:-[A-Z][A-Za-z0-9]*)*\b`
+  // X-Retry-After
+];
+var PLAIN_NAME = new RegExp(PLAIN_NAMES.join("|"), "g");
+var HEADER_IN_PROSE = /\b([A-Z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)+|[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s+(?:HTTP\s+)?headers?\b/g;
+var STANDARD_HEADERS = new Set(
+  "contenttype contentlength contentencoding contentdisposition contentlanguage authorization proxyauthorization wwwauthenticate accept acceptencoding acceptlanguage acceptcharset useragent cachecontrol etag ifnonematch ifmodifiedsince lastmodified location setcookie cookie host origin referer retryafter forwarded xforwardedfor xforwardedproto xrequestedwith accesscontrolalloworigin accesscontrolallowheaders accesscontrolallowmethods strictransportsecurity stricttransportsecurity contentsecuritypolicy xframeoptions xcontenttypeoptions vary connection keepalive upgrade range acceptranges date server allow expires pragma link".split(" ")
+);
+var PLAIN_PATH = new RegExp(String.raw`(?<![\w/.:~-])(?:[\w@.-]+/)+[\w@.-]+\.(?:${EXT})(?![\w/-])`, "g");
+var unlinked = (text) => text.replace(/\]\([^)\n]*\)/g, "]").replace(/<https?:[^>\n]*>/g, " ").replace(/\b(?:https?:\/\/|www\.)\S+/g, " ");
+var sentencesOf = (text) => text.split(/(?<=[.!?;])\s+(?=[A-Z0-9`"'(])/);
+function claimsIn(title, lines2, max = 30) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set();
+  const push = (c) => {
+    const key = `${c.kind}:${c.kind === "name" ? norm2(c.text) : c.text}`;
+    if (seen.has(key) || out.length >= max) return;
+    seen.add(key);
+    out.push(c);
+  };
+  const outside = /* @__PURE__ */ new Set();
+  const scan = (raw, n3) => {
+    if (!raw.trim() || /^\s*>/.test(raw) || TESTED_LINE.test(raw)) return;
+    for (const sentence2 of sentencesOf(unlinked(raw).replace(/^\s*(?:[-*+•]|\d{1,2}[.)])\s+/, ""))) {
+      if (/\?\s*$/.test(sentence2) || NOT_ABOUT_THIS_CHANGE.test(sentence2) || TESTED_LINE.test(sentence2)) continue;
+      const first2 = sentence2.replace(/^(?:also|and|now|then|additionally|plus)\s+/i, "").match(/^([A-Za-z][a-z]{2,})\b/)?.[1]?.toLowerCase() ?? "";
+      const verbFirst = /(?:s|ed|es|ing)$/.test(first2) && !/^(?:this|that|these|those|its|was|has|is|does|use|uses|used|thus|plus|also|yes|less|class|access|process|progress|success|address|based|related|inspired|following|given|according|depending|regarding|considering|compared|similar|due|prior|thanks|updated|tested|verified)$/.test(first2);
+      const spans = [];
+      for (const m of sentence2.matchAll(/`([^`\n]+)`/g)) spans.push({ text: m[1].trim(), at: m.index, backticked: true });
+      const bare = sentence2.replace(/`[^`\n]*`/g, (s) => " ".repeat(s.length));
+      for (const m of bare.matchAll(PLAIN_PATH)) spans.push({ text: m[0], at: m.index, backticked: false });
+      for (const m of bare.matchAll(PLAIN_NAME)) spans.push({ text: m[0], at: m.index, backticked: false });
+      for (const m of bare.matchAll(HEADER_IN_PROSE)) spans.push({ text: m[1], at: m.index, backticked: false, header: true });
+      for (const s of spans) {
+        if (EXTERNAL_CUE.test(sentence2.slice(Math.max(0, s.at - 45), s.at + s.text.length + 45))) {
+          outside.add(s.text.toLowerCase());
+          outside.add(norm2(s.text));
+          continue;
+        }
+        if (NEGATED_NEAR.test(sentence2.slice(Math.max(0, s.at - 60), s.at))) continue;
+        const v = verbBefore(sentence2, s.at);
+        const verb = v?.word ?? (verbFirst ? first2 : void 0);
+        const flags = {
+          line: n3,
+          backticked: s.backticked,
+          adds: v?.kind === "add",
+          removes: v?.kind === "remove",
+          touches: v?.kind === "touch" || v === null && verbFirst,
+          verb,
+          uses: v?.kind === "add" || v?.kind !== "remove" && Boolean(verb && USING.test(verb))
+        };
+        const path = pathOf(s.text);
+        const bareFile = s.backticked ? bareFileOf(s.text) : null;
+        if (path) push({ kind: "file", text: path, ...flags });
+        else if (bareFile) push({ kind: "file", text: bareFile, ...flags });
+        else if (s.header) {
+          if (norm2(s.text).length >= 6 && !STANDARD_HEADERS.has(norm2(s.text))) push({ kind: "name", text: s.text, ...flags });
+        } else if (codeShaped(s.text) && !STANDARD_HEADERS.has(norm2(s.text))) push({ kind: "name", text: s.text.replace(/\(\)$/, ""), ...flags });
+        else if (s.backticked && flags.uses && /^[A-Za-z_][\w.-]{2,}$/.test(s.text) && !NOT_A_NAME.has(norm2(s.text))) push({ kind: "name", text: s.text, ...flags, plain: true });
+      }
+    }
+  };
+  scan(title, void 0);
+  for (const l of lines2) scan(l.text, l.n > 0 ? l.n : void 0);
+  return out.filter((c) => !outside.has(c.text.toLowerCase()) && !outside.has(norm2(c.text)));
+}
+function codeShapedNames(text) {
+  const out = /* @__PURE__ */ new Set();
+  const t = unlinked(text);
+  for (const m of t.matchAll(/`([^`\n]+)`/g)) if (codeShaped(m[1].trim())) out.add(m[1].trim().replace(/\(\)$/, ""));
+  for (const m of t.replace(/`[^`\n]*`/g, " ").matchAll(PLAIN_NAME)) if (codeShaped(m[0])) out.add(m[0].replace(/\(\)$/, ""));
+  return [...out];
+}
+var FACT = new RegExp(
+  [
+    String.raw`(?<![\w.#])\d+(?:[.,]\d+)?\s?(?:%|ms|µs|s|sec|secs|seconds|minutes?|min|x|×|kb|mb|gb|rps|qps|req\/s)(?![\w])`,
+    String.raw`(?<![\w/&])#\d{2,}\b`,
+    // an HTTP status code, when a word before it says it is one: "returns 502", "status 429", "on a 503"
+    String.raw`(?<=\b(?:status|http|code|returns?|returned|responds?|responded|responses?|errors?|retry|retries|retried|on an?)\s+(?:code\s+|status\s+)?)(?:100|101|20[0-6]|30[1-4]|307|308|4(?:0[0-9]|1[0-8]|2[2-4]|26|28|29|31)|451|50[0-8]|511)(?=xx|s?\b)`
+  ].join("|"),
+  "gi"
+);
+var HTTP_CODE = /(?<![\w.#/])(?:100|101|20[0-6]|30[1-4]|307|308|4(?:0[0-9]|1[0-8]|2[2-4]|26|28|29|31)|451|50[0-8]|511)(?=xx|s?(?![\w.]))/g;
+var HTTP_CUE = /\b(?:[1-5]xx|status|http|responses?|error codes?|status codes?)\b/i;
+function factsIn(lines2, max = 12) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const l of lines2) {
+    if (!l.text.trim() || /^\s*>/.test(l.text) || TESTED_LINE.test(l.text)) continue;
+    const prose = unlinked(l.text).replace(/`[^`\n]*`/g, " ");
+    const found = [...prose.matchAll(FACT)].map((m) => m[0].trim());
+    if (HTTP_CUE.test(prose)) found.push(...[...prose.matchAll(HTTP_CODE)].map((m) => m[0]));
+    for (const text of found) {
+      if (seen.has(text) || out.length >= max) continue;
+      seen.add(text);
+      out.push({ text, line: l.n > 0 ? l.n : void 0 });
+    }
+  }
+  return out;
+}
+var PASSED = /(?<![\w.])(\d[\d,]*)\s+(?:tests?\s+|specs?\s+)?(?:passed|passing|pass|green)\b|\ball\s+(\d[\d,]*)\s+(?:tests?|specs?)\b/gi;
+function passedClaims(title, lines2) {
+  const out = [];
+  for (const [text, line] of [[title, void 0], ...lines2.map((l) => [l.text, l.n > 0 ? l.n : void 0])]) {
+    if (/^\s*>/.test(text)) continue;
+    for (const m of text.matchAll(PASSED)) {
+      const n3 = Number((m[1] ?? m[2]).replace(/,/g, ""));
+      if (Number.isSafeInteger(n3)) out.push({ n: n3, text: m[0].trim(), line });
+    }
+  }
+  return out;
+}
+var EXCLUDE = [":(exclude,glob)**/node_modules/**", ":(exclude,glob)**/dist/**", ":(exclude,glob)**/*.min.*", ":(exclude,glob)**/*.map", ":(exclude,glob)**/package-lock.json", ":(exclude,glob)**/*.lock"];
+function gitRepoSearch(cwd) {
+  let root;
+  const toplevel = () => {
+    if (root === void 0) {
+      try {
+        root = execFileSync2("git", ["rev-parse", "--show-toplevel"], { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
+      } catch {
+        root = null;
+      }
+    }
+    return root;
+  };
+  return {
+    find(names) {
+      if (!names.length) return /* @__PURE__ */ new Set();
+      const top = toplevel();
+      if (!top) return null;
+      const args = ["-C", top, "grep", "-h", "-o", "-i", "-I", "-E", "--no-color"];
+      for (const n3 of names) args.push("-e", looseRegex(n3));
+      args.push("--", ".", ...EXCLUDE);
+      let out = "";
+      try {
+        out = execFileSync2("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 8 * 1024 * 1024, timeout: 2e3 });
+      } catch (e) {
+        const err = e;
+        if (err.code === "ENOBUFS") return new Set(names);
+        if (err.status === 1) return /* @__PURE__ */ new Set();
+        return null;
+      }
+      const printed2 = out.split("\n").map((l) => norm2(l)).filter(Boolean);
+      const exact = new Set(printed2);
+      return new Set(names.filter((n3) => exact.has(norm2(n3)) || printed2.some((t) => t.includes(norm2(n3)))));
+    },
+    hasFile(path) {
+      const top = toplevel();
+      if (!top) return null;
+      if (path.includes("/")) return existsSync5(join5(top, path));
+      try {
+        return execFileSync2("git", ["-C", top, "ls-files", "--", `:(glob)**/${path}`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 2e3 }).trim().length > 0;
+      } catch {
+        return null;
+      }
+    }
+  };
+}
+var flatCache = /* @__PURE__ */ new WeakMap();
+var flatSession = /* @__PURE__ */ new WeakMap();
+function makeResolver(s) {
+  const diff = s.diff && s.diff.searchable ? s.diff : null;
+  const session = s.session?.hasOutput && s.session.text ? s.session : null;
+  if (!diff && !session) return null;
+  let changed2 = { added: "", removed: "" };
+  if (diff) {
+    let hit = flatCache.get(diff);
+    if (!hit) {
+      const c = changedText(diff);
+      hit = { added: flat(c.added), removed: flat(c.removed) };
+      flatCache.set(diff, hit);
+    }
+    changed2 = hit;
+  }
+  let sessionFlat = "";
+  if (session) {
+    sessionFlat = flatSession.get(session) ?? flat(session.text);
+    flatSession.set(session, sessionFlat);
+  }
+  let rawText = null;
+  const raw = () => {
+    if (rawText === null) {
+      const c = diff ? changedText(diff) : { added: "", removed: "" };
+      rawText = `${c.added}
+${c.removed}
+${session?.text ?? ""}`.toLowerCase();
+    }
+    return rawText;
+  };
+  const inRepo2 = /* @__PURE__ */ new Map();
+  const local = (n3) => {
+    if (diff && changed2.added.includes(n3)) return "added";
+    if (diff && changed2.removed.includes(n3)) return "removed";
+    if (session && sessionFlat.includes(n3)) return "session";
+    return null;
+  };
+  return {
+    diffKnown: Boolean(diff),
+    sessionKnown: Boolean(session),
+    prime(names) {
+      if (!s.repo) return;
+      const all = /* @__PURE__ */ new Set();
+      for (const n3 of names) {
+        all.add(n3);
+        if (n3.includes(".")) {
+          for (const part of n3.split(".")) if (norm2(part).length >= 3) all.add(part);
+        }
+      }
+      const todo = [...all].filter((n3) => !inRepo2.has(n3) && !local(norm2(n3)));
+      if (!todo.length) return;
+      const found = s.repo.find(todo);
+      for (const n3 of todo) inRepo2.set(n3, found ? found.has(n3) : null);
+    },
+    where(name) {
+      const n3 = norm2(name);
+      const here = local(n3);
+      if (here) return here;
+      if (name.includes(".")) {
+        const parts = name.split(".").filter((p) => norm2(p).length >= 3);
+        if (parts.length > 1 && parts.every((p) => local(norm2(p)) || inRepo2.get(p) === true)) return "repo";
+      }
+      const r = inRepo2.get(name);
+      if (r === true) return "repo";
+      if (r === false && diff) return "nowhere";
+      return "unknown";
+    },
+    whereWord(name) {
+      if (!diff) return null;
+      const c = changedText(diff);
+      const re = new RegExp(String.raw`(?<![A-Za-z0-9_])${escapeRe(name)}(?![A-Za-z0-9_])`, "i");
+      if (re.test(c.added)) return "added";
+      return re.test(c.removed) ? "removed" : null;
+    },
+    fileStat(path) {
+      if (!diff) return null;
+      const base = path.split("/").pop();
+      const hit = diff.files.filter((f) => f.path === path || f.path.endsWith("/" + path) || path.endsWith("/" + f.path) || !path.includes("/") && f.path.split("/").pop() === base);
+      return hit.length ? { additions: hit.reduce((n3, f) => n3 + f.additions, 0), deletions: hit.reduce((n3, f) => n3 + f.deletions, 0) } : null;
+    },
+    file(path) {
+      if (!diff) return "unknown";
+      const base = path.split("/").pop();
+      for (const f of diff.files) if (f.path === path || f.path.endsWith("/" + path) || path.endsWith("/" + f.path) || (f.renamed || !path.includes("/")) && f.path.split("/").pop() === base) return "diff";
+      const has = s.repo?.hasFile(path);
+      if (has === true) return "repo";
+      if (has === false) return "nowhere";
+      return "unknown";
+    },
+    hasFact(text) {
+      if (!session) return null;
+      const text2 = raw();
+      const num = text.match(/^#?(\d+(?:[.,]\d+)?)/)?.[1];
+      if (text.startsWith("#")) return new RegExp(String.raw`#${num}(?!\d)`).test(text2) || new RegExp(String.raw`(?:issues|pull)/${num}(?!\d)`).test(text2);
+      if (!num) return text2.includes(text.toLowerCase());
+      return new RegExp(String.raw`(?<![\d.,])${escapeRe(num)}(?![\d]|[.,]\d)`).test(text2);
+    }
+  };
+}
+function kindOf(m) {
+  const code = m[1];
+  if (code !== void 0) {
+    const path = pathOf(code);
+    if (path) return { kind: "file", value: path };
+    if (codeShaped(code)) return { kind: "name", value: code.replace(/\(\)$/, "") };
+    return { kind: "other", value: code };
+  }
+  const t = m[0].trim();
+  if (/^https?:/.test(t) || /^#\d/.test(t) || /^[A-Z][A-Z0-9]+-\d+$/.test(t)) return { kind: "fact", value: t };
+  if (/^\d/.test(t)) return /[%a-zµ×]|[.,]\d|^\d{3,}/i.test(t.replace(/\s/g, "")) ? { kind: "fact", value: t } : { kind: "other", value: t };
+  if (m[2] !== void 0) {
+    const path = pathOf(m[2]);
+    return path ? { kind: "file", value: path } : { kind: "other", value: t };
+  }
+  return codeShaped(t) ? { kind: "name", value: t.replace(/\(\)$/, "") } : { kind: "other", value: t };
+}
+function verifiedSpecificity(lines2, wordCount, files, r) {
+  if (!wordCount) return 0;
+  const found = [];
+  const names = [];
+  for (const l of lines2) {
+    for (const m of l.text.matchAll(SPECIFIC)) {
+      const name = m[1] ?? m[2];
+      if (name && (files.has(name) || files.has(name.split("/").pop()))) continue;
+      const k = kindOf(m);
+      found.push(k);
+      if (k.kind === "name") names.push(k.value);
+    }
+  }
+  r.prime(names);
+  let n3 = 0;
+  for (const k of found) {
+    if (k.kind === "name" && r.where(k.value) === "nowhere") continue;
+    if (k.kind === "file" && r.file(k.value) === "nowhere") continue;
+    if (k.kind === "fact" && r.hasFact(k.value) === false) continue;
+    n3++;
+  }
+  return 100 * n3 / wordCount;
+}
+
+// src/rules/coverage.ts
+var SHARE = 0.4;
+var MIN_LINES = 60;
+var GENERIC = new Set(
+  "src lib libs app apps pkg packages internal cmd core common shared util utils helper helpers index main mod test tests spec specs type types dist build config configs component components model models service services module modules public static assets scripts tools tool misc other base default".split(" ")
+);
+var alike = (a, b) => {
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  return short.length >= 3 && long.startsWith(short) && short.length / long.length >= 0.6;
+};
+function termsOf(paths) {
+  const out = /* @__PURE__ */ new Set();
+  for (const p of paths) {
+    for (const seg of p.replace(/\.[A-Za-z0-9]+$/, "").split("/")) {
+      for (const w of seg.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().split(/[^a-z0-9]+/)) {
+        if (w.length >= 3 && !GENERIC.has(w)) out.add(w);
+      }
+    }
+  }
+  return out;
+}
+var unmentionedArea = {
+  id: "unmentioned-area",
+  kinds: ["pr"],
+  needsDiff: true,
+  run({ diff, msg, text }) {
+    const d = diff;
+    if (d.truncated) return null;
+    const isTest2 = new Set(d.tests.map((f) => f.path));
+    const counted = d.files.filter((f) => !generatedFile(f) && !isTest2.has(f.path) && f.additions + f.deletions > 0);
+    const total = counted.reduce((n3, f) => n3 + f.additions + f.deletions, 0);
+    if (total < MIN_LINES) return null;
+    const by = /* @__PURE__ */ new Map();
+    for (const f of counted) by.set(areaOf(f.path), [...by.get(areaOf(f.path)) ?? [], f]);
+    const [area, files] = [...by.entries()].sort((a, b) => b[1].reduce((n3, f) => n3 + f.additions + f.deletions, 0) - a[1].reduce((n3, f) => n3 + f.additions + f.deletions, 0))[0];
+    const lines2 = files.reduce((n3, f) => n3 + f.additions + f.deletions, 0);
+    if (area === "(root)" || lines2 / total < SHARE) return null;
+    const terms = termsOf(files.map((f) => f.path));
+    if (!terms.size) return null;
+    const prose = [msg.title, ...text.lines.map((l) => l.text)].join("\n");
+    const said = [...new Set(prose.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 3))];
+    for (const t of terms) if (said.some((w) => alike(t, w))) return null;
+    const lowered = prose.toLowerCase();
+    if (files.some((f) => lowered.includes(f.path.split("/").pop().toLowerCase()))) return null;
+    const own = norm2(files.map((f) => `${f.added ?? ""}
+${f.removed ?? ""}`).join("\n"));
+    if (own && codeShapedNames(prose).some((n3) => own.includes(norm2(n3)))) return null;
+    if (by.size === 1) return null;
+    const pct3 = Math.round(100 * lines2 / total);
+    return {
+      rule: "unmentioned-area",
+      severity: "warn",
+      points: 6,
+      message: `${pct3}% of the changed lines (${lines2} in ${files.length} file${files.length === 1 ? "" : "s"}) are in ${area}, and the description never mentions it`,
+      hint: `Say what changed in ${area}, or say plainly that the branch carries it. A description of the smaller part reads as the whole change.`,
+      data: { area, lines: lines2, share: pct3 }
+    };
+  }
+};
+var coverageRules = [unmentionedArea];
 
 // src/rules/prose.ts
 var VOCAB = new RegExp(
@@ -1165,8 +1681,8 @@ var aiCloser = {
   id: "ai-closer",
   kinds: ["commit", "pr"],
   run({ text }) {
-    const first = text.lines.find((l) => l.text.trim() && !text.headings.includes(l));
-    const h = hits(text.lines, CLOSER, (l) => l === first)[0];
+    const first2 = text.lines.find((l) => l.text.trim() && !text.headings.includes(l));
+    const h = hits(text.lines, CLOSER, (l) => l === first2)[0];
     if (!h) return null;
     const q2 = quote(h.match);
     return {
@@ -1301,6 +1817,159 @@ var emDash = {
   }
 };
 var proseRules = [chatbotLeftovers, aiOpener, aiCloser, aiVocab, bulletBloat, longBullet, emoji, boldSpam, emDash];
+
+// src/rules/sourced.ts
+var LEVELS = {
+  nameNowhere: "warn",
+  fileNowhere: "warn",
+  nameWeak: "warn",
+  addedButRemoved: "warn",
+  existsUntouched: "info",
+  fact: "warn",
+  testCount: "error"
+};
+var LOOKUP_RULES = /* @__PURE__ */ new Set(["unsourced-name", "unsourced-fact", "unmentioned-area"]);
+var isLookupNote = (f) => LOOKUP_RULES.has(f.rule) && f.severity !== "info";
+function list(items, max = 3) {
+  const shown = items.slice(0, max).map((s) => `\`${s}\``);
+  return shown.join(", ") + (items.length > max ? ` and ${items.length - max} more` : "");
+}
+var first = (cs) => cs.find((c) => c.line !== void 0)?.line;
+var unsourcedName = {
+  id: "unsourced-name",
+  kinds: ["commit", "pr"],
+  needsDiff: true,
+  run(ctx) {
+    const r = ctx.resolver;
+    if (!r || !r.diffKnown) return null;
+    const claims2 = claimsIn(ctx.msg.title, ctx.text.lines);
+    if (!claims2.length) return null;
+    r.prime(claims2.filter((c) => c.kind === "name").map((c) => c.text));
+    const madeUp = [];
+    const madeUpFile = [];
+    const unsure = [];
+    const addedButRemoved = [];
+    const exists = [];
+    for (const c of claims2) {
+      if (c.kind === "name") {
+        const w = r.where(c.text);
+        if (c.plain) {
+          if (r.whereWord(c.text) === "removed") addedButRemoved.push(c);
+          continue;
+        }
+        if (w === "nowhere") (c.adds || c.touches || r.sessionKnown ? madeUp : unsure).push(c);
+        else if (w === "removed" && c.uses) addedButRemoved.push(c);
+        else if (w === "repo" && c.adds) exists.push(c);
+      } else {
+        const f = r.file(c.text);
+        if (f === "nowhere") (c.adds || c.touches ? madeUpFile : unsure).push(c);
+        else if (f === "repo" && c.adds) exists.push(c);
+        else if (f === "diff" && c.uses) {
+          const st = r.fileStat(c.text);
+          if (st && st.additions === 0 && st.deletions > 0) addedButRemoved.push(c);
+        }
+      }
+    }
+    const out = [];
+    const sure = [...madeUp, ...madeUpFile];
+    if (sure.length) {
+      const errors = sure.some((c) => (c.kind === "name" ? LEVELS.nameNowhere : LEVELS.fileNowhere) === "error");
+      out.push({
+        rule: "unsourced-name",
+        severity: errors ? "error" : "warn",
+        points: Math.min(24, (errors ? 20 : 6) + 4 * (sure.length - 1)),
+        message: `Says the change adds or touches ${list(sure.map((c) => c.text))}, but ${sure.length > 1 ? "they aren't" : "it isn't"} in the diff or anywhere in the repo`,
+        hint: "Use the name the diff really has (check the spelling against it) or drop the sentence. If it comes from outside this repo, say where.",
+        line: first(sure),
+        quote: sure[0].text,
+        data: { count: sure.length, names: sure.map((c) => c.text).join(", ") }
+      });
+    }
+    if (unsure.length) {
+      out.push({
+        rule: "unsourced-name",
+        severity: LEVELS.nameWeak,
+        points: Math.min(12, 4 * unsure.length),
+        message: `${list(unsure.map((c) => c.text))} ${unsure.length > 1 ? "aren't" : "isn't"} in the diff or anywhere in the repo`,
+        hint: "Check the spelling against the diff. If it's from a dependency or another repo, say so.",
+        line: first(unsure),
+        quote: unsure[0].text,
+        data: { count: unsure.length, names: unsure.map((c) => c.text).join(", ") }
+      });
+    }
+    if (addedButRemoved.length) {
+      out.push({
+        rule: "unsourced-name",
+        severity: LEVELS.addedButRemoved,
+        points: 8,
+        message: `Says the change adds ${list(addedButRemoved.map((c) => c.text))}, but the diff only removes ${addedButRemoved.length > 1 ? "them" : "it"}`,
+        hint: "Say what the change does to it: removes, replaces or renames.",
+        line: first(addedButRemoved),
+        quote: addedButRemoved[0].text,
+        data: { count: addedButRemoved.length, names: addedButRemoved.map((c) => c.text).join(", ") }
+      });
+    }
+    if (exists.length) {
+      out.push({
+        rule: "unsourced-name",
+        severity: LEVELS.existsUntouched,
+        points: 2,
+        message: `${list(exists.map((c) => c.text))} already exist${exists.length > 1 ? "" : "s"} and this diff doesn't touch ${exists.length > 1 ? "them" : "it"}`,
+        hint: 'If the change only uses it, say "uses", not "adds".',
+        line: first(exists),
+        quote: exists[0].text,
+        data: { count: exists.length, names: exists.map((c) => c.text).join(", ") }
+      });
+    }
+    return out.length ? out : null;
+  }
+};
+var unsourcedFact = {
+  id: "unsourced-fact",
+  kinds: ["commit", "pr"],
+  run(ctx) {
+    const r = ctx.resolver;
+    if (!r || !r.sessionKnown) return null;
+    const missing = factsIn(ctx.text.lines).filter((f) => r.hasFact(f.text) === false);
+    if (!missing.length) return null;
+    return {
+      rule: "unsourced-fact",
+      severity: LEVELS.fact,
+      points: Math.min(15, 5 * missing.length),
+      message: `${list(missing.map((f) => f.text))} ${missing.length > 1 ? "aren't" : "isn't"} in the diff, in anything a command printed, or in what the user wrote`,
+      hint: "Say where it comes from (a command you ran, an issue, what the user told you) or leave it out. Never write a figure you did not see.",
+      line: missing[0].line,
+      quote: missing[0].text,
+      data: { count: missing.length, facts: missing.map((f) => f.text).join(", ") }
+    };
+  }
+};
+var testCountMismatch = {
+  id: "test-count-mismatch",
+  kinds: ["commit", "pr"],
+  run(ctx) {
+    const s = ctx.session;
+    if (!s?.hasOutput || !s.tests.length || !s.testCounts?.length) return null;
+    const printed2 = new Set(s.testCounts.slice(0, 300));
+    const sums = /* @__PURE__ */ new Set();
+    const arr = [...printed2];
+    for (let i = 0; i < arr.length; i++) for (let j = i; j < arr.length; j++) sums.add(arr[i] + arr[j]);
+    const wrong = passedClaims(ctx.msg.title, ctx.text.lines).filter((c) => !printed2.has(c.n) && !sums.has(c.n));
+    if (!wrong.length) return null;
+    const seen = [...printed2].filter((n3) => n3 >= 5).sort((a, b) => b - a).slice(0, 4);
+    return {
+      rule: "test-count-mismatch",
+      severity: LEVELS.testCount,
+      points: 20,
+      message: `Says "${wrong[0].text}", but no test run in this session printed ${wrong[0].n}`,
+      hint: `Quote what the run actually printed${seen.length ? ` (the runs here printed counts like ${seen.join(", ")})` : ""}, or run the tests again and copy the result.`,
+      line: wrong[0].line,
+      quote: wrong[0].text,
+      data: { claimed: wrong[0].n }
+    };
+  }
+};
+var sourcedRules = [unsourcedName, unsourcedFact, testCountMismatch];
 
 // src/vague.ts
 var VAGUE = /^(?:updates?|fix(?:es|ed)?|changes?|wip|misc|stuff|cleanup|clean ?up|refactor(?:ing)?|improvements?|tweaks?|minor(?: fix(?:es)?| changes?| updates?| tweaks?)?|small (?:fix(?:es)?|changes?)|(?:various|several|some) (?:fix(?:es)?|changes|improvements|updates)|update (?:the )?(?:files?|code|stuff|things|project|app)|fix(?:ed|es)? (?:the |a |some |all )?(?:bugs?|issues?|stuff|things?|problems?|errors?|it|this|that)|bug ?fix(?:es)?|quick ?fix|hot ?fix|final changes?|more changes|code changes|done|save|commit|summary|changes made|tests?|testing|temp|tmp|asdf|x+|\.+)\.?$/i;
@@ -1490,10 +2159,10 @@ function profileFrom(commits) {
       ticket++;
       ticketExample ??= tk[1];
     }
-    const first = core(c.subject)[0];
-    if (first && new RegExp("\\p{L}", "u").test(first)) {
+    const first2 = core(c.subject)[0];
+    if (first2 && new RegExp("\\p{L}", "u").test(first2)) {
       letters++;
-      if (first !== first.toLowerCase()) upper++;
+      if (first2 !== first2.toLowerCase()) upper++;
     }
     if (c.body.trim()) body++;
     const verb = core(c.subject).match(/^[A-Za-z]+/)?.[0];
@@ -1579,9 +2248,9 @@ var styleCase = {
   kinds: ["commit"],
   run({ msg, style }) {
     if (!style) return null;
-    const first = subjectCore(msg.title)[0];
-    if (!first || !new RegExp("\\p{L}", "u").test(first)) return null;
-    const upper = first !== first.toLowerCase();
+    const first2 = subjectCore(msg.title)[0];
+    if (!first2 || !new RegExp("\\p{L}", "u").test(first2)) return null;
+    const upper = first2 !== first2.toLowerCase();
     if (!upper && style.capitalized >= 0.85) {
       return {
         rule: "style-case",
@@ -1727,8 +2396,8 @@ var blankLine = {
   id: "blank-line",
   kinds: ["commit"],
   run({ msg }) {
-    const first = msg.body.split("\n")[0] ?? "";
-    if (!first.trim()) return null;
+    const first2 = msg.body.split("\n")[0] ?? "";
+    if (!first2.trim()) return null;
     return {
       rule: "blank-line",
       severity: "warn",
@@ -1746,14 +2415,14 @@ var markdownInCommit = {
     const inSubject = /^#{1,6}\s|\*\*|__\w/.test(msg.title);
     const n3 = text.headings.length + text.emojiLed.length + (text.boldLabels >= 2 ? text.boldLabels : 0) + (inSubject ? 2 : 0);
     if (!n3) return null;
-    const first = inSubject ? { n: 1 } : text.headings[0] ?? text.emojiLed[0];
+    const first2 = inSubject ? { n: 1 } : text.headings[0] ?? text.emojiLed[0];
     return {
       rule: "markdown-in-commit",
       severity: "warn",
       points: Math.min(12, 4 + 2 * n3),
       message: inSubject ? "Markdown in the subject line" : "Markdown headers or bold labels in a commit message",
       hint: 'git log shows raw text, so "## Summary" and **bold** show up as literal symbols. Use plain sentences.',
-      line: first?.n
+      line: first2?.n
     };
   }
 };
@@ -1787,7 +2456,7 @@ var commitChangelog = {
 var subjectRules = [commitChangelog, emptySubject, subjectVague, subjectLength, subjectMood, subjectPeriod, blankLine, markdownInCommit];
 
 // src/rules/index.ts
-var RULES = [...groundedRules, ...subjectRules, ...styleRules, ...proseRules];
+var RULES = [...groundedRules, ...sourcedRules, ...coverageRules, ...subjectRules, ...styleRules, ...proseRules];
 var RULE_IDS = RULES.map((r) => r.id);
 
 // src/analyze.ts
@@ -1878,10 +2547,11 @@ function analyze(msg, diff, opts = {}) {
   const skip = msg.kind === "pr" ? opts.template?.lines : void 0;
   const text = analyzeText(msg.body, msg.bodyLine, skip);
   const files = new Set(diff?.files.flatMap((f) => [f.path, f.path.split("/").pop()]) ?? []);
-  const density = specificity(text.lines, text.words, files);
+  const resolver = makeResolver({ diff, session: opts.session, repo: opts.repo });
+  const density = resolver ? verifiedSpecificity(text.lines, text.words, files, resolver) : specificity(text.lines, text.words, files);
   const length2 = opts.length ?? "normal";
   const budget = Math.round(wordBudget(msg.kind, diff, length2) * specificityBonus(density));
-  const ctx = { msg, diff, text, budget, density, length: length2, style: opts.style ?? null, session: opts.session ?? null, previous: opts.previous ?? null };
+  const ctx = { msg, diff, text, budget, density, length: length2, style: opts.style ?? null, session: opts.session ?? null, previous: opts.previous ?? null, resolver };
   let findings = [];
   for (const rule of RULES) {
     if (!rule.kinds.includes(msg.kind) || rule.needsDiff && !diff) continue;
@@ -1893,7 +2563,7 @@ function analyze(msg, diff, opts = {}) {
   const score2 = Math.min(100, findings.reduce((n3, f) => n3 + f.points, 0));
   return { kind: msg.kind, title: msg.title, score: score2, ...gradeOf(score2), words: text.words, budget, density: Math.round(density * 10) / 10, diff, findings };
 }
-var CLAIMS2 = /* @__PURE__ */ new Set(["phantom-tests", "unverified-in-session", "vague-verification", "ticked-boxes", "unbacked-claim"]);
+var CLAIMS2 = /* @__PURE__ */ new Set(["phantom-tests", "unverified-in-session", "vague-verification", "ticked-boxes", "unbacked-claim", "unsourced-name", "unsourced-fact", "test-count-mismatch"]);
 function keepableEvidence(msg, r) {
   const flagged = new Set(r.findings.filter((f) => CLAIMS2.has(f.rule) && f.line).map((f) => f.line));
   const lines2 = msg.body.split("\n").filter((_, i) => !flagged.has(msg.bodyLine + i));
@@ -1921,14 +2591,15 @@ function shapeFor(kind, size) {
     ];
   }
   const opening = 'Opening, 1 or 2 sentences: what changed and why, in plain words (no "What:" or "Why:" labels).';
-  const tested = 'Tested: the commands you ran and what they returned. If nothing ran, "Not tested:" and what should be checked.';
+  const tested = 'Tested: only if you ran something: the command and what it returned. If nothing ran, leave testing out (no "Not tested" line); a risk nothing exercised goes in the risk line.';
   const risk = "Optional, one line: a risk, breaking change, migration or follow-up.";
-  if (size === "tiny") return [opening, "Bullets only if there are 2 or more separate behavior changes.", risk, tested];
+  const carry = 'Carry over what you were given that a reviewer needs: the issue link with its word ("Closes #12"), other PRs cited and why, a question or feedback the author wants, what it leaves for later or still works, an example they gave. Cut padding, never these.';
+  if (size === "tiny") return [opening, "Bullets only if there are 2 or more separate behavior changes.", carry, risk, tested];
   const bullets = size === "big" ? "2 to 5 bullets, more on a diff this big: the changes a reviewer would ask about, one per bullet in about 25 words, each with where to look and the values (old \u2192 new, limits, defaults). More bullets, not longer ones. Group by area, never file by file. Say which part is mechanical and roughly how much of the diff it is." : "2 to 5 bullets: the changes a reviewer would ask about, one per bullet in about 25 words, each with where to look (function, setting, endpoint) and the values (old \u2192 new, limits, defaults). Group by area, never file by file.";
-  return [opening, bullets, risk, tested];
+  return [opening, bullets, carry, risk, tested];
 }
 var LENGTH_NOTE = {
-  short: "Fewer, tighter bullets and no extra background; still say what changed and why, keep every fact, and keep the Tested line.",
+  short: "Fewer, tighter bullets and no extra background; still say what changed and why, and keep every fact and anything you ran.",
   detailed: "More room for reasoning: the design choices, what was ruled out and why, and the risks, still grouped by area, never file by file."
 };
 function buildContext(kind, cwd, base) {
@@ -2005,7 +2676,7 @@ function contextOf(kind, diff, opts = {}) {
 var pct2 = (x) => `${Math.round(x * 100)}%`;
 var n = (x) => x.toLocaleString("en-US");
 var plural = (k, one, many = `${one}s`) => `${n(k)} ${k === 1 ? one : many}`;
-function list(files, max = 6) {
+function list2(files, max = 6) {
   const shown = files.slice(0, max).map((f) => `${f.path} (${n(f.lines)})`);
   return shown.join(", ") + (files.length > max ? `, +${files.length - max} more` : "");
 }
@@ -2023,9 +2694,9 @@ function renderContext(c) {
     } else {
       out.push(`Files: ${d.paths.join(", ")}${d.files > d.paths.length ? `, +${d.files - d.paths.length} more` : ""}`);
     }
-    out.push(d.tests.length ? `Tests: ${list(d.tests)}.` : "Tests: none changed, so don't say tests were added.");
-    if (d.docs.length) out.push(`Docs: ${list(d.docs)}.`);
-    if (d.generated.length) out.push(`Generated or lockfiles, not counted: ${list(d.generated, 4)}.`);
+    out.push(d.tests.length ? `Tests: ${list2(d.tests)}.` : "Tests: none changed, so don't say tests were added.");
+    if (d.docs.length) out.push(`Docs: ${list2(d.docs)}.`);
+    if (d.generated.length) out.push(`Generated or lockfiles, not counted: ${list2(d.generated, 4)}.`);
     if (d.renames.length) {
       const shown = d.renames.slice(0, 4).join(", ") + (d.renames.length > 4 ? `, +${d.renames.length - 4} more` : "");
       out.push(`Only moved or renamed: ${plural(d.renames.length, "file")} (${shown}). That part is mechanical.`);
@@ -2050,7 +2721,7 @@ function renderContext(c) {
     out.push(`Words: about ${n(c.range.floor)} to ${n(c.range.budget)}. Text dense with numbers, code and links gets up to 2.5\xD7 the top; padding doesn't.`);
     out.push(
       "",
-      "From your session, not the diff: the why (the bug, the error message quoted, the issue link, who asked) and the Tested line (the commands you ran in this session and what they returned)."
+      "From your session, not the diff: the why (the bug, the error message quoted, the issue link, who asked) and what you ran, if anything (the commands and what they returned)."
     );
   } else {
     out.push(`Body words: ${n(c.range.budget)} at most, up to 2.5\xD7 more if it's dense with specifics (numbers, code references, links). A body is optional.`);
@@ -2251,6 +2922,9 @@ function createClient(opts) {
     }
   };
 }
+function fileChange(f) {
+  return { path: f.filename, additions: f.additions, deletions: f.deletions, ...f.patch === void 0 ? {} : splitPatch(f.patch) };
+}
 var MAX_FILE_PAGES = 3;
 var CODING_AGENTS = /^(?:copilot|copilot-swe-agent|devin-ai-integration|google-labs-jules|jules|cursor|cursoragent|claude|anthropic-claude|chatgpt-codex-connector|codex|openhands(?:-agent)?|sweep-ai|amazon-q-developer|factory-droid|codegen-sh|codeflash-ai)(?:\[bot\])?$/i;
 function isCodingAgent(user) {
@@ -2265,7 +2939,7 @@ async function fetchPrFiles(client, ref, changedFiles) {
   const files = [];
   for (let page = 1; page <= MAX_FILE_PAGES && files.length < changedFiles; page++) {
     const batch = await client.get(`${base}/files?per_page=100&page=${page}`);
-    files.push(...batch.map((f) => ({ path: f.filename, additions: f.additions, deletions: f.deletions })));
+    files.push(...batch.map(fileChange));
     if (batch.length < 100) break;
   }
   return files;
@@ -2300,8 +2974,8 @@ async function fetchTemplate(client, owner, repo, ref) {
   return null;
 }
 async function fetchRecentPrs(client, ref, count) {
-  const list2 = await client.get(`/repos/${ref.owner}/${ref.repo}/pulls?state=closed&sort=updated&direction=desc&per_page=50`);
-  const picked = list2.filter((p) => p.merged_at && !isBot(p.user)).slice(0, count);
+  const list3 = await client.get(`/repos/${ref.owner}/${ref.repo}/pulls?state=closed&sort=updated&direction=desc&per_page=50`);
+  const picked = list3.filter((p) => p.merged_at && !isBot(p.user)).slice(0, count);
   const out = [];
   for (const p of picked) {
     const pr2 = { ...ref, number: p.number };
@@ -2314,12 +2988,12 @@ async function fetchRecentPrs(client, ref, count) {
 }
 
 // src/token.ts
-import { execFileSync as execFileSync2 } from "child_process";
+import { execFileSync as execFileSync3 } from "child_process";
 function localToken(env = process.env) {
   const t = env.GITHUB_TOKEN || env.GH_TOKEN;
   if (t) return t;
   try {
-    return execFileSync2("gh", ["auth", "token"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 3e3 }).trim() || null;
+    return execFileSync3("gh", ["auth", "token"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 3e3 }).trim() || null;
   } catch {
     return null;
   }
@@ -2362,8 +3036,8 @@ function detectAgent(env = process.env) {
 
 // src/seen.ts
 import { createHash as createHash2 } from "crypto";
-import { appendFileSync, existsSync as existsSync5, mkdirSync as mkdirSync2, readFileSync as readFileSync5, writeFileSync as writeFileSync2 } from "fs";
-import { join as join5, resolve as resolve3 } from "path";
+import { appendFileSync, existsSync as existsSync6, mkdirSync as mkdirSync2, readFileSync as readFileSync5, writeFileSync as writeFileSync2 } from "fs";
+import { join as join6, resolve as resolve3 } from "path";
 var TRAILER = /^\s*([\w-]+-by|change-id):/i;
 var MAX = 2e3;
 function fingerprint(message) {
@@ -2372,11 +3046,11 @@ function fingerprint(message) {
 }
 function seenFile(cwd) {
   const common = git(["rev-parse", "--git-common-dir"], cwd)?.trim();
-  return common ? join5(resolve3(cwd, common), "buzzcut-seen") : null;
+  return common ? join6(resolve3(cwd, common), "buzzcut-seen") : null;
 }
 function readSeen(cwd) {
   const file = seenFile(cwd);
-  if (!file || !existsSync5(file)) return null;
+  if (!file || !existsSync6(file)) return null;
   try {
     const [head = "", ...rest] = readFileSync5(file, "utf8").split("\n");
     const since = Number(head.match(/^since (\d+)$/)?.[1]);
@@ -2389,7 +3063,7 @@ function readSeen(cwd) {
 function markInstalled(cwd, now = Math.floor(Date.now() / 1e3)) {
   try {
     const file = seenFile(cwd);
-    if (file && !existsSync5(file)) writeFileSync2(file, `since ${now}
+    if (file && !existsSync6(file)) writeFileSync2(file, `since ${now}
 `);
   } catch {
   }
@@ -2399,8 +3073,8 @@ function recordSeen(message, cwd, now = Math.floor(Date.now() / 1e3)) {
     const file = seenFile(cwd);
     if (!file) return;
     const print = fingerprint(message);
-    if (!existsSync5(file)) {
-      mkdirSync2(join5(file, ".."), { recursive: true });
+    if (!existsSync6(file)) {
+      mkdirSync2(join6(file, ".."), { recursive: true });
       writeFileSync2(file, `since ${now}
 ${print}
 `);
@@ -2637,21 +3311,21 @@ function segments(src) {
   return segs;
 }
 var WRAPPERS = /* @__PURE__ */ new Set(["command", "builtin", "exec", "time", "nohup", "env"]);
-function program(words) {
+function program(words2) {
   let i = 0;
-  while (i < words.length) {
-    const w = words[i];
-    if (/^[A-Za-z_]\w*=/.test(w) || WRAPPERS.has(w) || words[i - 1] === "env" && w.startsWith("-")) i++;
+  while (i < words2.length) {
+    const w = words2[i];
+    if (/^[A-Za-z_]\w*=/.test(w) || WRAPPERS.has(w) || words2[i - 1] === "env" && w.startsWith("-")) i++;
     else break;
   }
-  return words.slice(i);
+  return words2.slice(i);
 }
-function echoed(words) {
-  const args = words.slice(1).filter((w, k) => !(k === 0 && /^-[neE]+$/.test(w)));
+function echoed(words2) {
+  const args = words2.slice(1).filter((w, k) => !(k === 0 && /^-[neE]+$/.test(w)));
   return args.join(" ") + "\n";
 }
-function printed(words) {
-  const [fmt = "", ...args] = words.slice(1);
+function printed(words2) {
+  const [fmt = "", ...args] = words2.slice(1);
   if (/^%s(\\n)?$/.test(fmt)) return args.join(fmt.endsWith("\\n") ? "\n" : "") + (fmt.endsWith("\\n") ? "\n" : "");
   return fmt.replace(/\\n/g, "\n").replace(/\\t/g, "	");
 }
@@ -2833,16 +3507,83 @@ function transcriptCommands(text) {
 function programs(cmd) {
   return segments(cmd).map((seg) => seg.words.find((w) => !/^[A-Za-z_]\w*=/.test(w)) ?? "").map((p) => p.replace(/^.*\//, "")).filter((p) => /^[\w.+-]+$/.test(p));
 }
-function sessionFacts(commands) {
+function sessionFacts(commands, extra = {}) {
   const isTest2 = (c) => heads(c).some((h) => TEST_CMD.test(h));
   const tests = commands.filter(isTest2);
   const exercised = commands.filter((c) => isTest2(c) || programs(c).some((p) => !INERT.test(p)));
-  return { tests, exercised };
+  return { tests, exercised, ...extra };
+}
+var MAX_TEXT = 15e5;
+var HEAD = 1e4;
+var TAIL = 3e4;
+var N = String.raw`(\d[\d,]*)(?![\d.]*\d)(?!\s?(?:ms|s|sec|secs|seconds|m|min)\b)`;
+var COUNT_PATTERNS = [
+  new RegExp(String.raw`(?<![\w.])${N}\s+(?:tests?|specs?|cases?|examples?|assertions?|checks?|suites?|passed|passing|pass|failed|failing|failures?|skipped|total|ok)\b`, "gi"),
+  new RegExp(String.raw`\b(?:tests?|specs?|examples?)(?:\s+(?:files?|suites?))?\s*[:=]\s*${N}`, "gi"),
+  new RegExp(String.raw`\b(?:tests?|specs?|examples?)\s+run\s*[:=]?\s*${N}`, "gi"),
+  new RegExp(String.raw`\b(?:passed|passing|failed|failures?)\s*[:=(]\s*${N}`, "gi"),
+  new RegExp(String.raw`\bran\s+${N}\b`, "gi"),
+  new RegExp(String.raw`(?<![\w.])${N}\s+of\s+${N}(?![\w.])`, "gi")
+];
+function testCountsIn(output) {
+  const out = /* @__PURE__ */ new Set();
+  for (const line of output.split("\n")) {
+    if (line.length > 400) continue;
+    for (const re of COUNT_PATTERNS) {
+      for (const m of line.matchAll(re)) {
+        for (const g of m.slice(1)) {
+          const n3 = Number(g?.replace(/,/g, ""));
+          if (g && Number.isSafeInteger(n3)) out.add(n3);
+        }
+      }
+    }
+  }
+  return [...out];
+}
+var asText = (v) => typeof v === "string" ? v : Array.isArray(v) ? v.map((b) => b && typeof b === "object" && typeof b.text === "string" ? b.text : "").join("\n") : "";
+function transcriptText(text) {
+  const parts = [];
+  const counts = /* @__PURE__ */ new Set();
+  let hasOutput = false;
+  let size = 0;
+  const keep = (s) => {
+    if (!s || size > MAX_TEXT) return;
+    const cut = s.length > HEAD + TAIL ? s.slice(0, HEAD) + "\n\u2026\n" + s.slice(-TAIL) : s;
+    parts.push(cut);
+    size += cut.length;
+  };
+  for (const line of text.split("\n")) {
+    const t = line.trim();
+    if (!t.startsWith("{")) continue;
+    let entry;
+    try {
+      entry = JSON.parse(t);
+    } catch {
+      continue;
+    }
+    if (entry.type !== "user") continue;
+    const content = entry.message?.content;
+    if (typeof content === "string") {
+      keep(content);
+      continue;
+    }
+    if (!Array.isArray(content)) continue;
+    for (const b of content) {
+      if (b.type === "tool_result") {
+        hasOutput = true;
+        const out = asText(b.content);
+        for (const n3 of testCountsIn(out)) counts.add(n3);
+        keep(out);
+      } else if (b.type === "text") keep(b.text ?? "");
+    }
+  }
+  return { text: parts.join("\n"), hasOutput, testCounts: [...counts] };
 }
 function readSession(path) {
   try {
     if (statSync3(path).size > MAX_BYTES) return null;
-    return sessionFacts(transcriptCommands(readFileSync6(path, "utf8")));
+    const raw = readFileSync6(path, "utf8");
+    return sessionFacts(transcriptCommands(raw), transcriptText(raw));
   } catch {
     return null;
   }
@@ -2870,6 +3611,12 @@ function agentFeedback(what, r, max) {
   lines2.push("Cut the padding, not the facts: keep the why (from the conversation), every number, error message, link and name the reviewer needs, and only the commands you actually ran. Rewrite it yourself and run the command again; there's no need to ask the user unless they asked for this exact wording.");
   return lines2.join("\n");
 }
+function agentAdvice(what, r) {
+  const notes = r.findings.filter(isLookupNote);
+  const lines2 = [`buzzcut: this ${what} passes, and these notes are for you. Nothing was blocked. Fix them if they're right; if a name is real (from a dependency or another repo), say where it comes from.`];
+  for (const f of notes.slice(0, 6)) lines2.push(`${ICON[f.severity]} ${f.rule}: ${f.message}${/[.?!]$/.test(f.message) ? "" : "."} ${f.hint}`);
+  return lines2.join("\n");
+}
 function commitMsgHook(file, h) {
   const repo = loadRepo(h.cwd);
   const raw = readSafe(resolve4(h.cwd, file));
@@ -2882,7 +3629,7 @@ ${msg.body}`, h.cwd);
   };
   if (!msg.title || isIgnored(msg.title, repo.config) || operationInProgress(h.cwd)) return through(ok());
   const diff = stagedDiff(h.cwd) ?? amendDiff(h.cwd);
-  const report2 = analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length });
+  const report2 = analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length, repo: gitRepoSearch(h.cwd) });
   const max = repo.config.max;
   const p = palette(h.color);
   if (passes(report2, max)) return through(ok(p.dim(`buzzcut \u2713 yap score ${report2.score} (${report2.grade})`) + "\n"));
@@ -2966,7 +3713,7 @@ function judge(key, dir, msg, max, run) {
   const report2 = run(prev && !prev.warned ? { evidence: prev.evidence, strict: true } : null);
   if (passes(report2, max)) {
     clearDraft(key, dir);
-    return null;
+    return report2.findings.some(isLookupNote) ? report2 : null;
   }
   const warned = Boolean(prev?.warned) || report2.findings.some((f) => f.rule === "dropped-facts");
   const evidence2 = [.../* @__PURE__ */ new Set([...prev?.evidence ?? [], ...keepableEvidence(msg, report2)])];
@@ -2980,8 +3727,8 @@ function checkCommit(call, dir, repo, session) {
   const msg = parseCommit(text);
   if (!msg.title || isIgnored(msg.title, repo.config)) return null;
   const diff = call.stagesFirst ? worktreeDiff(dir) : call.all ? worktreeDiff(dir, { untracked: false }) : call.amend ? amendDiff(dir) : stagedDiff(dir);
-  const report2 = judge("hook:commit", dir, msg, repo.config.max, (previous) => analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length, session, previous }));
-  return report2 ? { what: "commit message", report: report2 } : null;
+  const report2 = judge("hook:commit", dir, msg, repo.config.max, (previous) => analyze(msg, diff, { style: repo.style, rules: repo.config.rules, length: repo.config.length, session, previous, repo: gitRepoSearch(dir) }));
+  return report2 ? { what: "commit message", report: report2, advice: passes(report2, repo.config.max) } : null;
 }
 function checkPr(call, dir, repo, session) {
   if (call.generated) return null;
@@ -2995,9 +3742,9 @@ function checkPr(call, dir, repo, session) {
     dir,
     msg,
     repo.config.max,
-    (previous) => analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session, previous })
+    (previous) => analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session, previous, repo: gitRepoSearch(dir) })
   );
-  return report2 ? { what: "PR description", report: report2 } : null;
+  return report2 ? { what: "PR description", report: report2, advice: passes(report2, repo.config.max) } : null;
 }
 function checkCommand(command, cwd, transcript) {
   if (!mightMatter(command)) return { problems: [], repo: null };
@@ -3005,16 +3752,16 @@ function checkCommand(command, cwd, transcript) {
   if (!calls.length) return { problems: [], repo: null };
   const problems = [];
   const session = transcript ? readSession(transcript) : null;
-  let first = null;
+  let first2 = null;
   for (const call of calls) {
     const dir = call.dir ? resolve4(cwd, call.dir) : cwd;
     const repo = loadRepo(dir);
-    first ??= repo;
+    first2 ??= repo;
     if (!repo.root) continue;
     const p = call.tool === "git-commit" ? checkCommit(call, dir, repo, session) : checkPr(call, dir, repo, session);
     if (p) problems.push(p);
   }
-  return { problems, repo: first };
+  return { problems, repo: first2 };
 }
 var obj = (v) => v && typeof v === "object" && !Array.isArray(v) ? v : {};
 var str = (...vs) => vs.find((v) => typeof v === "string" && v !== "");
@@ -3097,7 +3844,7 @@ function extractMcp(input, flavor) {
     }
   }
 }
-function lineCount2(text) {
+function lineCount(text) {
   return text ? text.split("\n").length - (text.endsWith("\n") ? 1 : 0) : 0;
 }
 function checkMcp(call, cwd, transcript) {
@@ -3107,7 +3854,7 @@ function checkMcp(call, cwd, transcript) {
   const repo = loadRepo(cwd);
   const session = transcript ? readSession(transcript) : null;
   const a = call.args;
-  const opts = { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session };
+  const opts = { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, session, repo: repo.root ? gitRepoSearch(cwd) : null };
   if (isPr) {
     const title = str(a.title) ?? null;
     const body = str(a.body) ?? null;
@@ -3121,17 +3868,18 @@ function checkMcp(call, cwd, transcript) {
     if (repo.root) failing2 = judge(branchKey(cwd), cwd, msg2, repo.config.max, (previous) => analyze(msg2, diff, { ...opts, previous }));
     else {
       const report3 = analyze(msg2, diff, opts);
-      failing2 = passes(report3, repo.config.max) ? null : report3;
+      failing2 = passes(report3, repo.config.max) && !report3.findings.some(isLookupNote) ? null : report3;
     }
-    return { problems: failing2 ? [{ what: "PR description", report: failing2 }] : [], repo };
+    return { problems: failing2 ? [{ what: "PR description", report: failing2, advice: passes(failing2, repo.config.max) }] : [], repo };
   }
   const message = str(a.message);
   if (!message) return { problems: [], repo };
-  const files = Array.isArray(a.files) ? a.files.map((f) => obj(f)).map((f) => ({ path: str(f.path) ?? "file", additions: lineCount2(str(f.content) ?? ""), deletions: 0 })) : str(a.path) ? [{ path: str(a.path), additions: lineCount2(str(a.content) ?? ""), deletions: 0 }] : [];
+  const files = Array.isArray(a.files) ? a.files.map((f) => obj(f)).map((f) => ({ path: str(f.path) ?? "file", additions: lineCount(str(f.content) ?? ""), deletions: 0 })) : str(a.path) ? [{ path: str(a.path), additions: lineCount(str(a.content) ?? ""), deletions: 0 }] : [];
   const msg = parseCommit(message);
   if (!msg.title || isIgnored(msg.title, repo.config)) return { problems: [], repo };
   const report2 = analyze(msg, files.length ? buildDiff(files) : null, opts);
-  return { problems: passes(report2, repo.config.max) ? [] : [{ what: "commit message", report: report2 }], repo };
+  const ok2 = passes(report2, repo.config.max);
+  return { problems: ok2 && !report2.findings.some(isLookupNote) ? [] : [{ what: "commit message", report: report2, advice: ok2 }], repo };
 }
 function agentHook(payload, flavor, h) {
   let input;
@@ -3147,9 +3895,11 @@ function agentHook(payload, flavor, h) {
   try {
     const { problems, repo } = mcp ? checkMcp(mcp, cwd ?? h.cwd, transcript) : checkCommand(command, cwd ?? h.cwd, transcript);
     if (!problems.length || !repo) return pass(flavor);
-    const reason = problems.map((p) => agentFeedback(p.what, p.report, repo.config.max)).join("\n\n");
+    const failing2 = problems.filter((p) => !p.advice);
+    if (!failing2.length) return advise(flavor, problems.map((p) => agentAdvice(p.what, p.report)).join("\n\n"));
+    const reason = failing2.map((p) => agentFeedback(p.what, p.report, repo.config.max)).join("\n\n");
     if (repo.config.block === "never") return advise(flavor, reason);
-    const summary = problems.map((p) => `${p.what}: yap score ${p.report.score} (${p.report.grade})`).join("; ");
+    const summary = failing2.map((p) => `${p.what}: yap score ${p.report.score} (${p.report.grade})`).join("; ");
     return deny(flavor, reason, summary);
   } catch (e) {
     return { ...pass(flavor), stderr: `buzzcut hook error (let the command run): ${e.message}
@@ -3158,13 +3908,13 @@ function agentHook(payload, flavor, h) {
 }
 
 // src/init.ts
-import { chmodSync, existsSync as existsSync7, mkdirSync as mkdirSync3, readFileSync as readFileSync8, unlinkSync, writeFileSync as writeFileSync3 } from "fs";
-import { delimiter, dirname, join as join7, relative as relative2, resolve as resolve5 } from "path";
+import { chmodSync, existsSync as existsSync8, mkdirSync as mkdirSync3, readFileSync as readFileSync8, unlinkSync, writeFileSync as writeFileSync3 } from "fs";
+import { delimiter, dirname, join as join8, relative as relative2, resolve as resolve5 } from "path";
 
 // src/targets.ts
-import { existsSync as existsSync6 } from "fs";
+import { existsSync as existsSync7 } from "fs";
 import { homedir } from "os";
-import { join as join6 } from "path";
+import { join as join7 } from "path";
 var OURS = /buzzcut\S*"?\s+hook\s+(claude|copilot|cursor|windsurf|antigravity)\b/;
 var isOurs = (cmd) => typeof cmd === "string" && OURS.test(cmd);
 var CURSOR_MATCHER = String.raw`\bgit\b.*\bcommit\b|\bgh\b.*\bpr\b`;
@@ -3187,9 +3937,9 @@ function mergeCopilotHooks(_config, command) {
 function mergeCursorHooks(config, command) {
   const hooks = { ...config.hooks ?? {} };
   for (const [event, matcher] of [["beforeShellExecution", CURSOR_MATCHER], ["beforeMCPExecution", MCP_TOOLS]]) {
-    const list2 = (hooks[event] ?? []).filter((h) => !isOurs(h.command));
-    if (command) list2.push({ command, matcher });
-    if (list2.length) hooks[event] = list2;
+    const list3 = (hooks[event] ?? []).filter((h) => !isOurs(h.command));
+    if (command) list3.push({ command, matcher });
+    if (list3.length) hooks[event] = list3;
     else delete hooks[event];
   }
   return { version: 1, ...config, hooks };
@@ -3197,9 +3947,9 @@ function mergeCursorHooks(config, command) {
 function mergeWindsurfHooks(config, command) {
   const hooks = { ...config.hooks ?? {} };
   for (const event of ["pre_run_command", "pre_mcp_tool_use"]) {
-    const list2 = (hooks[event] ?? []).filter((h) => !isOurs(h.command));
-    if (command) list2.push({ command, show_output: true });
-    if (list2.length) hooks[event] = list2;
+    const list3 = (hooks[event] ?? []).filter((h) => !isOurs(h.command));
+    if (command) list3.push({ command, show_output: true });
+    if (list3.length) hooks[event] = list3;
     else delete hooks[event];
   }
   return { ...config, hooks };
@@ -3212,97 +3962,97 @@ function mergeAntigravityHooks(config, command) {
   }
   return out;
 }
-var claudeHome = (home) => process.env.CLAUDE_CONFIG_DIR || join6(home, ".claude");
-var codexHome = (home) => process.env.CODEX_HOME || join6(home, ".codex");
+var claudeHome = (home) => process.env.CLAUDE_CONFIG_DIR || join7(home, ".claude");
+var codexHome = (home) => process.env.CODEX_HOME || join7(home, ".codex");
 var TARGETS = [
   {
     id: "claude",
     name: "Claude Code",
-    detect: (home) => existsSync6(claudeHome(home)),
-    userSkillsDir: (home) => join6(claudeHome(home), "skills"),
+    detect: (home) => existsSync7(claudeHome(home)),
+    userSkillsDir: (home) => join7(claudeHome(home), "skills"),
     repoSkillsDir: ".claude/skills",
     hook: {
       flavor: "claude",
-      userFile: (home) => join6(claudeHome(home), "settings.json"),
-      repoFile: (root) => join6(root, ".claude", "settings.json"),
+      userFile: (home) => join7(claudeHome(home), "settings.json"),
+      repoFile: (root) => join7(root, ".claude", "settings.json"),
       merge: mergeClaudeSettings
     }
   },
   {
     id: "copilot",
     name: "VS Code (Copilot agent)",
-    detect: (home) => existsSync6(join6(home, ".copilot")) || vscodeUserDirs(home).some((d) => existsSync6(d)),
-    userSkillsDir: (home) => join6(home, ".copilot", "skills"),
+    detect: (home) => existsSync7(join7(home, ".copilot")) || vscodeUserDirs(home).some((d) => existsSync7(d)),
+    userSkillsDir: (home) => join7(home, ".copilot", "skills"),
     repoSkillsDir: ".agents/skills",
     hook: {
       flavor: "claude",
-      userFile: (home) => join6(home, ".copilot", "hooks", "buzzcut.json"),
-      repoFile: (root) => join6(root, ".github", "hooks", "buzzcut.json"),
+      userFile: (home) => join7(home, ".copilot", "hooks", "buzzcut.json"),
+      repoFile: (root) => join7(root, ".github", "hooks", "buzzcut.json"),
       merge: mergeCopilotHooks
     }
   },
   {
     id: "cursor",
     name: "Cursor",
-    detect: (home) => existsSync6(join6(home, ".cursor")),
-    userSkillsDir: (home) => join6(home, ".cursor", "skills"),
+    detect: (home) => existsSync7(join7(home, ".cursor")),
+    userSkillsDir: (home) => join7(home, ".cursor", "skills"),
     repoSkillsDir: ".agents/skills",
     hook: {
       flavor: "cursor",
-      userFile: (home) => join6(home, ".cursor", "hooks.json"),
-      repoFile: (root) => join6(root, ".cursor", "hooks.json"),
+      userFile: (home) => join7(home, ".cursor", "hooks.json"),
+      repoFile: (root) => join7(root, ".cursor", "hooks.json"),
       merge: mergeCursorHooks
     }
   },
   {
     id: "windsurf",
     name: "Windsurf",
-    detect: (home) => existsSync6(join6(home, ".codeium", "windsurf")),
-    userSkillsDir: (home) => join6(home, ".codeium", "windsurf", "skills"),
+    detect: (home) => existsSync7(join7(home, ".codeium", "windsurf")),
+    userSkillsDir: (home) => join7(home, ".codeium", "windsurf", "skills"),
     repoSkillsDir: ".windsurf/skills",
     hook: {
       flavor: "windsurf",
-      userFile: (home) => join6(home, ".codeium", "windsurf", "hooks.json"),
+      userFile: (home) => join7(home, ".codeium", "windsurf", "hooks.json"),
       // Devin-era builds read .devin/hooks.json and fall back to .windsurf/hooks.json.
-      repoFile: (root) => existsSync6(join6(root, ".devin", "hooks.json")) ? join6(root, ".devin", "hooks.json") : join6(root, ".windsurf", "hooks.json"),
+      repoFile: (root) => existsSync7(join7(root, ".devin", "hooks.json")) ? join7(root, ".devin", "hooks.json") : join7(root, ".windsurf", "hooks.json"),
       merge: mergeWindsurfHooks
     }
   },
   {
     id: "antigravity",
     name: "Antigravity",
-    detect: (home) => ["antigravity", "antigravity-ide", "antigravity-cli"].some((d) => existsSync6(join6(home, ".gemini", d))),
+    detect: (home) => ["antigravity", "antigravity-ide", "antigravity-cli"].some((d) => existsSync7(join7(home, ".gemini", d))),
     // Antigravity 2.x discovers global customizations in ~/.gemini/config/; older builds
     // read ~/.gemini/antigravity/skills.
-    userSkillsDir: (home) => existsSync6(join6(home, ".gemini", "config")) ? join6(home, ".gemini", "config", "skills") : join6(home, ".gemini", "antigravity", "skills"),
+    userSkillsDir: (home) => existsSync7(join7(home, ".gemini", "config")) ? join7(home, ".gemini", "config", "skills") : join7(home, ".gemini", "antigravity", "skills"),
     repoSkillsDir: ".agents/skills",
     hook: {
       flavor: "antigravity",
-      userFile: (home) => join6(home, ".gemini", "config", "hooks.json"),
-      repoFile: (root) => join6(root, ".agents", "hooks.json"),
+      userFile: (home) => join7(home, ".gemini", "config", "hooks.json"),
+      repoFile: (root) => join7(root, ".agents", "hooks.json"),
       merge: mergeAntigravityHooks
     }
   },
   {
     id: "codex",
     name: "Codex",
-    detect: (home) => existsSync6(codexHome(home)),
-    userSkillsDir: (home) => join6(codexHome(home), "skills"),
+    detect: (home) => existsSync7(codexHome(home)),
+    userSkillsDir: (home) => join7(codexHome(home), "skills"),
     repoSkillsDir: ".agents/skills"
   },
   {
     id: "agents",
     name: "Other agents (~/.agents)",
-    detect: (home) => existsSync6(join6(home, ".agents")),
-    userSkillsDir: (home) => join6(home, ".agents", "skills"),
+    detect: (home) => existsSync7(join7(home, ".agents")),
+    userSkillsDir: (home) => join7(home, ".agents", "skills"),
     repoSkillsDir: ".agents/skills"
   }
 ];
 function vscodeUserDirs(home = homedir()) {
   const names = ["Code", "Code - Insiders"];
-  if (process.platform === "darwin") return names.map((n3) => join6(home, "Library", "Application Support", n3, "User"));
-  if (process.platform === "win32") return names.map((n3) => join6(process.env.APPDATA ?? join6(home, "AppData", "Roaming"), n3, "User"));
-  return names.map((n3) => join6(process.env.XDG_CONFIG_HOME ?? join6(home, ".config"), n3, "User"));
+  if (process.platform === "darwin") return names.map((n3) => join7(home, "Library", "Application Support", n3, "User"));
+  if (process.platform === "win32") return names.map((n3) => join7(process.env.APPDATA ?? join7(home, "AppData", "Roaming"), n3, "User"));
+  return names.map((n3) => join7(process.env.XDG_CONFIG_HOME ?? join7(home, ".config"), n3, "User"));
 }
 
 // src/init.ts
@@ -3368,8 +4118,8 @@ function hooksDir(root) {
   const dir = resolve5(root, common || ".git", "hooks");
   const shared = git(["config", "--get", "core.hooksPath"], root)?.trim();
   if (shared) {
-    const hook2 = join7(resolve5(root, shared), "commit-msg");
-    const chains = existsSync7(hook2) && readFileSync8(hook2, "utf8").includes("--git-common-dir");
+    const hook2 = join8(resolve5(root, shared), "commit-msg");
+    const chains = existsSync8(hook2) && readFileSync8(hook2, "utf8").includes("--git-common-dir");
     if (!chains) return { dir, husky: false, shadowed: resolve5(root, shared) };
   }
   return { dir, husky: false };
@@ -3378,12 +4128,12 @@ function globalBin(env) {
   const names = process.platform === "win32" ? ["buzzcut.cmd", "buzzcut.exe", "buzzcut"] : ["buzzcut"];
   for (const dir of (env.PATH ?? "").split(delimiter)) {
     if (!dir || /[\\/]_npx[\\/]/.test(dir)) continue;
-    for (const n3 of names) if (existsSync7(join7(dir, n3))) return join7(dir, n3);
+    for (const n3 of names) if (existsSync8(join8(dir, n3))) return join8(dir, n3);
   }
   return null;
 }
 function detectRunner(root, env) {
-  if (existsSync7(join7(root, "node_modules", ".bin", "buzzcut"))) return "local";
+  if (existsSync8(join8(root, "node_modules", ".bin", "buzzcut"))) return "local";
   if (globalBin(env)) return "global";
   return null;
 }
@@ -3396,7 +4146,7 @@ function repoCommand(runner2, t) {
   return `${have} && ${bin} hook ${flavor} || true`;
 }
 function repoAgents(root, env) {
-  const has = (p) => existsSync7(join7(root, p));
+  const has = (p) => existsSync8(join8(root, p));
   const ids = [];
   if (has(".claude") || env.CLAUDECODE) ids.push("claude");
   if (has(".cursor")) ids.push("cursor");
@@ -3406,14 +4156,14 @@ function repoAgents(root, env) {
   return ids;
 }
 function readJson(path) {
-  if (!existsSync7(path)) return {};
+  if (!existsSync8(path)) return {};
   const text = readFileSync8(path, "utf8");
   if (!text.trim()) return {};
   const v = JSON.parse(text);
   if (!v || typeof v !== "object" || Array.isArray(v)) throw new Error("isn't a JSON object");
   return v;
 }
-var isOurSkill = (path) => existsSync7(path) && /^name:\s*buzzcut\s*$/m.test(readFileSync8(path, "utf8"));
+var isOurSkill = (path) => existsSync8(path) && /^name:\s*buzzcut\s*$/m.test(readFileSync8(path, "utf8"));
 function init(o) {
   const res = { ok: true, done: [], notes: [] };
   const root = git(["rev-parse", "--show-toplevel"], o.cwd)?.trim();
@@ -3437,8 +4187,8 @@ function init(o) {
     const { dir, husky, shadowed } = hooksDir(root);
     if (shadowed && !o.uninstall) res.notes.push(`git runs the hooks in ${shadowed} for every repo (core.hooksPath), so the ones in ${rel(dir)} won't run. Run \`buzzcut setup\`, which checks every repo and still runs each repo's own hooks, or add \`buzzcut hook commit-msg "$1"\` to that folder's commit-msg.`);
     for (const hook2 of ["commit-msg", "pre-push"]) {
-      const path = join7(dir, hook2);
-      const before = existsSync7(path) ? readFileSync8(path, "utf8") : null;
+      const path = join8(dir, hook2);
+      const before = existsSync8(path) ? readFileSync8(path, "utf8") : null;
       if (o.uninstall) {
         if (before == null || !before.includes(BEGIN)) continue;
         const after = stripBlock(before);
@@ -3455,7 +4205,7 @@ function init(o) {
     if (!o.uninstall && !o.dryRun) markInstalled(root);
     if (husky && !o.uninstall) res.notes.push("husky detected: the hooks went into .husky/, so commit them to share with your team.");
     for (const f of ["lefthook.yml", "lefthook.yaml", ".lefthook.yml", ".pre-commit-config.yaml"]) {
-      if (existsSync7(join7(root, f)) && !o.uninstall) {
+      if (existsSync8(join8(root, f)) && !o.uninstall) {
         res.notes.push(`${f} found: that tool may overwrite git hooks. Add \`buzzcut hook commit-msg {1}\` as a commit-msg command there too.`);
       }
     }
@@ -3472,7 +4222,7 @@ function init(o) {
       try {
         const before = readJson(path);
         const after = t.hook.merge(before, o.uninstall ? null : repoCommand(runner2 ?? "global", t));
-        if (JSON.stringify(before) !== JSON.stringify(after) && !(o.uninstall && !existsSync7(path))) {
+        if (JSON.stringify(before) !== JSON.stringify(after) && !(o.uninstall && !existsSync8(path))) {
           if (o.uninstall && !Object.keys(after).length) {
             if (!o.dryRun) unlinkSync(path);
           } else write(path, JSON.stringify(after, null, 2) + "\n");
@@ -3485,13 +4235,13 @@ function init(o) {
     if (selected || o.uninstall) skillDirs.add(t.repoSkillsDir);
   }
   for (const d of skillDirs) {
-    const path = join7(root, d, "buzzcut", "SKILL.md");
+    const path = join8(root, d, "buzzcut", "SKILL.md");
     if (o.uninstall) {
       if (isOurSkill(path)) {
         if (!o.dryRun) unlinkSync(path);
         res.done.push(`removed the skill from ${rel(path)}`);
       }
-    } else if (o.skillSource && (!existsSync7(path) || isOurSkill(path))) {
+    } else if (o.skillSource && (!existsSync8(path) || isOurSkill(path))) {
       write(path, readFileSync8(o.skillSource, "utf8"));
       res.done.push(`added the skill to ${rel(path)}`);
     }
@@ -3503,12 +4253,12 @@ function init(o) {
 }
 
 // src/setup.ts
-import { execFileSync as execFileSync3 } from "child_process";
-import { chmodSync as chmodSync2, copyFileSync, existsSync as existsSync8, mkdirSync as mkdirSync4, readFileSync as readFileSync9, rmSync as rmSync2, writeFileSync as writeFileSync4 } from "fs";
-import { dirname as dirname2, join as join8, resolve as resolve6 } from "path";
+import { execFileSync as execFileSync4 } from "child_process";
+import { chmodSync as chmodSync2, copyFileSync, existsSync as existsSync9, mkdirSync as mkdirSync4, readFileSync as readFileSync9, rmSync as rmSync2, writeFileSync as writeFileSync4 } from "fs";
+import { dirname as dirname2, join as join9, resolve as resolve6 } from "path";
 import { fileURLToPath } from "url";
 function configDir(home, env) {
-  return env.XDG_CONFIG_HOME ? join8(env.XDG_CONFIG_HOME, "buzzcut") : join8(home, ".config", "buzzcut");
+  return env.XDG_CONFIG_HOME ? join9(env.XDG_CONFIG_HOME, "buzzcut") : join9(home, ".config", "buzzcut");
 }
 var q = (p) => `"${p}"`;
 function hookCommand(node, bundle, flavor) {
@@ -3516,7 +4266,7 @@ function hookCommand(node, bundle, flavor) {
 }
 function runGit(args, env) {
   try {
-    return execFileSync3("git", args, { env, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    return execFileSync4("git", args, { env, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
   } catch {
     return null;
   }
@@ -3587,7 +4337,7 @@ function ownHookScript(hook2, node, bundle) {
 var VSCODE_MARK = "(buzzcut)";
 var VSCODE_SETTINGS = {
   "github.copilot.chat.commitMessageGeneration.instructions": `${VSCODE_MARK} Subject: imperative, 72 characters or fewer, no trailing period; match the repo's existing style (past tense if its history uses it, conventional prefixes only if the repo uses them). Add a body only when the why isn't obvious: 1 to 3 lines on why (what was broken, who needed it), plus a few plain "- " bullets if the change has several parts. Plain text, no markdown headers, bold or emoji. Never claim tests were added unless test files changed, and never claim something is faster or safer without a number.`,
-  "github.copilot.chat.pullRequestDescriptionGeneration.instructions": `${VSCODE_MARK} Open with one or two sentences: what changed and why (the bug, the error message, the issue link, who asked), in plain words with no "What:" or "Why:" labels. Then 2 to 5 bullets with the changes a reviewer would ask about, each saying where to look (function, setting, endpoint) and the concrete values (old \u2192 new, limits, defaults); group by area, never file by file. A tiny change needs no bullets. Add one line for a risk, breaking change or migration if there is one. End with "Tested:" and only commands that were actually run, with their results, or "Not tested:" and what should be checked. Short plain headers only for very large PRs. No emoji headers, bold labels, or words like comprehensive, robust, seamless, leverage. Never claim tests were added unless test files changed.`
+  "github.copilot.chat.pullRequestDescriptionGeneration.instructions": `${VSCODE_MARK} Open with one or two sentences: what changed and why (the bug, the error message, the issue link, who asked), in plain words with no "What:" or "Why:" labels. Then 2 to 5 bullets with the changes a reviewer would ask about, each saying where to look (function, setting, endpoint) and the concrete values (old \u2192 new, limits, defaults); group by area, never file by file. A tiny change needs no bullets. Add one line for a risk, breaking change or migration if there is one. If you ran commands, end with "Tested:" and only commands that were actually run, with their results; if nothing ran, say nothing about testing. Short plain headers only for very large PRs. No emoji headers, bold labels, or words like comprehensive, robust, seamless, leverage. Never claim tests were added unless test files changed.`
 };
 function significant(text) {
   const out = [];
@@ -3627,19 +4377,19 @@ function removeVscodeSettings(text) {
   return kept.join("\n");
 }
 function readJson2(path) {
-  if (!existsSync8(path)) return {};
+  if (!existsSync9(path)) return {};
   const text = readFileSync9(path, "utf8");
   if (!text.trim()) return {};
   const v = JSON.parse(text);
   if (!v || typeof v !== "object" || Array.isArray(v)) throw new Error("isn't a JSON object");
   return v;
 }
-var isOurSkill2 = (path) => existsSync8(path) && /^name:\s*buzzcut\s*$/m.test(readFileSync9(path, "utf8"));
+var isOurSkill2 = (path) => existsSync9(path) && /^name:\s*buzzcut\s*$/m.test(readFileSync9(path, "utf8"));
 function setup(o) {
   const res = { ok: true, done: [], notes: [] };
   const dir = configDir(o.home, o.env);
-  const bundle = join8(dir, "buzzcut.mjs");
-  const statePath = join8(dir, "state.json");
+  const bundle = join9(dir, "buzzcut.mjs");
+  const statePath = join9(dir, "state.json");
   const tilde = (p) => p.startsWith(o.home) ? "~" + p.slice(o.home.length) : p;
   const write = (path, content, mode) => {
     if (o.dryRun) return;
@@ -3649,12 +4399,12 @@ function setup(o) {
   };
   let state = null;
   try {
-    state = existsSync8(statePath) ? JSON.parse(readFileSync9(statePath, "utf8")) : null;
+    state = existsSync9(statePath) ? JSON.parse(readFileSync9(statePath, "utf8")) : null;
   } catch {
     state = null;
   }
   if (!o.uninstall) {
-    if (!existsSync8(o.bundleSource)) return { ...res, ok: false, error: `can't find the buzzcut build at ${o.bundleSource}` };
+    if (!existsSync9(o.bundleSource)) return { ...res, ok: false, error: `can't find the buzzcut build at ${o.bundleSource}` };
     if (!o.dryRun) {
       mkdirSync4(dir, { recursive: true });
       copyFileSync(o.bundleSource, bundle);
@@ -3664,7 +4414,7 @@ function setup(o) {
   if (o.gitHooks) {
     const gitEnv = { ...o.env, HOME: o.home };
     const current = runGit(["config", "--global", "--get", "core.hooksPath"], gitEnv)?.trim() || null;
-    const ownDir = join8(dir, "git-hooks");
+    const ownDir = join9(dir, "git-hooks");
     if (o.uninstall) {
       const g = state?.git;
       if (g?.own) {
@@ -3673,8 +4423,8 @@ function setup(o) {
         res.done.push("removed the global git hooks and unset core.hooksPath");
       } else if (g) {
         for (const hook2 of ["commit-msg", "pre-push"]) {
-          const p = join8(g.dir, hook2);
-          if (existsSync8(p) && readFileSync9(p, "utf8").includes(BEGIN)) {
+          const p = join9(g.dir, hook2);
+          if (existsSync9(p) && readFileSync9(p, "utf8").includes(BEGIN)) {
             if (!o.dryRun) writeFileSync4(p, stripBlock(readFileSync9(p, "utf8")));
             res.done.push(`removed the buzzcut block from ${tilde(p)}`);
           }
@@ -3683,14 +4433,14 @@ function setup(o) {
     } else if (current && resolve6(current.replace(/^~/, o.home)) !== resolve6(ownDir)) {
       const target = resolve6(current.replace(/^~/, o.home));
       for (const hook2 of ["commit-msg", "pre-push"]) {
-        const p = join8(target, hook2);
-        write(p, insertBlock(existsSync8(p) ? readFileSync9(p, "utf8") : null, globalBlock(hook2, o.node, bundle)), 493);
+        const p = join9(target, hook2);
+        write(p, insertBlock(existsSync9(p) ? readFileSync9(p, "utf8") : null, globalBlock(hook2, o.node, bundle)), 493);
       }
       state = { ...state ?? {}, git: { dir: target, own: false } };
       res.done.push(`added commit-msg and pre-push checks to your global hooks folder ${tilde(target)}`);
     } else {
-      for (const name of PASS_THROUGH) write(join8(ownDir, name), passThroughScript(name), 493);
-      for (const hook2 of ["commit-msg", "pre-push"]) write(join8(ownDir, hook2), ownHookScript(hook2, o.node, bundle), 493);
+      for (const name of PASS_THROUGH) write(join9(ownDir, name), passThroughScript(name), 493);
+      for (const hook2 of ["commit-msg", "pre-push"]) write(join9(ownDir, hook2), ownHookScript(hook2, o.node, bundle), 493);
       if (!o.dryRun) runGit(["config", "--global", "core.hooksPath", ownDir], gitEnv);
       state = { ...state ?? {}, git: { dir: ownDir, own: true } };
       res.done.push(`git: every repo now checks commits and pushes (core.hooksPath \u2192 ${tilde(ownDir)}); each repo's own hooks still run`);
@@ -3702,13 +4452,13 @@ function setup(o) {
     for (const t of TARGETS) {
       if (!t.detect(o.home)) continue;
       const did = [];
-      const skillPath = join8(t.userSkillsDir(o.home), "buzzcut", "SKILL.md");
+      const skillPath = join9(t.userSkillsDir(o.home), "buzzcut", "SKILL.md");
       if (o.uninstall) {
         if (isOurSkill2(skillPath)) {
           if (!o.dryRun) rmSync2(dirname2(skillPath), { recursive: true, force: true });
           did.push("skill");
         }
-      } else if (!existsSync8(skillPath) || isOurSkill2(skillPath)) {
+      } else if (!existsSync9(skillPath) || isOurSkill2(skillPath)) {
         write(skillPath, skill);
         did.push("skill");
       } else {
@@ -3719,7 +4469,7 @@ function setup(o) {
         try {
           const before = readJson2(path);
           const after = t.hook.merge(before, o.uninstall ? null : hookCommand(o.node, bundle, t.hook.flavor));
-          if (JSON.stringify(before) !== JSON.stringify(after) && !(o.uninstall && !existsSync8(path))) {
+          if (JSON.stringify(before) !== JSON.stringify(after) && !(o.uninstall && !existsSync9(path))) {
             if (o.uninstall && !Object.keys(after).length) {
               if (!o.dryRun) rmSync2(path, { force: true });
             } else write(path, JSON.stringify(after, null, 2) + "\n");
@@ -3734,9 +4484,9 @@ function setup(o) {
   }
   if (o.vscode) {
     for (const d of vscodeUserDirs(o.home)) {
-      if (!existsSync8(d)) continue;
-      const p = join8(d, "settings.json");
-      const text = existsSync8(p) ? readFileSync9(p, "utf8") : "";
+      if (!existsSync9(d)) continue;
+      const p = join9(d, "settings.json");
+      const text = existsSync9(p) ? readFileSync9(p, "utf8") : "";
       const next = o.uninstall ? removeVscodeSettings(text) : addVscodeSettings(text);
       if (next === null) {
         if (!o.uninstall && Object.keys(VSCODE_SETTINGS).some((k) => keyRe(k).test(text) && !text.includes(VSCODE_MARK))) {
@@ -3765,27 +4515,27 @@ function newerVersion(a, b) {
   return false;
 }
 function refreshInstall(o) {
-  const statePath = join8(configDir(o.home, o.env), "state.json");
+  const statePath = join9(configDir(o.home, o.env), "state.json");
   let state;
   try {
     state = JSON.parse(readFileSync9(statePath, "utf8"));
   } catch {
     return null;
   }
-  if (!state.bundle || !newerVersion(o.version, state.version) || !existsSync8(o.bundleSource) || !existsSync8(o.skillSource)) return null;
+  if (!state.bundle || !newerVersion(o.version, state.version) || !existsSync9(o.bundleSource) || !existsSync9(o.skillSource)) return null;
   copyFileSync(o.bundleSource, state.bundle);
   const skill = readFileSync9(o.skillSource, "utf8");
   for (const t of TARGETS) {
-    const p = join8(t.userSkillsDir(o.home), "buzzcut", "SKILL.md");
+    const p = join9(t.userSkillsDir(o.home), "buzzcut", "SKILL.md");
     if (isOurSkill2(p)) writeFileSync4(p, skill);
   }
   writeFileSync4(statePath, JSON.stringify({ ...state, version: o.version }, null, 2) + "\n");
-  const nodeGone = state.node && !existsSync8(state.node) ? " The node it ran with is gone: run `buzzcut setup` again." : "";
+  const nodeGone = state.node && !existsSync9(state.node) ? " The node it ran with is gone: run `buzzcut setup` again." : "";
   return `updated this machine's hooks and skills from buzzcut ${state.version} to ${o.version}.${nodeGone}`;
 }
 function installedAt(home, env) {
   try {
-    const state = JSON.parse(readFileSync9(join8(configDir(home, env), "state.json"), "utf8"));
+    const state = JSON.parse(readFileSync9(join9(configDir(home, env), "state.json"), "utf8"));
     return typeof state.installedAt === "number" ? state.installedAt : null;
   } catch {
     return null;
@@ -3797,29 +4547,29 @@ function doctor(home, env, cwd) {
   const tilde = (p) => p.startsWith(home) ? "~" + p.slice(home.length) : p;
   let state = null;
   try {
-    state = JSON.parse(readFileSync9(join8(dir, "state.json"), "utf8"));
+    state = JSON.parse(readFileSync9(join9(dir, "state.json"), "utf8"));
   } catch {
     state = null;
   }
   if (!state) {
     out.push({ ok: false, text: "machine setup: not installed (run `buzzcut setup`)" });
   } else {
-    const nodeOk = existsSync8(state.node);
-    const bundleOk = existsSync8(state.bundle);
+    const nodeOk = existsSync9(state.node);
+    const bundleOk = existsSync9(state.bundle);
     out.push({ ok: nodeOk && bundleOk, text: `buzzcut ${state.version} at ${tilde(state.bundle)}, run by ${tilde(state.node)}${nodeOk ? "" : " (that node is gone: run `buzzcut setup` again)"}` });
   }
   const gitEnv = { ...env, HOME: home };
   const global = runGit(["config", "--global", "--get", "core.hooksPath"], gitEnv)?.trim();
-  const globalHook = global ? join8(resolve6(global.replace(/^~/, home)), "commit-msg") : null;
-  const globalOk = Boolean(globalHook && existsSync8(globalHook) && readFileSync9(globalHook, "utf8").includes(BEGIN));
+  const globalHook = global ? join9(resolve6(global.replace(/^~/, home)), "commit-msg") : null;
+  const globalOk = Boolean(globalHook && existsSync9(globalHook) && readFileSync9(globalHook, "utf8").includes(BEGIN));
   out.push({ ok: globalOk, text: `git, every repo: ${globalOk ? `commit-msg and pre-push checks in ${tilde(global)}` : "no global buzzcut hooks"}` });
   const local = runGit(["-C", cwd, "config", "--local", "--get", "core.hooksPath"], gitEnv)?.trim();
   const inRepo2 = runGit(["-C", cwd, "rev-parse", "--is-inside-work-tree"], gitEnv)?.trim() === "true";
   if (inRepo2) {
     const common = runGit(["-C", cwd, "rev-parse", "--git-common-dir"], gitEnv)?.trim();
-    const hooksDir2 = common ? join8(common, "hooks") : null;
-    const repoHook = local ? join8(resolve6(cwd, local.replace(/(^|[\\/])\.husky[\\/]_$/, "$1.husky")), "commit-msg") : hooksDir2 ? join8(resolve6(cwd, hooksDir2), "commit-msg") : null;
-    const repoOk = Boolean(repoHook && existsSync8(repoHook) && readFileSync9(repoHook, "utf8").includes(BEGIN));
+    const hooksDir2 = common ? join9(common, "hooks") : null;
+    const repoHook = local ? join9(resolve6(cwd, local.replace(/(^|[\\/])\.husky[\\/]_$/, "$1.husky")), "commit-msg") : hooksDir2 ? join9(resolve6(cwd, hooksDir2), "commit-msg") : null;
+    const repoOk = Boolean(repoHook && existsSync9(repoHook) && readFileSync9(repoHook, "utf8").includes(BEGIN));
     if (local) {
       out.push({ ok: repoOk, text: `this repo: uses its own hooks path (${local}), so ${repoOk ? "its buzzcut hook runs" : "global hooks are skipped here: run `buzzcut init`"}` });
     } else {
@@ -3831,28 +4581,28 @@ function doctor(home, env, cwd) {
       out.push({ ok: null, text: `${t.name}: not installed on this machine` });
       continue;
     }
-    const skillOk = isOurSkill2(join8(t.userSkillsDir(home), "buzzcut", "SKILL.md"));
+    const skillOk = isOurSkill2(join9(t.userSkillsDir(home), "buzzcut", "SKILL.md"));
     let hookOk = null;
     if (t.hook) {
       const p = t.hook.userFile(home);
-      hookOk = existsSync8(p) && /buzzcut\S*"?\s+hook\s/.test(readFileSync9(p, "utf8"));
+      hookOk = existsSync9(p) && /buzzcut\S*"?\s+hook\s/.test(readFileSync9(p, "utf8"));
     }
     const parts = [`skill ${skillOk ? "\u2713" : "\u2717"}`];
     if (hookOk !== null) parts.push(`hook ${hookOk ? "\u2713" : "\u2717"}`);
     out.push({ ok: skillOk && hookOk !== false, text: `${t.name}: ${parts.join(", ")}` });
   }
   for (const d of vscodeUserDirs(home)) {
-    if (!existsSync8(d)) continue;
-    const p = join8(d, "settings.json");
-    const ok2 = existsSync8(p) && readFileSync9(p, "utf8").includes(VSCODE_MARK);
+    if (!existsSync9(d)) continue;
+    const p = join9(d, "settings.json");
+    const ok2 = existsSync9(p) && readFileSync9(p, "utf8").includes(VSCODE_MARK);
     out.push({ ok: ok2, text: `VS Code \u2728 buttons (${tilde(d)}): ${ok2 ? "use buzzcut rules" : "not configured"}` });
   }
   return out;
 }
 function packageFiles(moduleUrl) {
   const here = dirname2(fileURLToPath(moduleUrl));
-  const root = [resolve6(here, ".."), here].find((d) => existsSync8(join8(d, "skills", "buzzcut", "SKILL.md"))) ?? resolve6(here, "..");
-  return { bundle: join8(root, "bundle", "buzzcut.mjs"), skill: join8(root, "skills", "buzzcut", "SKILL.md") };
+  const root = [resolve6(here, ".."), here].find((d) => existsSync9(join9(d, "skills", "buzzcut", "SKILL.md"))) ?? resolve6(here, "..");
+  return { bundle: join9(root, "bundle", "buzzcut.mjs"), skill: join9(root, "skills", "buzzcut", "SKILL.md") };
 }
 
 // src/keep.ts
@@ -3862,16 +4612,16 @@ var MARKUP = /^\s*(?:#{1,6}\s+|>\s*|[-*+•]\s+|\d{1,2}[.)]\s+)+/;
 function plain(line) {
   return line.replace(MARKUP, "").replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1").split(/(`[^`]*`)/).map((part, i) => i % 2 ? part : part.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/(\*\*|__)(.+?)\1/g, "$2").replace(/(^|[\s("])[*_](?=\S)|(?<=\S)[*_](?=$|[\s).,;:!?"])/g, "$1")).join("").trim();
 }
-function sentencesOf(body, skip, min = 4) {
+function sentencesOf2(body, skip, min = 4) {
   const text = analyzeText(body, 1, skip);
   const structural = new Set([...text.headings, ...text.labels, ...text.ticked].map((l) => l.n));
   const out = [];
   for (const line of text.lines) {
     if (structural.has(line.n) || CHECKBOX2.test(line.text) || /^\s*\|/.test(line.text)) continue;
     for (const sentence2 of plain(line.text).split(/(?<=[.!?])\s+(?=[A-Z0-9`"'(])/)) {
-      const words = countWords(sentence2);
-      if (words < min) continue;
-      out.push({ text: sentence2, words, at: out.length });
+      const words2 = countWords(sentence2);
+      if (words2 < min) continue;
+      out.push({ text: sentence2, words: words2, at: out.length });
     }
   }
   return out;
@@ -3899,17 +4649,17 @@ function score(sentence2, files) {
 }
 var SHOW = { sentences: 3, words: 70 };
 function worthKeeping(body, budget, files = /* @__PURE__ */ new Set(), skip) {
-  const candidates = sentencesOf(body, skip).map((c) => ({ ...c, score: score(c.text, files) }));
+  const candidates = sentencesOf2(body, skip).map((c) => ({ ...c, score: score(c.text, files) }));
   const limit = Math.min(Math.max(budget, 30), SHOW.words);
   const picked = [];
-  let words = 0;
+  let words2 = 0;
   for (const c of candidates.filter((c2) => c2.score >= 2).sort((a, b) => b.score - a.score || a.at - b.at)) {
-    if (picked.length >= SHOW.sentences || picked.length && words + c.words > limit) continue;
+    if (picked.length >= SHOW.sentences || picked.length && words2 + c.words > limit) continue;
     picked.push(c);
-    words += c.words;
+    words2 += c.words;
   }
   picked.sort((a, b) => a.at - b.at);
-  return { sentences: picked.map((c) => c.text), words };
+  return { sentences: picked.map((c) => c.text), words: words2 };
 }
 var REASON = /\b(?:because|since (?!v?\d|last\b|then\b|yesterday\b|the (?:last|first|start|beginning)\b)|so that|so (?:we|it|the|they|you|users?|callers?|reviewers?)\b|in order to|otherwise|previously|used to|(?:had|have|has) to|caus(?:e|ed|es|ing)|crash(?:es|ed|ing)?|broke|breaks|broken|regress(?:ion|ions|ed)|leak(?:s|ed|ing)?|race condition|timed out|timeouts?|deadlock(?:s|ed)?|outages?|incidents?|(?:reported|requested|asked for|needed|required) (?:by|in|on|for|from|to|so)\b|need to|unblocks?|blocked|blocks|panic(?:s|ked)?|flaky|typo|(?:was|were|is|are) (?:wrong|incorrect|missing|broken|stale|slow|stuck|lost|ignored|dropped|duplicated)|can(?:no|')t|couldn't|doesn't|didn't|wasn't|isn't|won't)\b|\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?|refs?|see)\b\s*:?\s*#\d+|(?:^|[\s(\[])#\d+\b|https?:\/\/\S*(?:issues|jira|linear|browse|sentry)/i;
 var TICKET_REF = /\b[A-Z][A-Z0-9]+-\d+\b/;
@@ -3934,7 +4684,7 @@ function whyScore(s) {
 var clip = (s, max) => s.length > max ? s.slice(0, max - 1).trimEnd().replace(/[,;:]$/, "") + "\u2026" : s;
 function whyOf(title, body, skip) {
   let best = null;
-  for (const c of sentencesOf(body, skip, 3)) {
+  for (const c of sentencesOf2(body, skip, 3)) {
     const n3 = whyScore(c.text);
     if (n3 >= 3 && (!best || n3 > best.n + 1)) best = { text: c.text, n: n3 };
   }
@@ -3987,7 +4737,7 @@ var ROASTS = {
 };
 var NITS = {
   length: (f, s) => `A little long: ${s.words} words where about ${s.budget} would do.`,
-  "template-on-tiny": (f) => `${f.data?.headers} section headers for a ${f.data?.lines}-line change. An opening and a Tested line would do.`,
+  "template-on-tiny": (f) => `${f.data?.headers} section headers for a ${f.data?.lines}-line change. An opening and a bullet or two would do.`,
   "diff-echo": (f) => `Walks through ${f.data?.count} files the diff already shows.`,
   "unbacked-claim": (f) => `"${f.quote}" could use a number.`,
   "ticked-boxes": (f) => `${f.data?.count} ticked boxes. Name the command instead.`,
@@ -3998,7 +4748,7 @@ var NITS = {
   emoji: () => "The emoji headers can go.",
   "bold-spam": (f) => `${f.data?.count} bold phrases. Bold one thing, at most.`,
   "bullet-bloat": (f) => `${f.data?.count} bullets. Keep the ones a reviewer would ask about.`,
-  "thin-description": (f) => /tested/.test(f.message) ? "Add a Tested line: what ran, and what it returned." : `${f.data?.words} words for ${changed(Number(f.data?.lines))}. The reviewer needs a map.`,
+  "thin-description": (f) => `${f.data?.words} words for ${changed(Number(f.data?.lines))}. The reviewer needs a map.`,
   "long-bullet": (f) => `A ${f.data?.longest}-word bullet. One change per bullet, about 25 words.`,
   "subject-length": () => "The title could be shorter.",
   "commit-changelog": (f) => `${f.data?.bullets} bullets in a commit body. git log reads better as prose.`,
@@ -4202,19 +4952,19 @@ Roast any PR: npx buzzcut roast <pr-url>`;
 function boardSummary(b) {
   const rows = [...b.rows].sort((x, y) => y.report.score - x.report.score);
   const avg = rows.length ? Math.round(rows.reduce((t, r) => t + r.report.score, 0) / rows.length) : 0;
-  const words = rows.reduce((t, r) => t + r.report.words, 0);
+  const words2 = rows.reduce((t, r) => t + r.report.words, 0);
   const over = rows.reduce((t, r) => t + Math.max(0, r.report.words - r.report.budget), 0);
   const lazy = rows.filter((r) => r.report.findings.some((f) => f.rule === "subject-vague" || f.rule === "empty-subject"));
   const withDiff = rows.filter((r) => r.report.diff && r.report.words > 0);
   const tightest = withDiff.length ? withDiff.reduce((a, c) => c.report.diff.changedLines / c.report.words > a.report.diff.changedLines / a.report.words ? c : a) : null;
-  return { rows, avg, words, over, lazy, yappiest: rows[0] ?? null, tightest };
+  return { rows, avg, words: words2, over, lazy, yappiest: rows[0] ?? null, tightest };
 }
 var lines = (r) => r.diff?.changedLines ?? 0;
 var changed = (k) => `${n2(k)} changed line${k === 1 ? "" : "s"}`;
 var failing = (rows) => rows.filter((r) => !passes(r.report, DEFAULTS.max)).length;
 function renderBoard(b, opts) {
   const p = palette(opts.color);
-  const { rows, avg, words, over, lazy, yappiest, tightest } = boardSummary(b);
+  const { rows, avg, words: words2, over, lazy, yappiest, tightest } = boardSummary(b);
   const out = [""];
   out.push(...banner(p, "\u{1F488} THE BUZZCUT ROAST", b.subject), "");
   const { grade, verdict } = gradeOf(avg);
@@ -4242,7 +4992,7 @@ function renderBoard(b, opts) {
     out.push(`   ${p.bold("Laziest ")}  ${lazy.length} ${unit}${lazy.length > 1 ? "s that say" : " that says"} nothing: ${examples}.`);
   }
   if (over >= 100) {
-    out.push(`   ${p.bold("Total   ")}  ${n2(words)} words, ${n2(over)} of them over budget.`);
+    out.push(`   ${p.bold("Total   ")}  ${n2(words2)} words, ${n2(over)} of them over budget.`);
   }
   out.push(`   ${p.bold("Verdict ")}  ${failLine}`);
   out.push("");
@@ -4250,14 +5000,14 @@ function renderBoard(b, opts) {
   return out.join("\n");
 }
 function renderBoardMarkdown(b) {
-  const { rows, avg, words, over, yappiest } = boardSummary(b);
+  const { rows, avg, words: words2, over, yappiest } = boardSummary(b);
   const { grade } = gradeOf(avg);
   const out = [`### \u{1F488} buzzcut roast: ${b.subject}`, "", `**Average yap score ${avg}/100 (${grade})**`, ""];
   out.push(`| | ${b.kind === "pr" ? "PR" : "Commit"} | Score | Words | Lines | Title |`, "|---|---|---|---|---|---|");
   for (const { id, title, report: r } of rows) out.push(`| ${passes(r, DEFAULTS.max) ? "\u2713" : "\u2717"} | ${id} | ${r.score} ${r.grade} | ${r.words} | ${lines(r)} | ${title.replace(/\|/g, "\\|")} |`);
   out.push("");
   if (yappiest && yappiest.report.score > 10) out.push(`Yappiest: ${yappiest.id}, ${yappiest.report.words} words for ${changed(lines(yappiest.report))}.`);
-  if (over > 0) out.push(`${words} words in total, ${over} over budget.`);
+  if (over > 0) out.push(`${words2} words in total, ${over} over budget.`);
   out.push("", "<sub>Roast yours: `npx buzzcut roast owner/repo`</sub>");
   return out.join("\n");
 }
@@ -4384,13 +5134,13 @@ function readInput(positional, opts, allowTtyEmpty = false) {
   }
   return null;
 }
-function report(msg, diff, opts, label, draftFile2, anchor) {
+function report(msg, diff, opts, label, draftFile2, anchor, search) {
   const repo = repoOrFail();
   const key = draftFile2 && draftFile2 !== "-" ? `file:${resolve7(draftFile2)}` : null;
   const sig = diff ? diffSignature(diff) + (anchor ? `@${anchor}` : "") : void 0;
   const saved = key ? readDraft(key, process.cwd()) : null;
   const prev = saved && (!saved.diff || !sig || saved.diff === sig) ? saved : null;
-  const r = analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, previous: prev ? { evidence: prev.evidence, strict: false } : null });
+  const r = analyze(msg, diff, { style: repo.style, template: repo.template, rules: repo.config.rules, length: repo.config.length, previous: prev ? { evidence: prev.evidence, strict: false } : null, repo: search });
   if (key) saveDraft(key, process.cwd(), { evidence: keepableEvidence(msg, r), at: Date.now(), diff: sig });
   const max = maxScore(opts, repo.config.max);
   const json = opts.json === true;
@@ -4428,7 +5178,7 @@ function check(positional, opts) {
     }
   }
   const anchor = kind === "commit" && !rev && diff ? git(["rev-parse", "-q", "--verify", "HEAD"]) ?? "root" : void 0;
-  return report(msg, diff, opts, void 0, typeof opts.m === "string" || typeof opts.message === "string" ? void 0 : positional[0], anchor);
+  return report(msg, diff, opts, void 0, typeof opts.m === "string" || typeof opts.message === "string" ? void 0 : positional[0], anchor, rev ? null : gitRepoSearch(process.cwd()));
 }
 function pr(positional, opts) {
   let raw = readInput(positional, opts);
@@ -4438,7 +5188,7 @@ function pr(positional, opts) {
     let view;
     try {
       view = JSON.parse(
-        execFileSync4("gh", ["pr", "view", "--json", "title,body,baseRefName"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
+        execFileSync5("gh", ["pr", "view", "--json", "title,body,baseRefName"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
       );
     } catch {
       fail('no PR body given, and `gh pr view` found no open PR for this branch. Pass a file: buzzcut pr body.md --title "\u2026"');
@@ -4450,7 +5200,7 @@ function pr(positional, opts) {
   const b = base ?? defaultBase();
   const diff = opts.diff === false || !b ? null : branchDiff(b);
   if (!diff && opts.diff !== false) note(`couldn't diff against ${b ?? "a base branch"}, so the diff checks were skipped (use --base)`, opts.json === true);
-  return report(prMessage(title, raw), diff, opts, "pr", typeof opts.m === "string" || typeof opts.message === "string" ? void 0 : positional[0]);
+  return report(prMessage(title, raw), diff, opts, "pr", typeof opts.m === "string" || typeof opts.message === "string" ? void 0 : positional[0], void 0, gitRepoSearch(process.cwd()));
 }
 function context(opts) {
   const kind = opts.kind ?? "commit";

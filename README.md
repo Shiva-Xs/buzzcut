@@ -4,9 +4,9 @@
 
 **AI yaps, we cut. Pull requests written like the good old days.**
 
-Your agent writes the code. buzzcut makes the commit messages and PR descriptions it writes say what changed and why, in plain words, so your reviewers read the PR itself instead of pasting it into another AI to find out what it does. Each draft is checked against the diff before it runs; when it's a form, a file tour or padding, the agent is told exactly what to cut and rewrites it. You don't do anything.
+Your agent writes the code. buzzcut makes the commit messages and PR descriptions it writes say what changed and why, in plain words, so your reviewers read the PR itself instead of pasting it into another AI to find out what it does. Each draft is checked before it runs: the names, files and test counts it cites are looked up in the diff, the repo and the agent's session, and when it's a form, a file tour or padding, the agent is told exactly what to cut and rewrites it. You don't do anything.
 
-No API key, no LLM, zero dependencies. Works in Claude Code, Cursor, Windsurf, Antigravity, VS Code and the terminal.
+No API key and zero dependencies. The checks are deterministic: no model is called (the GitHub Action has an optional AI check that is off by default). Works in Claude Code, Cursor, Windsurf, Antigravity, VS Code and the terminal.
 
 [![npm](https://img.shields.io/npm/v/buzzcut?color=3fb950&label=npm)](https://www.npmjs.com/package/buzzcut)
 [![ci](https://github.com/Shiva-Xs/buzzcut/actions/workflows/ci.yml/badge.svg)](https://github.com/Shiva-Xs/buzzcut/actions/workflows/ci.yml)
@@ -20,7 +20,7 @@ No API key, no LLM, zero dependencies. Works in Claude Code, Cursor, Windsurf, A
 
 Senior engineers keep saying it: AI-written PRs are hard to read. `## Summary / ## Changes / ## Testing` on a 9-line fix, a bold label on every bullet, a tour of files the diff already shows, boxes ticked for tests nobody ran. So reviewers paste the PR into another AI to find out what changed.
 
-In 1,275 real PRs opened by coding agents in 2026, 20% never said why and 21% never said how the change was tested ([bench/](bench)). We're not going to stop coding with AI, so buzzcut makes what it writes read like a good engineer's PR from before AI: what changed and why, the few changes a reviewer would ask about, and what was tested. Not squeezed into one paragraph, not a form.
+In 1,275 real PRs opened by coding agents in 2026, 20% never said why ([bench/](bench)). We're not going to stop coding with AI, so buzzcut makes what it writes read like a good engineer's PR from before AI: what changed and why, the few changes a reviewer would ask about, and what was run, if anything was. Not squeezed into one paragraph, not a form.
 
 ## Install once
 
@@ -230,7 +230,11 @@ report.findings;     // [{ rule: 'subject-vague', severity: 'error', … }, { ru
 
 **Is this an AI detector?** No. It flags patterns, not authors. A person who writes "leverage" gets the same note as a model that does.
 
-**Why no LLM?** A deterministic check is free, fast (20 to 40 ms per hook call), private, and gives the same answer every time, so it can gate commits and CI. Your coding agent is already a language model; what it lacked was something objective to check its writing against.
+**Why no LLM?** A deterministic check is free, fast (tens of milliseconds per hook call), private, and gives the same answer every time, so it can gate commits and CI. Your coding agent is already a language model; what it lacked was something objective to check its writing against.
+
+**What does it actually check against the diff?** That the names, files and test counts a description cites exist in the diff, the repo as it stood, or what the agent ran, and that "adds X" isn't about something the diff removes. A name it can't find is shown as a note, not a block. It can't tell whether what you say the code *does* is true, so the skill has the agent reread that part against the diff itself. On 62 invented names planted in real PRs it flagged 54, on 39 invented files 37, and on 32 wrong numbers or 41 wrong behaviors it caught 3 of each ([how it was measured](docs/how-it-works.md#checking-names-files-and-test-counts)).
+
+**Does a PR have to say how it was tested?** No. Say what you ran and what it returned when you ran something; when you didn't, leave testing out instead of writing "Not tested". What buzzcut blocks is claiming tests that didn't run.
 
 **Does it read my agent sessions?** Only the transcript file the agent's own hook hands it, only to list which commands ran, and only on your machine. Nothing is sent anywhere.
 

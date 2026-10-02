@@ -49,7 +49,7 @@
     <div class="hero-band" id="band">
       <div class="hero-in">
         <ul class="facts" aria-label="What it costs">
-          <li>No LLM</li>
+          <li>No LLM by default</li>
           <li>No API key</li>
           <li>Zero dependencies</li>
           <li>MIT</li>
@@ -136,7 +136,6 @@
       <div class="found">
         <p class="found-h">What we found in <b>1,275</b> real PRs opened by coding agents this year</p>
         <ul class="bars">
-          <li style="--v:21"><span class="n">21%</span><span class="t">Never say how it was tested</span></li>
           <li style="--v:20.2"><span class="n">20%</span><span class="t">Never say why</span></li>
           <li style="--v:16.4"><span class="n">16%</span><span class="t">More bullets than the change deserves</span></li>
           <li style="--v:15.5"><span class="n">16%</span><span class="t">A bold label on every line</span></li>
@@ -239,7 +238,7 @@
       <p class="label"><b>05</b> Proof</p>
       <div class="split-head">
         <h2 id="proof-h">Tested on real pull requests, from before AI and after</h2>
-        <p class="sub">Two tests. buzzcut's checks ran on every PR and commit we downloaded, including work merged between 2018 and May 2021 in 75 projects, from kubernetes and rust to cpython and the Linux kernel: anything flagged there is a false alarm. Then an agent wrote buzzcut's version of real agent PRs from their own diffs, and a blind judge compared each with the original.</p>
+        <p class="sub">Two tests. buzzcut's checks ran on every PR and commit we downloaded, including work merged between 2018 and May 2021 in 75 projects, from kubernetes and rust to cpython and the Linux kernel: anything flagged there counts as a false alarm. Then an agent wrote buzzcut's version of real agent PRs from their own diffs, and a blind judge compared each with the original.</p>
       </div>
       <div class="stats">
         <div class="stat red"><b>3,366</b><span>real PRs and commits buzzcut's checks ran on, 1,275 of them opened by coding agents</span></div>
@@ -266,11 +265,11 @@
         </details>
         <details>
           <summary>Does it use an LLM or send my code anywhere?</summary>
-          <p>No. It's a deterministic check that runs on your machine in 20 to 40 ms per hook call. The only network calls go to GitHub, when you roast a PR or run the Action.</p>
+          <p>Not by default. The checks are deterministic and run on your machine in tens of milliseconds per hook call. The only network calls go to GitHub, when you roast a PR or run the Action. The Action has an optional AI check you turn on with your own API key; it is off by default and only advises.</p>
         </details>
         <details>
           <summary>What does it check against the diff?</summary>
-          <p>Which files changed and how many lines. That's enough to size the description and catch a file-by-file tour, a <code>feat:</code> on a docs-only change, or a claim about files that aren't there. It doesn't read what the code does.</p>
+          <p>The files that changed, the changed lines, the repo as it stood and what your agent ran. That sizes the description, catches a file-by-file tour or a <code>feat:</code> on a docs-only change, and looks up the names, files and test counts a description cites; one it can't find is shown as a note. It can't tell whether what you say the code does is true.</p>
         </details>
         <details>
           <summary>Will it block my team?</summary>
@@ -278,7 +277,7 @@
         </details>
         <details>
           <summary>Does it make agents write "What" and "Why" headings?</summary>
-          <p>No. It asks for the PR a good engineer writes: an opening that says what changed and why in plain words, a few bullets for the changes a reviewer would ask about, and a Tested line. On a small change, headings like "## Summary / ## Changes / ## Notes" count as a form; on a big one, a few short plain headers are fine.</p>
+          <p>No. It asks for the PR a good engineer writes: an opening that says what changed and why in plain words, a few bullets for the changes a reviewer would ask about, and what you ran if you ran something. On a small change, headings like "## Summary / ## Changes / ## Notes" count as a form; on a big one, a few short plain headers are fine.</p>
         </details>
         <details>
           <summary>How do I undo it?</summary>
@@ -298,7 +297,7 @@
         <code>npm i -g buzzcut &amp;&amp; buzzcut setup</code>
         <button type="button" class="copy" data-copy="npm i -g buzzcut && buzzcut setup" data-label="Copy">Copy</button>
       </div>
-      <p class="fine">No LLM, no API key, zero dependencies, MIT.</p>
+      <p class="fine">No API key, zero dependencies, MIT.</p>
     </div>
   </section>
 </main>
@@ -308,7 +307,7 @@
     <div class="foot-brand">
       <a class="logo" href="./"><span class="pole" aria-hidden="true"></span>buzzcut</a>
       <p class="foot-tag">Pull requests written like the good old days.</p>
-      <p class="foot-note">Open source · no LLM · no API key · MIT</p>
+      <p class="foot-note">Open source · no API key · MIT</p>
       <a class="btn foot-gh" href="https://github.com/Shiva-Xs/buzzcut"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 .2a8 8 0 0 0-2.53 15.6c.4.07.55-.17.55-.38v-1.4c-2.23.49-2.7-.96-2.7-.96-.36-.93-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2Z"/></svg>Star it on GitHub</a>
     </div>
     <div>
