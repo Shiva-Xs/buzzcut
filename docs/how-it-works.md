@@ -101,8 +101,17 @@ How it was measured, on a held-out set of 311 PRs from 27 repos that appear nowh
 
 ### Writing, against a plain prompt
 
-[`bench/eval/v3/`](../bench/eval/v3) has the plan, the arms and the results. Gemini 3.8 Flash wrote descriptions for real PRs, each with the author's full text as notes and with only its first sentences; a second pass graded them against a checklist of facts from the notes, with the arm letters shuffled. 36 PRs to tune on, then 35 from repos not used anywhere else, run once after the skill was frozen (61 of the 70 test packets were graded when this was written).
+[`bench/eval/v3/`](../bench/eval/v3) has the plan, the arms and the results. Gemini 3.8 Flash wrote descriptions for real PRs, each with the author's full text as notes and with only its first sentences; a second pass graded them against a checklist of facts from the notes, with the arm letters shuffled. 36 PRs to tune on, then 35 from repos not used anywhere else, run once after the skill was frozen. On the test set (70 graded descriptions per arm, mean rank, 1 is best):
 
-- **Against a bare "write the PR description", the skill wins.** It keeps 81 to 92% of the facts the author gave against 64%, and on the test set a bare prompt made 16 unsupported claims across 13 descriptions. On the test set the skill with its checker beat the bare prompt in 35 of 61 PRs, and the skill text alone in 47 of 61.
-- **Against a good plain prompt, the skill's writing rules win, the checker is unproven.** The skill text alone beat a plain prompt that says "keep the facts, add nothing, leave testing out if nothing ran" in 55 of 61 test PRs (45 of 72 on the tuning set). The full tool (skill, `buzzcut context`, checker loop) beat it 50 of 72 on the tuning set and 40 of 61 on the test set, but kept fewer of the author's facts on the test set (81% against 88%), and was behind the skill text alone there (23 to 38). The checker helped on the tuning set and hurt on the test set, so it is not shown to help.
-- **Not shown:** that this holds for other models, or for descriptions written from a real agent session instead of an author's notes. The grader and the writer are the same model family. A blind audit by Claude agreed with the grader on 85% of arm orderings on the tuning set; the test set was not audited, because the grading run stopped at 61 of 70 packets and the release didn't wait. One more caveat on the test grades: the full tool was marked down for "about 90% of the diff" lines that come from `buzzcut context`, which the grader couldn't see.
+| arm | mean rank | needed facts kept | unsupported claims |
+|---|---|---|---|
+| skill text alone | **1.84** | 92% | 0 |
+| skill + `buzzcut context` + checker (the full tool) | 2.76 | 80% | 8 (see below) |
+| plain prompt: keep the facts, add nothing, leave testing out if nothing ran | 3.09 | 89% | 0 |
+| bare "write the PR description" | 3.49 | 65% | 22 in 16 descriptions |
+
+- **Against a bare prompt, the skill wins.** The skill text alone beat it in 54 of 70 PRs and the full tool in 40 of 70. The bare prompt kept 65% of the facts the author gave and made 22 unsupported claims in 16 descriptions.
+- **Against a good plain prompt, the skill's writing rules win.** The skill text alone beat the plain prompt in 61 of 70 test PRs (45 of 72 on the tuning set), with more of the author's facts kept (92% against 89%).
+- **The checker loop is not shown to help.** The full tool beat the plain prompt in 44 of 70 PRs but kept fewer facts (80% against 89%), which misses the bar set beforehand, and trailed the skill text alone (28 to 42). It was ahead of the skill text alone on the tuning set and behind on the test set. It is worst on big PRs (14 PRs; the full tool ranked last), where it also dropped the most facts. 7 of its 8 unsupported claims are lines like "about 90% of the diff" that come from `buzzcut context`, which the grader could not see, so that count is too high.
+- **Audit.** Claude graded 17 of the 70 test PRs blind before seeing the grades: the order of the arms agreed on 81% of pairs, the facts kept on 98% of decisions and the unsupported claims on 96%.
+- **Not shown:** that this holds for other models, or for descriptions written from a real agent session instead of an author's notes. The grader and the writer are the same model family.
