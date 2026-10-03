@@ -377,7 +377,7 @@ describe('commands', () => {
     expect(out).toContain('Only moved or renamed: 1 file (src/new/name.ts)');
     expect(out).toContain('Commits on this branch (2), oldest first:\n  Reject negative ledger amounts\n  Test the ledger and move name.ts');
     expect(out).toContain('1. Opening, 1 or 2 sentences: what changed and why');
-    expect(out).toContain('Words: up to 189 for a diff this size, a ceiling and not a target.');
+    expect(out).toContain('Length follows what you were given, not the size of the diff');
     expect(out).toContain('From what you were given, not the diff: the why');
     const json = JSON.parse(s.yap(['context', '--kind', 'pr', '--base', 'main', '--json']).stdout);
     expect(json.diff.size).toBe('normal');

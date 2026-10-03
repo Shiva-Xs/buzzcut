@@ -53,3 +53,14 @@ The fresh set is built from `pool2.json` and sealed like the test set was: nobod
 4. `Read bench/eval/v3/TASK-B.md with SETS=freshR,freshT and do the task`
 
 Then Claude scores them and gives you the grading message: `Read bench/eval/v3/TASK-GRADE.md with SETS=freshR,freshT ROUND=1 and do the task`.
+
+## Round 4: the second cycle, on `fresh2`
+
+Same rules as round 3; nobody opens `sets/fresh2*`, `out/fresh2*` or `grade/fresh2*`. Four fresh chats, side by side:
+
+1. `Read bench/eval/v3/TASK-CHECKLIST.md with SETS=fresh2R,fresh2T and do the task`
+2. `Read bench/eval/v3/TASK-C2.md with SETS=fresh2R,fresh2T and do the task`
+3. `Read bench/eval/v3/TASK-B0.md with SETS=fresh2R,fresh2T and do the task`
+4. `Read bench/eval/v3/TASK-B.md with SETS=fresh2R,fresh2T and do the task`
+
+Then Claude scores them and gives you the grading message with `SETS=fresh2R,fresh2T ROUND=1`.

@@ -80,3 +80,13 @@ What the test cannot show is written in the results: one writer model, human PR 
 5. on big PRs, B's mean rank is no worse than C2's.
 
 If it passes, the docs say the full tool matches the skill text. If it misses, nothing more is tuned on this set: the docs keep calling the checker loop unproven, and 0.3.0 ships that way. No second cycle.
+
+## Round 4: the second cycle (written before anything is run)
+
+**Round 3 result** (`RESULTS-FRESH.md`): facts fixed (B 91% against B0's 92%), writing not: two of five conditions. B is still longer than B0 on thin notes at every size and ranks behind it and level with the plain prompt.
+
+**The fix (the last one).** Only the text `buzzcut context` gives the writer: no numbered slots and no "Optional" risk slot; the word figure is gone (the checker still flags padding); and a line that length follows what you were given, not the size of the diff. The carry-over, Tested and mechanical-counts lines stay.
+
+**Fresh set.** `fresh2`: 32 PRs (12 tiny, 12 normal, 8 big) from 16 repos, 10 of them not in `fresh`, built from the PRs of `pool2.json` that neither `fresh` nor any earlier set used (all 828 fetched before the draw). Arms B, B0, C2; same notes, rubric, grader and audit as round 3.
+
+**Same five conditions as round 3.** This is the last cycle. If B misses, 0.3.0 ships as is, and the docs say the skill text alone writes better than the full tool.

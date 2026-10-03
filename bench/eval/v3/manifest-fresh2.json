@@ -1,0 +1,258 @@
+[
+ {
+  "id": "pr01",
+  "url": "https://github.com/sympy/sympy/pull/21543",
+  "repo": "sympy/sympy",
+  "size": "normal",
+  "lines": 31,
+  "title": "perf(polys): make EX faster for trivial operations"
+ },
+ {
+  "id": "pr02",
+  "url": "https://github.com/Textualize/rich/pull/1226",
+  "repo": "Textualize/rich",
+  "size": "big",
+  "lines": 449,
+  "title": "KR translate"
+ },
+ {
+  "id": "pr03",
+  "url": "https://github.com/pydata/xarray/pull/5284",
+  "repo": "pydata/xarray",
+  "size": "normal",
+  "lines": 55,
+  "title": "Dask-friendly nan check in xr.corr() and xr.cov()"
+ },
+ {
+  "id": "pr04",
+  "url": "https://github.com/go-chi/chi/pull/555",
+  "repo": "go-chi/chi",
+  "size": "normal",
+  "lines": 33,
+  "title": "Remove one allocation by foregoing context.WithValue"
+ },
+ {
+  "id": "pr05",
+  "url": "https://github.com/pydata/xarray/pull/5285",
+  "repo": "pydata/xarray",
+  "size": "big",
+  "lines": 360,
+  "title": "Clean up and enhance plot method docstrings"
+ },
+ {
+  "id": "pr06",
+  "url": "https://github.com/mrdoob/three.js/pull/21842",
+  "repo": "mrdoob/three.js",
+  "size": "normal",
+  "lines": 96,
+  "title": "Fixed eslint errors for examples"
+ },
+ {
+  "id": "pr07",
+  "url": "https://github.com/dtolnay/syn/pull/729",
+  "repo": "dtolnay/syn",
+  "size": "normal",
+  "lines": 46,
+  "title": "Avoid unnecessary clones and allocations when peeking"
+ },
+ {
+  "id": "pr08",
+  "url": "https://github.com/dtolnay/syn/pull/943",
+  "repo": "dtolnay/syn",
+  "size": "normal",
+  "lines": 34,
+  "title": "update `File` example program output"
+ },
+ {
+  "id": "pr09",
+  "url": "https://github.com/sequelize/sequelize/pull/13074",
+  "repo": "sequelize/sequelize",
+  "size": "tiny",
+  "lines": 8,
+  "title": "This PR is a rework of #12811, #12655"
+ },
+ {
+  "id": "pr10",
+  "url": "https://github.com/chartjs/Chart.js/pull/8883",
+  "repo": "chartjs/Chart.js",
+  "size": "tiny",
+  "lines": 17,
+  "title": "Setting correct decimated values when below threshold"
+ },
+ {
+  "id": "pr11",
+  "url": "https://github.com/sequelize/sequelize/pull/13129",
+  "repo": "sequelize/sequelize",
+  "size": "normal",
+  "lines": 39,
+  "title": "test(model): add tests for previous and set function"
+ },
+ {
+  "id": "pr12",
+  "url": "https://github.com/python-attrs/attrs/pull/819",
+  "repo": "python-attrs/attrs",
+  "size": "normal",
+  "lines": 181,
+  "title": "Initial implementation of a faster repr"
+ },
+ {
+  "id": "pr13",
+  "url": "https://github.com/typeorm/typeorm/pull/7625",
+  "repo": "typeorm/typeorm",
+  "size": "tiny",
+  "lines": 7,
+  "title": "feat: add schema support for orphanedRowAction"
+ },
+ {
+  "id": "pr14",
+  "url": "https://github.com/typeorm/typeorm/pull/7568",
+  "repo": "typeorm/typeorm",
+  "size": "tiny",
+  "lines": 2,
+  "title": "doc: Speed up TS migration command"
+ },
+ {
+  "id": "pr15",
+  "url": "https://github.com/mrdoob/three.js/pull/21854",
+  "repo": "mrdoob/three.js",
+  "size": "tiny",
+  "lines": 4,
+  "title": "docs: Update PlaneGeometry.html"
+ },
+ {
+  "id": "pr16",
+  "url": "https://github.com/sequelize/sequelize/pull/13028",
+  "repo": "sequelize/sequelize",
+  "size": "tiny",
+  "lines": 11,
+  "title": "fix: add bigint type to WhereValue"
+ },
+ {
+  "id": "pr17",
+  "url": "https://github.com/mrdoob/three.js/pull/21878",
+  "repo": "mrdoob/three.js",
+  "size": "normal",
+  "lines": 52,
+  "title": "MMDLoader: Skip transparency check for CompressedTexture."
+ },
+ {
+  "id": "pr18",
+  "url": "https://github.com/sequelize/sequelize/pull/13102",
+  "repo": "sequelize/sequelize",
+  "size": "big",
+  "lines": 370,
+  "title": "fix(mysql): release connection on deadlocks"
+ },
+ {
+  "id": "pr19",
+  "url": "https://github.com/rust-lang/rustfmt/pull/4680",
+  "repo": "rust-lang/rustfmt",
+  "size": "big",
+  "lines": 307,
+  "title": "Implement `One` option for imports_granularity"
+ },
+ {
+  "id": "pr20",
+  "url": "https://github.com/psycopg/psycopg2/pull/1110",
+  "repo": "psycopg/psycopg2",
+  "size": "tiny",
+  "lines": 1,
+  "title": "Fix ctypes doc example AttributeError"
+ },
+ {
+  "id": "pr21",
+  "url": "https://github.com/moment/moment/pull/5742",
+  "repo": "moment/moment",
+  "size": "normal",
+  "lines": 141,
+  "title": "[locale] Fix Serbian locale (sr, sr-cyrl)"
+ },
+ {
+  "id": "pr22",
+  "url": "https://github.com/koajs/koa/pull/1447",
+  "repo": "koajs/koa",
+  "size": "normal",
+  "lines": 71,
+  "title": "feat: allow bodyless responses for non empty status codes"
+ },
+ {
+  "id": "pr23",
+  "url": "https://github.com/Automattic/mongoose/pull/10109",
+  "repo": "Automattic/mongoose",
+  "size": "tiny",
+  "lines": 22,
+  "title": "refactor(index.d.ts): move `discriminator()` to common interface"
+ },
+ {
+  "id": "pr24",
+  "url": "https://github.com/moment/moment/pull/5737",
+  "repo": "moment/moment",
+  "size": "tiny",
+  "lines": 3,
+  "title": "[misc] Update dep message to reflect project status"
+ },
+ {
+  "id": "pr25",
+  "url": "https://github.com/sequelize/sequelize/pull/12841",
+  "repo": "sequelize/sequelize",
+  "size": "normal",
+  "lines": 199,
+  "title": "fix(mysql, mariadb): release connection on deadlocks"
+ },
+ {
+  "id": "pr26",
+  "url": "https://github.com/Textualize/rich/pull/1106",
+  "repo": "Textualize/rich",
+  "size": "big",
+  "lines": 439,
+  "title": "Added german readme"
+ },
+ {
+  "id": "pr27",
+  "url": "https://github.com/Automattic/mongoose/pull/10170",
+  "repo": "Automattic/mongoose",
+  "size": "big",
+  "lines": 532,
+  "title": "chore: update carbon + native ads integration"
+ },
+ {
+  "id": "pr28",
+  "url": "https://github.com/mrdoob/three.js/pull/21884",
+  "repo": "mrdoob/three.js",
+  "size": "big",
+  "lines": 2118,
+  "title": "Improve MeshPhysicalMaterial transmission support"
+ },
+ {
+  "id": "pr29",
+  "url": "https://github.com/mrdoob/three.js/pull/21825",
+  "repo": "mrdoob/three.js",
+  "size": "big",
+  "lines": 327,
+  "title": "PerspectiveCamera: Add Kooima's Generalized Projection Formulation"
+ },
+ {
+  "id": "pr30",
+  "url": "https://github.com/Automattic/mongoose/pull/10168",
+  "repo": "Automattic/mongoose",
+  "size": "tiny",
+  "lines": 2,
+  "title": "fix(index.d.ts): add parameter type in merge"
+ },
+ {
+  "id": "pr31",
+  "url": "https://github.com/sphinx-doc/sphinx/pull/9071",
+  "repo": "sphinx-doc/sphinx",
+  "size": "tiny",
+  "lines": 2,
+  "title": "Pin Sphinx 3.x to docutils <0.17"
+ },
+ {
+  "id": "pr32",
+  "url": "https://github.com/psycopg/psycopg2/pull/1102",
+  "repo": "psycopg/psycopg2",
+  "size": "tiny",
+  "lines": 9,
+  "title": "Find mxDateTime.h automatically"
+ }
+]

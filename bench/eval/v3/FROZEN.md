@@ -15,3 +15,9 @@ The skill and the checker are fixed from this point. A change to any of them mea
 - Commit: `8c57f49` (branch `v0.3`); `src/` tree `bf65b3d4a59d651f6fecb9f02cfeef061e0b5ee7`; `skills/buzzcut/SKILL.md` sha256 starts `db6d13e29eed4da9399fa9ac`
 - Fresh list: `manifest-fresh.json` sha256 starts `553be72b05974140`, drawn from `pool2.json` (28 repos, 828 PRs frozen before reading; the first 437 fetched were eligible, 37 chosen from 16 repos)
 - Arms B, B0, C2. Pass conditions: PREREG.md, "Round 3". One cycle only.
+
+## Round 4 (second cycle, fresh2)
+
+- Commit: the one after `d773503` that adds `manifest-fresh2.json` (see git log); `src/` tree `bf65b3d4a59d651f6fecb9f02cfeef061e0b5ee7` before this commit's change to `src/context.ts`; `skills/buzzcut/SKILL.md` unchanged from round 3 (sha256 starts `db6d13e29eed4da9399fa9ac`)
+- Fresh list: `manifest-fresh2.json` sha256 starts `962b02327d580fb8`
+- Arms B, B0, C2. Pass conditions: PREREG.md, "Round 3" (same five). Last cycle.
