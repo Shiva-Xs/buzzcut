@@ -30,8 +30,10 @@ for (const m of manifest) {
   key[m.id] = Object.fromEntries(order.map((a, i) => [letters[i], a.name]));
   const notes = clean(readFileSync(here(`sets/${set}/${m.id}/notes.md`), 'utf8'));
   const diff = readFileSync(here(`sets/${set}/${m.id}/diff.txt`), 'utf8');
+  const ctxFile = here(`sets/${set}/${m.id}/context.txt`);
+  const summary = existsSync(ctxFile) ? readFileSync(ctxFile, 'utf8').split('\n').filter((l, i, a) => i > 0 && !a.slice(0, i).some((x) => x.startsWith('Shape for')) && !l.startsWith('Shape for')).join('\n').trim() : '';
   const cl = existsSync(here(`grade/${set}/checklist/${m.id}.json`)) ? JSON.parse(readFileSync(here(`grade/${set}/checklist/${m.id}.json`), 'utf8')) : [];
-  let p = `########## ${m.id}\n\nAUTHOR NOTES (everything the author knew about why and how it was checked):\n${notes.slice(0, 3500)}${notes.length > 3500 ? '\n…(cut)' : ''}\n\nDIFF (changed lines, cut):\n${diff.slice(0, 3500)}${diff.length > 3500 ? '\n…(cut)' : ''}\n\nCHECKLIST of needed facts from the notes:\n${cl.length ? cl.map((f, i) => `${i + 1}. ${f}`).join('\n') : '(none)'}\n`;
+  let p = `########## ${m.id}\n\nAUTHOR NOTES (everything the author knew about why and how it was checked):\n${notes.slice(0, 3500)}${notes.length > 3500 ? '\n…(cut)' : ''}\n\nDIFF (changed lines, cut):\n${diff.slice(0, 3500)}${diff.length > 3500 ? '\n…(cut)' : ''}\n\nDIFF SUMMARY (counted from the whole diff; any description may use it):\n${summary || '(none)'}\n\nCHECKLIST of needed facts from the notes:\n${cl.length ? cl.map((f, i) => `${i + 1}. ${f}`).join('\n') : '(none)'}\n`;
   order.forEach((a, i) => {
     p += `\n----- ${letters[i]} -----\n${clean(readFileSync(here(`out/${set}/${a.dir}/${m.id}.md`), 'utf8'))}\n`;
   });

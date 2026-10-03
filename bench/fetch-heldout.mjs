@@ -86,6 +86,7 @@ async function pool(items, n, fn, label) {
   );
 }
 
-await pool(frozen.prs, 4, fetchPr, 'pr');
-await pool(frozen.repos, 3, snapshot, 'repo');
+// SKIP_PRS / SKIP_SNAPSHOTS / ONLY_REPOS (comma-separated owner/repo) let a big pool fetch its PRs first and clone only the repos a set uses.
+if (!process.env.SKIP_PRS) await pool(frozen.prs, 4, fetchPr, 'pr');
+if (!process.env.SKIP_SNAPSHOTS) await pool(process.env.ONLY_REPOS ? process.env.ONLY_REPOS.split(',') : frozen.repos, 3, snapshot, 'repo');
 process.stderr.write('done\n');

@@ -471,7 +471,7 @@ export const thinDescription: Rule = {
         severity: 'warn',
         points: 12,
         message: text.words ? `A one-line description for a ${n}-line diff` : `No description for a ${n}-line diff`,
-        hint: "Give the reviewer a map: what changed and why (the bug, the request, the issue), the few behavior changes worth a real look and where they are, what's mechanical and roughly how much of the diff it is, and what you ran if you ran something.",
+        hint: "Give the reviewer a map: what changed and why (the bug, the request, the issue), the few behavior changes worth a real look and where they are, what's mechanical and how many lines it is, and what ran if anything did.",
         data: { lines: n, words: text.words },
       };
     }

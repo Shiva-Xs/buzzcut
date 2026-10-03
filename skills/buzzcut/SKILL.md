@@ -35,6 +35,8 @@ Short means no padding, not fewer facts. A description that's too thin fails the
 - other PRs and issues they mention, and why (merge this first, a related fix, who asked)
 - a question they're asking, feedback they want, or that it's a draft
 - what it doesn't do or leaves for later, and what still works as before
+- docs, threads and other links they cite, with what each is for
+- what they ran and what it showed, "tests pass" included
 - an example, expected output or config they gave
 - the reason, in their words
 
@@ -72,9 +74,9 @@ Updating a description that's already clear (says what and why, true to the diff
 Body, in this order:
 
 1. **Opening, 1 or 2 sentences: what changed and why.** The why comes from this session: the bug, the error message (quote it), the issue link, who asked for it. Say it in plain words, with no "What:" or "Why:" labels. If the session never says why, say what changed and leave the why out: a guessed reason is worse than none, and buzzcut's "never says why" is advice, not a reason to invent one.
-2. **Bullets, 2 to 5 (more on big diffs): the changes a reviewer would ask about.** One change per bullet, about 25 words at most: where to look (the function, setting or endpoint) and the concrete values, old → new, limits, defaults. A bullet that runs past that is two changes or has reasoning in it: split it, and put the reasoning in the opening. Group by area, never file by file. Say which part is mechanical and roughly how much of the diff it is.
+2. **Bullets, 2 to 5 (more on big diffs): the changes a reviewer would ask about.** One change per bullet, about 25 words at most: where to look (the function, setting or endpoint) and the concrete values, old → new, limits, defaults. A bullet that runs past that is two changes or has reasoning in it: split it, and put the reasoning in the opening. Group by area, never file by file. Say which part is mechanical and how many of the lines it is (the counts are in `buzzcut context`; use them, not a percentage).
 3. **Optional, one line:** a risk, breaking change, migration or follow-up.
-4. **`Tested:`, only if you ran something.** The commands you actually ran in this session and what they returned (`npm test`, 212 passed). Write what you saw, no more: "ran `cargo test`" isn't "`cargo test` passed" unless you saw it pass, and a test plan or a "How to test" list isn't a run. If you ran nothing, leave testing out: no "Not tested" line, because a reviewer learns nothing from it (CI and review are how an unrun change gets checked). If something a reviewer should look at was never exercised, say so in the risk line (step 3), in plain words. buzzcut reads the session and blocks "tests pass" when nothing ran. Never tick a checkbox you didn't check.
+4. **`Tested:`, when something ran.** The commands you ran in this session, or that the author or CI told you ran, and what they returned (`npm test`, 212 passed; "tests pass" from the author's notes counts). Write what you saw, no more: "ran `cargo test`" isn't "`cargo test` passed" unless you saw it pass, and a test plan or a "How to test" list isn't a run. If nothing ran and nobody told you what did, leave testing out: no "Not tested" line, because a reviewer learns nothing from it (CI and review are how an unrun change gets checked). If something a reviewer should look at was never exercised, say so in the risk line (step 3), in plain words. buzzcut reads the session and blocks "tests pass" when nothing ran. Never tick a checkbox you didn't check.
 
 Scale it with the diff (`buzzcut context` says which one this is):
 
@@ -89,7 +91,7 @@ The diff tells you what changed, where, and the values. Only the session tells y
 A big diff needs a map, not a tour. `buzzcut context` says where the lines are, which files are tests, generated or only renamed, and what the branch's commits were.
 
 - Open with what changed overall and why now.
-- Say what's mechanical (renames, moves, formatting, generated code) and roughly how much of the diff it is, so the reviewer can skim it.
+- Say what's mechanical (renames, moves, formatting, generated code) and how many lines it is (the counts are in `buzzcut context`), so the reviewer can skim it.
 - List the behavior changes that need a real review, one per bullet of about 25 words, each with where to look (the function or area, not every file) and the values. A big diff gets more bullets, not longer ones.
 - Say how to review it: an order, or which commits are mechanical if the history is split that way. Then risk, rollback if it matters, and what you ran to verify it.
 - Group by area, never file by file.

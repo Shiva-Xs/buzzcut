@@ -42,3 +42,14 @@ Nobody opens `sets/test*` or anything under `out/test*` or `grade/test*`. Six ch
 6. `Read bench/eval/v3/TASK-B.md with SETS=testR,testT and do the task`
 
 Each is 70 files (35 PRs, two kinds of notes). When all six are done, tell Claude: it scores them with no model, builds the packets and gives you the grading message (`ROUND=1`, `SETS=testR,testT`). Claude then audits 25% of the grades blind and reports the result against the bar in PREREG.md, whichever way it goes.
+
+## Round 3: the fixed full tool, on the fresh set
+
+The fresh set is built from `pool2.json` and sealed like the test set was: nobody opens `sets/fresh*`, `out/fresh*` or `grade/fresh*`. Five fresh chats, side by side:
+
+1. `Read bench/eval/v3/TASK-CHECKLIST.md with SETS=freshR,freshT and do the task`
+2. `Read bench/eval/v3/TASK-C2.md with SETS=freshR,freshT and do the task`
+3. `Read bench/eval/v3/TASK-B0.md with SETS=freshR,freshT and do the task`
+4. `Read bench/eval/v3/TASK-B.md with SETS=freshR,freshT and do the task`
+
+Then Claude scores them and gives you the grading message: `Read bench/eval/v3/TASK-GRADE.md with SETS=freshR,freshT ROUND=1 and do the task`.

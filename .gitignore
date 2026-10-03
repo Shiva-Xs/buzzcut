@@ -13,6 +13,7 @@ bench/cache/diffs/
 bench/cache/heldout/
 bench/cache/snapshots/
 bench/cache/v3/
+bench/cache/v3b/
 bench/eval/planted/out/
 bench/eval/planted/inputs/
 bench/eval/threearm/old/

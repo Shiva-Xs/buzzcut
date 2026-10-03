@@ -1,0 +1,298 @@
+[
+ {
+  "id": "pr01",
+  "url": "https://github.com/gofiber/fiber/pull/1288",
+  "repo": "gofiber/fiber",
+  "size": "normal",
+  "lines": 81,
+  "title": "✨ Etag middleware support to custom etags"
+ },
+ {
+  "id": "pr02",
+  "url": "https://github.com/tqdm/tqdm/pull/1142",
+  "repo": "tqdm/tqdm",
+  "size": "normal",
+  "lines": 61,
+  "title": "notebook: support `delay`"
+ },
+ {
+  "id": "pr03",
+  "url": "https://github.com/dask/dask/pull/7592",
+  "repo": "dask/dask",
+  "size": "tiny",
+  "lines": 8,
+  "title": "Using tmp_path and tmpdir to avoid temporary files and directories hanging in the repo"
+ },
+ {
+  "id": "pr04",
+  "url": "https://github.com/rust-lang/rustfmt/pull/4782",
+  "repo": "rust-lang/rustfmt",
+  "size": "big",
+  "lines": 866,
+  "title": "Expose `chain_width` et al in 1.4"
+ },
+ {
+  "id": "pr05",
+  "url": "https://github.com/Textualize/rich/pull/1182",
+  "repo": "Textualize/rich",
+  "size": "big",
+  "lines": 525,
+  "title": "Add `Optional` typing"
+ },
+ {
+  "id": "pr06",
+  "url": "https://github.com/python-attrs/attrs/pull/787",
+  "repo": "python-attrs/attrs",
+  "size": "big",
+  "lines": 674,
+  "title": "New attr.cmp_using helper function"
+ },
+ {
+  "id": "pr07",
+  "url": "https://github.com/cli/cli/pull/3679",
+  "repo": "cli/cli",
+  "size": "normal",
+  "lines": 103,
+  "title": "List all secrets instead of being subject to the default limit of 30 results"
+ },
+ {
+  "id": "pr08",
+  "url": "https://github.com/labstack/echo/pull/1792",
+  "repo": "labstack/echo",
+  "size": "normal",
+  "lines": 34,
+  "title": "improve code quality"
+ },
+ {
+  "id": "pr09",
+  "url": "https://github.com/pallets/werkzeug/pull/2094",
+  "repo": "pallets/werkzeug",
+  "size": "tiny",
+  "lines": 24,
+  "title": "Update manage-plnt.py example blogs to HTTPS and some current URLs"
+ },
+ {
+  "id": "pr10",
+  "url": "https://github.com/Textualize/rich/pull/1203",
+  "repo": "Textualize/rich",
+  "size": "big",
+  "lines": 448,
+  "title": "mypy strict compliant"
+ },
+ {
+  "id": "pr11",
+  "url": "https://github.com/tqdm/tqdm/pull/1006",
+  "repo": "tqdm/tqdm",
+  "size": "normal",
+  "lines": 228,
+  "title": "Tqdm tk"
+ },
+ {
+  "id": "pr12",
+  "url": "https://github.com/sphinx-doc/sphinx/pull/9282",
+  "repo": "sphinx-doc/sphinx",
+  "size": "tiny",
+  "lines": 26,
+  "title": "Fix #9280: py domain: \"exceptions\" module is not displayed"
+ },
+ {
+  "id": "pr13",
+  "url": "https://github.com/tqdm/tqdm/pull/1143",
+  "repo": "tqdm/tqdm",
+  "size": "big",
+  "lines": 977,
+  "title": "next release v4.60.0"
+ },
+ {
+  "id": "pr14",
+  "url": "https://github.com/dask/dask/pull/7700",
+  "repo": "dask/dask",
+  "size": "tiny",
+  "lines": 4,
+  "title": "Remove unused alphabet variables"
+ },
+ {
+  "id": "pr15",
+  "url": "https://github.com/pallets/werkzeug/pull/2051",
+  "repo": "pallets/werkzeug",
+  "size": "tiny",
+  "lines": 27,
+  "title": "fix connection reset when over max content size"
+ },
+ {
+  "id": "pr16",
+  "url": "https://github.com/python-attrs/attrs/pull/742",
+  "repo": "python-attrs/attrs",
+  "size": "normal",
+  "lines": 43,
+  "title": "Clarify next-gen auto_attribs inference rules"
+ },
+ {
+  "id": "pr17",
+  "url": "https://github.com/go-chi/chi/pull/596",
+  "repo": "go-chi/chi",
+  "size": "normal",
+  "lines": 72,
+  "title": "optimize sructs with memory alignment / padding"
+ },
+ {
+  "id": "pr18",
+  "url": "https://github.com/labstack/echo/pull/1724",
+  "repo": "labstack/echo",
+  "size": "big",
+  "lines": 732,
+  "title": "adds middleware for rate limiting"
+ },
+ {
+  "id": "pr19",
+  "url": "https://github.com/Textualize/rich/pull/1031",
+  "repo": "Textualize/rich",
+  "size": "big",
+  "lines": 395,
+  "title": "Added a Japanese translation of the README"
+ },
+ {
+  "id": "pr20",
+  "url": "https://github.com/sympy/sympy/pull/21327",
+  "repo": "sympy/sympy",
+  "size": "tiny",
+  "lines": 11,
+  "title": "Fixed Liouville ODE failing to match"
+ },
+ {
+  "id": "pr21",
+  "url": "https://github.com/scipy/scipy/pull/14127",
+  "repo": "scipy/scipy",
+  "size": "tiny",
+  "lines": 1,
+  "title": "CI: upgrade pip in benchmarks CI run"
+ },
+ {
+  "id": "pr22",
+  "url": "https://github.com/sphinx-doc/sphinx/pull/9131",
+  "repo": "sphinx-doc/sphinx",
+  "size": "normal",
+  "lines": 113,
+  "title": "Ignore nitpick warnings with regular expressions using `nitpick_ignore_regex`"
+ },
+ {
+  "id": "pr23",
+  "url": "https://github.com/networkx/networkx/pull/4685",
+  "repo": "networkx/networkx",
+  "size": "big",
+  "lines": 1073,
+  "title": "restructured networksimplex.py and added test_networksimplex.py"
+ },
+ {
+  "id": "pr24",
+  "url": "https://github.com/python-attrs/attrs/pull/731",
+  "repo": "python-attrs/attrs",
+  "size": "normal",
+  "lines": 132,
+  "title": "__attrs_init__()"
+ },
+ {
+  "id": "pr25",
+  "url": "https://github.com/dask/dask/pull/7675",
+  "repo": "dask/dask",
+  "size": "normal",
+  "lines": 31,
+  "title": "Accept axis tuple for flip consistent with numpy"
+ },
+ {
+  "id": "pr26",
+  "url": "https://github.com/junegunn/fzf/pull/2326",
+  "repo": "junegunn/fzf",
+  "size": "tiny",
+  "lines": 2,
+  "title": "Exit terminal mode before closing FZF window in Vim/Neovim"
+ },
+ {
+  "id": "pr27",
+  "url": "https://github.com/junegunn/fzf/pull/2368",
+  "repo": "junegunn/fzf",
+  "size": "big",
+  "lines": 507,
+  "title": "ansi: speed up parsing by roughly 7.5x"
+ },
+ {
+  "id": "pr28",
+  "url": "https://github.com/sphinx-doc/sphinx/pull/9185",
+  "repo": "sphinx-doc/sphinx",
+  "size": "normal",
+  "lines": 76,
+  "title": "autodoc.typehints can accurately represent overloads"
+ },
+ {
+  "id": "pr29",
+  "url": "https://github.com/pallets/werkzeug/pull/2103",
+  "repo": "pallets/werkzeug",
+  "size": "tiny",
+  "lines": 22,
+  "title": "Fix LocalStack mutable list issue"
+ },
+ {
+  "id": "pr30",
+  "url": "https://github.com/scipy/scipy/pull/14058",
+  "repo": "scipy/scipy",
+  "size": "normal",
+  "lines": 97,
+  "title": "BUG: fixed a dtype bug in linalg.solve."
+ },
+ {
+  "id": "pr31",
+  "url": "https://github.com/dask/dask/pull/7691",
+  "repo": "dask/dask",
+  "size": "tiny",
+  "lines": 2,
+  "title": "[docs] fix typo in DataFrame.set_index()"
+ },
+ {
+  "id": "pr32",
+  "url": "https://github.com/tqdm/tqdm/pull/1163",
+  "repo": "tqdm/tqdm",
+  "size": "big",
+  "lines": 978,
+  "title": "next release v4.61.0"
+ },
+ {
+  "id": "pr33",
+  "url": "https://github.com/sympy/sympy/pull/21474",
+  "repo": "sympy/sympy",
+  "size": "big",
+  "lines": 432,
+  "title": "Use strongly_connected_components for Matrix"
+ },
+ {
+  "id": "pr34",
+  "url": "https://github.com/tqdm/tqdm/pull/1155",
+  "repo": "tqdm/tqdm",
+  "size": "big",
+  "lines": 361,
+  "title": "added logging sub-module"
+ },
+ {
+  "id": "pr35",
+  "url": "https://github.com/tornadoweb/tornado/pull/2971",
+  "repo": "tornadoweb/tornado",
+  "size": "tiny",
+  "lines": 12,
+  "title": "locale: Only try to load locales that exist"
+ },
+ {
+  "id": "pr36",
+  "url": "https://github.com/networkx/networkx/pull/4659",
+  "repo": "networkx/networkx",
+  "size": "big",
+  "lines": 312,
+  "title": "Add an `initial` parameter to simple and dual Barábasi-Albert random graphs"
+ },
+ {
+  "id": "pr37",
+  "url": "https://github.com/tqdm/tqdm/pull/893",
+  "repo": "tqdm/tqdm",
+  "size": "tiny",
+  "lines": 3,
+  "title": "do not call len on iterable"
+ }
+]

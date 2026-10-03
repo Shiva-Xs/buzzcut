@@ -62,3 +62,21 @@ What the test cannot show is written in the results: one writer model, human PR 
 - Round 0 audit: the grader's arm order agreed with Claude's on 68% of the pairs both ranked (bar: 70%), with many ties. The fact, unsupported and testing grades agreed at 95% to 98%. Result and the changes made are in `RESULTS-DEV.md`. After round 0 I wrote that Claude would grade the test ranks itself. Round 2, under rubric v2, agreed on 85% of the pairs (no ties), so before the test is run the rule goes back to the original one: Gemini grades under rubric v2 and Claude audits 25% of the test PRs blind; if the order agrees on under 70% of the pairs, Claude grades all of them.
 - Grader rubric v2 (from round 1 on): boilerplate testing lines, mentions of the notes or session and headings on small changes count against a description, and ties only when equal.
 - Tuning round 1: a Tested line only when something ran (design call, with the evidence above); arm C2 added.
+
+## Round 3: fixing the full tool (written before anything is run)
+
+**What the sealed test showed.** The full tool B (skill, `buzzcut context`, checker loop) ranked 2.76 against 1.84 for the skill text alone (B0), kept 80% of the author's facts against 92%, and was worst on big PRs. Reading B's and B0's outputs side by side on the dev and test sets (so both are now spent for any claim) found where the facts went: B dropped the author's "tests pass" and "ran X" statements (its context said to give a Tested line only for what *you* ran), dropped reasons and cited links on tiny PRs (its context gave a word range "about 15 to 80" that read as a target), and on big PRs spent words on rough "about 90% of the diff" lines and a headed template. The checker itself fired no length findings on either arm.
+
+**The fix (one cycle).** Only text the writer is given: `buzzcut context` and `SKILL.md`. The Tested line takes what the author says ran as well as what you ran; the carry-over list gains "what they ran and what it showed" and "docs and links they cite"; the word range is a ceiling that carried-over facts may exceed, with no floor; "mechanical" is stated with the line counts, not a percentage; and the carry-over item comes before the bullets in the shape, so what the author gave is written first. The grader packets now carry the diff summary from `buzzcut context` for every arm, so a figure counted from the whole diff is checkable.
+
+**Fresh set.** `fresh` is built from `pool2.json`, a second pool from repos in neither the corpus, the held-out set nor the first pool, frozen before it was read. Arms: B (the fixed tool), B0 (the fixed skill text), C2 (the plain prompt). Same two kinds of notes, same rubric v2, Gemini writes and grades, Claude audits 25% blind.
+
+**B is fixed if all of these hold on `fresh`:**
+
+1. B's mean rank is no worse than B0's by more than 0.15;
+2. B keeps at least B0's share of the needed facts minus 3 points;
+3. B's PRs with an unsupported claim are no more than B0's plus 2;
+4. B beats C2: lower mean rank and more PRs won than lost;
+5. on big PRs, B's mean rank is no worse than C2's.
+
+If it passes, the docs say the full tool matches the skill text. If it misses, nothing more is tuned on this set: the docs keep calling the checker loop unproven, and 0.3.0 ships that way. No second cycle.

@@ -3,7 +3,7 @@
 //   T  thin notes: only its first lines, like an agent that barely kept track of why or how it was tested
 // A set "dev" becomes the sets devR and devT (same diffs, same ids), with out/devR/<arm>/ and out/devT/<arm>/ waiting.
 //
-//   node bench/eval/v3/build.mjs <name> <heldout|pool> <dev|test|all> <tiny> <normal> <big>
+//   node bench/eval/v3/build.mjs <name> <heldout|pool|pool2> <dev|test|all> <tiny> <normal> <big>
 //   node bench/eval/v3/build.mjs dev heldout dev 15 16 5
 //   node bench/eval/v3/build.mjs test pool all 14 14 12      (the sealed set: build it, don't read it)
 import { createHash } from 'node:crypto';
@@ -13,22 +13,23 @@ import { fileURLToPath } from 'node:url';
 import { buildDiff, contextOf, DEFAULT_CONFIG, renderContext, sizeOf } from '../../../dist/index.js';
 
 const [name, source, half, nTiny, nNormal, nBig] = process.argv.slice(2);
-if (!name || !['heldout', 'pool'].includes(source) || !['dev', 'test', 'all'].includes(half)) {
-  console.error('usage: build.mjs <name> <heldout|pool> <dev|test|all> <tiny> <normal> <big>');
+if (!name || !['heldout', 'pool', 'pool2'].includes(source) || !['dev', 'test', 'all'].includes(half)) {
+  console.error('usage: build.mjs <name> <heldout|pool|pool2> <dev|test|all> <tiny> <normal> <big>');
   process.exit(2);
 }
 const here = (p) => fileURLToPath(new URL(p, import.meta.url));
 const bench = (p) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const SNAP = process.env.HELDOUT_SNAPSHOTS || bench('cache/snapshots');
-const list = JSON.parse(readFileSync(source === 'heldout' ? bench('heldout.json') : here('pool.json'), 'utf8'));
-const cacheDir = source === 'heldout' ? bench('cache/heldout') : bench('cache/v3');
+const list = JSON.parse(readFileSync(source === 'heldout' ? bench('heldout.json') : here(`${source}.json`), 'utf8'));
+const cacheDir = source === 'heldout' ? bench('cache/heldout') : bench(source === 'pool' ? 'cache/v3' : 'cache/v3b');
 const sha = (s) => createHash('sha1').update(s).digest('hex');
 const isTest = (repo) => parseInt(sha(repo.toLowerCase()).slice(0, 8), 16) % 2 === 1;
 const words = (s) => (s.match(/\S+/g) ?? []).length;
 const take = { tiny: Number(nTiny), normal: Number(nNormal), big: Number(nBig) };
 // PRs already used by an earlier writing test, or another set here, are never reused.
 const used = new Set();
-for (const f of [bench('eval/threearm/manifest.json'), ...['dev', 'test'].map((n) => here(`manifest-${n}.json`))]) {
+import { readdirSync } from 'node:fs';
+for (const f of [bench('eval/threearm/manifest.json'), ...readdirSync(here('.')).filter((n) => /^manifest-.*\.json$/.test(n)).map((n) => here(n))]) {
   if (existsSync(f) && !f.endsWith(`manifest-${name}.json`)) for (const m of JSON.parse(readFileSync(f, 'utf8'))) used.add(m.url);
 }
 
