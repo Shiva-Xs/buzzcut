@@ -33,7 +33,6 @@ var package_default = {
     node: ">=20"
   },
   scripts: {
-    dev: "npm run build:site && npx -y live-server site",
     build: "tsup",
     "build:site": "node scripts/build-site.mjs",
     test: "tsup && vitest run",
