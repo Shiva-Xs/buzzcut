@@ -64,7 +64,7 @@ Two tests, both on real PRs. **buzzcut's checks** ran on all **3,366 PRs and com
 
 An earlier build sent back 10 of the PRs from before AI, 25 by people in 2026 and 104 by agents. The difference is false alarms fixed (`phantom-tests` on "Ran unit tests", paths and product names), Problem / Fix sections no longer blocking a small fix, and length and shape warnings no longer adding up to a send-back on their own.
 
-**An agent with buzzcut writes PRs reviewers prefer.** Sonnet 5 wrote buzzcut's version of 30 real agent PRs from repos the skill was never tuned on, from each PR's real diff and its original description (used as the agent's notes: facts kept, none added), checking with buzzcut until it passed. A separate call judged each pair blind, and a third fact-checked buzzcut's version against the diff and the notes ([bench/eval/corpus/](../bench/eval/corpus)):
+**An agent with buzzcut writes PRs reviewers prefer** (this run used the original skill, 0.1, and compared against the agents' own originals; the 0.3 comparison against a plain prompt is further down). Sonnet 5 wrote buzzcut's version of 30 real agent PRs from repos the skill was never tuned on, from each PR's real diff and its original description (used as the agent's notes: facts kept, none added), checking with buzzcut until it passed. A separate call judged each pair blind, and a third fact-checked buzzcut's version against the diff and the notes ([bench/eval/corpus/](../bench/eval/corpus)):
 
 | On 30 held-out agent PRs | buzzcut's version | Agent's original |
 |---|---|---|

@@ -239,13 +239,13 @@
       <p class="label"><b>05</b> Proof</p>
       <div class="split-head">
         <h2 id="proof-h">Tested on real pull requests, from before AI and after</h2>
-        <p class="sub">Two tests. buzzcut's checks ran on every PR and commit we downloaded, including work merged between 2018 and May 2021 in 75 projects, from kubernetes and rust to cpython and the Linux kernel: anything flagged there counts as a false alarm. Then an agent wrote buzzcut's version of real agent PRs from their own diffs, and a blind judge compared each with the original.</p>
+        <p class="sub">Two tests. buzzcut's checks ran on every PR and commit we downloaded, including work merged between 2018 and May 2021 in 75 projects, from kubernetes and rust to cpython and the Linux kernel: anything flagged there counts as a false alarm. Then a model wrote descriptions for real PRs with and without buzzcut's rules, and a blind grader compared them.</p>
       </div>
       <div class="stats">
         <div class="stat red"><b>3,366</b><span>real PRs and commits buzzcut's checks ran on, 1,275 of them opened by coding agents</span></div>
         <div class="stat"><b>0 <small>of</small> 167</b><span>commits from before AI were sent back</span></div>
-        <div class="stat"><b>30 <small>of</small> 30</b><span>times a blind judge preferred buzzcut's version of a real agent PR, on PRs from repos it was never tuned on</span></div>
-        <div class="stat"><b>11 <small>vs</small> 67</b><span>facts a reviewer needs that were missing: 11 from buzzcut's versions, 67 from the agents' originals</span></div>
+        <div class="stat"><b>49 <small>of</small> 64</b><span>descriptions where buzzcut's 0.3 tool ranked above a good plain prompt, blind-graded, on PRs from repos it was never tuned on</span></div>
+        <div class="stat"><b>30 <small>of</small> 30</b><span>times a blind judge preferred buzzcut's version of a real agent PR over the agent's original (the original skill, 0.1)</span></div>
       </div>
       <p class="fine proof-src">Data, scripts and every judged pair: <a href="https://github.com/Shiva-Xs/buzzcut/tree/main/bench">bench/</a> and <a href="https://github.com/Shiva-Xs/buzzcut/tree/main/bench/eval/corpus">bench/eval/corpus/</a></p>
     </div>
