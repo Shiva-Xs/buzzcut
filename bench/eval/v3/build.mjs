@@ -108,6 +108,7 @@ picked.forEach((c, i) => {
   manifest.push({ id, url: c.url, repo: `${c.owner}/${c.repo}`, size: sizeOf(d), lines: d.changedLines, title: c.pr.title });
 });
 for (const cond of ['R', 'T']) for (const arm of ['D', 'C', 'C2', 'B0', 'B']) mkdirSync(here(`out/${name}${cond}/${arm}`), { recursive: true });
+for (const cond of ['R', 'T']) mkdirSync(here(`grade/${name}${cond}/checklist`), { recursive: true });
 writeFileSync(here(`manifest-${name}.json`), JSON.stringify(manifest, null, 1) + '\n');
 const by = manifest.reduce((m, x) => ((m[x.size] = (m[x.size] ?? 0) + 1), m), {});
 console.log(`set ${name}: ${manifest.length} PRs`, by, `from ${new Set(manifest.map((m) => m.repo)).size} repos; sets ${name}R and ${name}T`);

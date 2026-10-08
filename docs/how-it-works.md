@@ -101,17 +101,17 @@ How it was measured, on a held-out set of 311 PRs from 27 repos that appear nowh
 
 ### Writing, against a plain prompt
 
-[`bench/eval/v3/`](../bench/eval/v3) has the plan, the arms and the results. Gemini 3.8 Flash wrote descriptions for real PRs, each with the author's full text as notes and with only its first sentences; a second pass graded them against a checklist of facts from the notes, with the arm letters shuffled. 36 PRs to tune on, then 35 from repos not used anywhere else, run once after the skill was frozen. On the test set (70 graded descriptions per arm, mean rank, 1 is best):
+[`bench/eval/v3/`](../bench/eval/v3) has the plans, the arms and every result. Gemini 3.8 Flash wrote descriptions for real PRs, each with the author's full text as notes and with only its first sentences; a second pass graded them against a checklist of facts from the notes, with the arm letters shuffled. The last run, of the tool as released, used 32 PRs from 16 repos used nowhere else (64 graded descriptions per arm):
 
-| arm | mean rank | needed facts kept | unsupported claims |
+| arm | mean rank (1 is best) | needed facts kept | PRs with an unsupported claim |
 |---|---|---|---|
-| skill text alone | **1.84** | 92% | 0 |
-| skill + `buzzcut context` + checker (the full tool) | 2.76 | 80% | 8 (see below) |
-| plain prompt: keep the facts, add nothing, leave testing out if nothing ran | 3.09 | 89% | 0 |
-| bare "write the PR description" | 3.49 | 65% | 22 in 16 descriptions |
+| skill text alone | **1.48** | 91% | 0 |
+| the full tool: skill + `buzzcut context` + checker | 1.86 | 90% | 3 |
+| plain prompt: keep the facts, add nothing, leave testing out if nothing ran | 2.66 | 87% | 1 |
 
-- **Against a bare prompt, the skill wins.** The skill text alone beat it in 54 of 70 PRs and the full tool in 40 of 70. The bare prompt kept 65% of the facts the author gave and made 22 unsupported claims in 16 descriptions.
-- **Against a good plain prompt, the skill's writing rules win.** The skill text alone beat the plain prompt in 61 of 70 test PRs (45 of 72 on the tuning set), with more of the author's facts kept (92% against 89%).
-- **The checker loop is not shown to help.** The full tool beat the plain prompt in 44 of 70 PRs but kept fewer facts (80% against 89%), which misses the bar set beforehand, and trailed the skill text alone (28 to 42). It was ahead of the skill text alone on the tuning set and behind on the test set. It is worst on big PRs (14 PRs; the full tool ranked last), where it also dropped the most facts. 7 of its 8 unsupported claims are lines like "about 90% of the diff" that come from `buzzcut context`, which the grader could not see, so that count is too high.
-- **Audit.** Claude graded 17 of the 70 test PRs blind before seeing the grades: the order of the arms agreed on 81% of pairs, the facts kept on 98% of decisions and the unsupported claims on 96%.
-- **Not shown:** that this holds for other models, or for descriptions written from a real agent session instead of an author's notes. The grader and the writer are the same model family.
+- **Both beat a good plain prompt.** The skill text alone won 57 of 64 PRs against it, the full tool 49 of 64.
+- **The skill text alone still writes a little better than the full tool**: 40 PRs to 24, about 0.4 of a rank. The full tool made one invented open question on thin notes and two borderline claims; its descriptions are shorter than the plain prompt's and now as long as the skill text's.
+- **The full tool got here in steps.** On the first sealed test set it kept 80% of the author's facts, ranked 2.76 against 1.84 for the skill text alone, and lost to the plain prompt on big PRs. The text `buzzcut context` gives the writer was the cause, not the checker: it told writers to give a Tested line only for what *they* ran (so the author's "tests pass" went), it gave a word range that read as a target, and it asked for a rough percentage of mechanical lines. Fixing those took the facts to 90%; removing the numbered slots and the word figure took the full tool from level with the plain prompt (33 PRs to 41) to ahead of it (49 to 15).
+- **Against a bare "write the PR description"** (first test set, before those fixes): the skill text alone won 54 of 70, the full tool 40 of 70; the bare prompt kept 65% of the author's facts and made 22 unsupported claims in 16 descriptions.
+- **Audits.** For each run Claude graded a quarter of the PRs blind before seeing the grades: the order of the arms agreed on 75% to 82% of pairs, the facts kept on 97% to 100% of decisions, the unsupported claims on 96% to 100%.
+- **Not shown:** that this holds for other models, or for descriptions written from a real agent session instead of an author's notes. The grader and the writer are the same model family. Part of the rank gap to the plain prompt is style the grader rewards (short, no boilerplate testing line, no headings on small changes); the facts and unsupported-claim columns are not.
