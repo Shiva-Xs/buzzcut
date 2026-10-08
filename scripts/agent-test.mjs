@@ -58,7 +58,8 @@ function claude(dir, prompt, { plugin, tools, mcp }) {
   if (plugin) args.push('--plugin-dir', root);
   if (mcp) args.push('--mcp-config', JSON.stringify(mcp), '--strict-mcp-config');
   const r = spawnSync('claude', args, { cwd: dir, env, encoding: 'utf8', input: '', maxBuffer: 64 * 1024 * 1024 });
-  writeFileSync(join(dir, 'session.jsonl'), r.stdout);
+  // Claude Code's own transcript starts with the user's message; the stream output doesn't, so add it for the replays below.
+  writeFileSync(join(dir, 'session.jsonl'), `${JSON.stringify({ type: 'user', message: { role: 'user', content: prompt } })}\n${r.stdout}`);
   const events = r.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l));
   const results = events
     .filter((e) => e.type === 'user')
@@ -102,7 +103,9 @@ function prScenario(prompt, { mustDeny }) {
     input: JSON.stringify({ tool_name: 'Bash', tool_input: { command: last }, cwd: dir, transcript_path: join(dir, 'session.jsonl') }),
     encoding: 'utf8',
   });
-  check('its last gh pr create passes', lastCheck.stdout.trim() === '');
+  // A description that passes may still come back with notes for the agent (advice, not a denial).
+  check('its last gh pr create passes', !/"permissionDecision":\s*"deny"/.test(lastCheck.stdout));
+  if (lastCheck.stdout.includes('additionalContext')) console.log('  · it passed with notes for the agent');
   if (denials[0]) show('what the agent was told', denials[0].slice(0, 900));
   show('last gh pr create', last.slice(0, 1400));
   return s.result;
@@ -180,7 +183,7 @@ scenarios['pr-mcp'] = function () {
     input: JSON.stringify({ tool_name: 'mcp__github__create_pull_request', tool_input: created[0]?.arguments ?? {}, cwd: dir, transcript_path: join(dir, 'session.jsonl') }),
     encoding: 'utf8',
   });
-  check('the PR that went through passes', created.length === 1 && lastCheck.stdout.trim() === '');
+  check('the PR that went through passes', created.length === 1 && !/"permissionDecision":\s*"deny"/.test(lastCheck.stdout));
   if (denials[0]) show('what the agent was told', denials[0].slice(0, 700));
   show('PR body that was created', body.slice(0, 1200));
   return s.result;
