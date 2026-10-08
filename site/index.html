@@ -167,7 +167,7 @@
           </li>
           <li>
             <span class="n">2</span>
-            <div><h3>It checks before anything runs</h3><p>Every <code>git commit</code>, <code>gh pr create</code> and GitHub tool call is read against the diff before it runs. A form on a tiny change, a missing reason or a claim the diff contradicts goes back with the fix.</p></div>
+            <div><h3>It checks before anything runs</h3><p>Every <code>git commit</code>, <code>gh pr create</code> and GitHub tool call is read against the diff before it runs. A form on a tiny change, a subject that says nothing, or tests claimed that never ran goes back with the fix. A name, file or number it can't find comes back as a note.</p></div>
           </li>
           <li>
             <span class="n">3</span>
@@ -183,7 +183,7 @@
             <li>Subjects that say nothing: "fix bug", "wip", "Update webhook.js"</li>
             <li>A full Summary / Changes / Testing form on a small diff</li>
             <li>A commit body that lists every change as bullets</li>
-            <li>Claims the diff contradicts</li>
+            <li>Tests claimed that were never added or run, or a test count that isn't what the run printed</li>
             <li>A rewrite that quietly dropped facts</li>
           </ul>
         </div>
@@ -192,6 +192,7 @@
           <ul>
             <li>A bit long, a few extra bullets, a buzzword</li>
             <li>No reason given on a larger change</li>
+            <li>A name, file or number it can't find in the diff, the repo or the session</li>
             <li>"Added" instead of "Add", and it follows your repo's tense</li>
             <li>Anything a person writes. People only ever get a warning.</li>
           </ul>
